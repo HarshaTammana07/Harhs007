@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Document } from "@/types";
-import { documentService } from "@/services/DocumentService";
+import { Document, DocumentCategory } from "@/types";
+// Removed documentService import as we're using API now
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
@@ -19,7 +19,7 @@ import { formatDistanceToNow, format } from "date-fns";
 interface DocumentListProps {
   documents: Document[];
   onView: (document: Document) => void;
-  onDownload: (documentId: string) => void;
+  onDownload: (document: Document) => void;
   onDelete: (documentId: string) => void;
 }
 
@@ -34,6 +34,22 @@ export function DocumentList({
   >("createdAt");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+  const getCategoryDisplayName = (category: DocumentCategory): string => {
+    const categoryMap: Record<DocumentCategory, string> = {
+      aadhar: "Aadhar Card",
+      pan: "PAN Card",
+      driving_license: "Driving License",
+      passport: "Passport",
+      house_documents: "House Documents",
+      business_documents: "Business Documents",
+      insurance_documents: "Insurance Documents",
+      bank_documents: "Bank Documents",
+      educational_certificates: "Educational Certificates",
+      medical_records: "Medical Records",
+    };
+    return categoryMap[category] || category;
+  };
+
   const sortedDocuments = [...documents].sort((a, b) => {
     let aValue: any;
     let bValue: any;
@@ -44,8 +60,8 @@ export function DocumentList({
         bValue = b.title.toLowerCase();
         break;
       case "category":
-        aValue = documentService.getCategoryDisplayName(a.category);
-        bValue = documentService.getCategoryDisplayName(b.category);
+        aValue = getCategoryDisplayName(a.category);
+        bValue = getCategoryDisplayName(b.category);
         break;
       case "createdAt":
         aValue = new Date(a.createdAt);
@@ -205,9 +221,7 @@ export function DocumentList({
                       {document.title}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      {documentService.getCategoryDisplayName(
-                        document.category
-                      )}
+                      {getCategoryDisplayName(document.category)}
                     </p>
                   </div>
                 </div>
@@ -225,7 +239,7 @@ export function DocumentList({
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => onDownload(document.id)}
+                    onClick={() => onDownload(document)}
                     title="Download document"
                   >
                     <ArrowDownTrayIcon className="h-4 w-4" />

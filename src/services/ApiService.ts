@@ -32,7 +32,8 @@ export class ApiService {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) throw new Error(`Failed to fetch family members: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to fetch family members: ${error.message}`);
 
     return data.map(this.transformFamilyMember);
   }
@@ -58,7 +59,12 @@ export class ApiService {
   /**
    * Create a new family member
    */
-  static async createFamilyMember(memberData: Omit<FamilyMember, "id" | "createdAt" | "updatedAt" | "documents" | "insurancePolicies">): Promise<FamilyMember> {
+  static async createFamilyMember(
+    memberData: Omit<
+      FamilyMember,
+      "id" | "createdAt" | "updatedAt" | "documents" | "insurancePolicies"
+    >
+  ): Promise<FamilyMember> {
     const { data, error } = await supabase
       .from("family_members")
       .insert({
@@ -66,7 +72,7 @@ export class ApiService {
         nickname: memberData.nickname,
         profile_photo: memberData.profilePhoto,
         relationship: memberData.relationship,
-        date_of_birth: memberData.dateOfBirth?.toISOString().split('T')[0],
+        date_of_birth: memberData.dateOfBirth?.toISOString().split("T")[0],
         phone: memberData.contactInfo.phone,
         email: memberData.contactInfo.email,
         address: memberData.contactInfo.address,
@@ -74,7 +80,8 @@ export class ApiService {
       .select()
       .single();
 
-    if (error) throw new Error(`Failed to create family member: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to create family member: ${error.message}`);
 
     return this.transformFamilyMember(data);
   }
@@ -82,20 +89,29 @@ export class ApiService {
   /**
    * Update family member
    */
-  static async updateFamilyMember(id: string, updates: Partial<FamilyMember>): Promise<FamilyMember> {
+  static async updateFamilyMember(
+    id: string,
+    updates: Partial<FamilyMember>
+  ): Promise<FamilyMember> {
     const updateData: any = {};
-    
+
     if (updates.fullName) updateData.full_name = updates.fullName;
     if (updates.nickname) updateData.nickname = updates.nickname;
-    if (updates.profilePhoto !== undefined) updateData.profile_photo = updates.profilePhoto;
+    if (updates.profilePhoto !== undefined)
+      updateData.profile_photo = updates.profilePhoto;
     if (updates.relationship) updateData.relationship = updates.relationship;
     if (updates.dateOfBirth !== undefined) {
-      updateData.date_of_birth = updates.dateOfBirth?.toISOString().split('T')[0];
+      updateData.date_of_birth = updates.dateOfBirth
+        ?.toISOString()
+        .split("T")[0];
     }
     if (updates.contactInfo) {
-      if (updates.contactInfo.phone !== undefined) updateData.phone = updates.contactInfo.phone;
-      if (updates.contactInfo.email !== undefined) updateData.email = updates.contactInfo.email;
-      if (updates.contactInfo.address !== undefined) updateData.address = updates.contactInfo.address;
+      if (updates.contactInfo.phone !== undefined)
+        updateData.phone = updates.contactInfo.phone;
+      if (updates.contactInfo.email !== undefined)
+        updateData.email = updates.contactInfo.email;
+      if (updates.contactInfo.address !== undefined)
+        updateData.address = updates.contactInfo.address;
     }
 
     updateData.updated_at = new Date().toISOString();
@@ -107,7 +123,8 @@ export class ApiService {
       .select()
       .single();
 
-    if (error) throw new Error(`Failed to update family member: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to update family member: ${error.message}`);
 
     return this.transformFamilyMember(data);
   }
@@ -121,7 +138,8 @@ export class ApiService {
       .delete()
       .eq("id", id);
 
-    if (error) throw new Error(`Failed to delete family member: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to delete family member: ${error.message}`);
   }
 
   // ==================== BUILDINGS ====================
@@ -132,10 +150,12 @@ export class ApiService {
   static async getBuildings(): Promise<Building[]> {
     const { data, error } = await supabase
       .from("buildings")
-      .select(`
+      .select(
+        `
         *,
         apartments (*)
-      `)
+      `
+      )
       .order("created_at", { ascending: false });
 
     if (error) throw new Error(`Failed to fetch buildings: ${error.message}`);
@@ -149,10 +169,12 @@ export class ApiService {
   static async getBuildingById(id: string): Promise<Building | null> {
     const { data, error } = await supabase
       .from("buildings")
-      .select(`
+      .select(
+        `
         *,
         apartments (*)
-      `)
+      `
+      )
       .eq("id", id)
       .single();
 
@@ -167,7 +189,12 @@ export class ApiService {
   /**
    * Create a new building
    */
-  static async createBuilding(buildingData: Omit<Building, "id" | "createdAt" | "updatedAt" | "apartments" | "documents">): Promise<Building> {
+  static async createBuilding(
+    buildingData: Omit<
+      Building,
+      "id" | "createdAt" | "updatedAt" | "apartments" | "documents"
+    >
+  ): Promise<Building> {
     const { data, error } = await supabase
       .from("buildings")
       .insert({
@@ -194,7 +221,9 @@ export class ApiService {
   /**
    * Get apartments by building ID
    */
-  static async getApartmentsByBuildingId(buildingId: string): Promise<Apartment[]> {
+  static async getApartmentsByBuildingId(
+    buildingId: string
+  ): Promise<Apartment[]> {
     const { data, error } = await supabase
       .from("apartments")
       .select("*")
@@ -210,7 +239,18 @@ export class ApiService {
   /**
    * Create apartment
    */
-  static async createApartment(apartmentData: Omit<Apartment, "id" | "createdAt" | "updatedAt" | "currentTenant" | "rentHistory" | "maintenanceRecords" | "documents">): Promise<Apartment> {
+  static async createApartment(
+    apartmentData: Omit<
+      Apartment,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "currentTenant"
+      | "rentHistory"
+      | "maintenanceRecords"
+      | "documents"
+    >
+  ): Promise<Apartment> {
     const { data, error } = await supabase
       .from("apartments")
       .insert({
@@ -259,7 +299,18 @@ export class ApiService {
   /**
    * Create flat
    */
-  static async createFlat(flatData: Omit<Flat, "id" | "createdAt" | "updatedAt" | "currentTenant" | "rentHistory" | "maintenanceRecords" | "documents">): Promise<Flat> {
+  static async createFlat(
+    flatData: Omit<
+      Flat,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "currentTenant"
+      | "rentHistory"
+      | "maintenanceRecords"
+      | "documents"
+    >
+  ): Promise<Flat> {
     const { data, error } = await supabase
       .from("flats")
       .insert({
@@ -314,7 +365,18 @@ export class ApiService {
   /**
    * Create land
    */
-  static async createLand(landData: Omit<Land, "id" | "createdAt" | "updatedAt" | "currentTenant" | "rentHistory" | "maintenanceRecords" | "documents">): Promise<Land> {
+  static async createLand(
+    landData: Omit<
+      Land,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "currentTenant"
+      | "rentHistory"
+      | "maintenanceRecords"
+      | "documents"
+    >
+  ): Promise<Land> {
     const { data, error } = await supabase
       .from("lands")
       .insert({
@@ -355,10 +417,12 @@ export class ApiService {
   static async getTenants(): Promise<Tenant[]> {
     const { data, error } = await supabase
       .from("tenants")
-      .select(`
+      .select(
+        `
         *,
         tenant_references (*)
-      `)
+      `
+      )
       .order("created_at", { ascending: false });
 
     if (error) throw new Error(`Failed to fetch tenants: ${error.message}`);
@@ -369,14 +433,21 @@ export class ApiService {
   /**
    * Create tenant
    */
-  static async createTenant(tenantData: Omit<Tenant, "id" | "createdAt" | "updatedAt" | "references" | "documents">): Promise<Tenant> {
+  static async createTenant(
+    tenantData: Omit<
+      Tenant,
+      "id" | "createdAt" | "updatedAt" | "references" | "documents"
+    >
+  ): Promise<Tenant> {
     const { data, error } = await supabase
       .from("tenants")
       .insert({
         first_name: tenantData.personalInfo.firstName,
         last_name: tenantData.personalInfo.lastName,
         full_name: tenantData.personalInfo.fullName,
-        date_of_birth: tenantData.personalInfo.dateOfBirth?.toISOString().split('T')[0],
+        date_of_birth: tenantData.personalInfo.dateOfBirth
+          ?.toISOString()
+          .split("T")[0],
         occupation: tenantData.personalInfo.occupation,
         employer: tenantData.personalInfo.employer,
         monthly_income: tenantData.personalInfo.monthlyIncome,
@@ -388,7 +459,8 @@ export class ApiService {
         email: tenantData.contactInfo.email,
         address: tenantData.contactInfo.address,
         emergency_contact_name: tenantData.emergencyContact.name,
-        emergency_contact_relationship: tenantData.emergencyContact.relationship,
+        emergency_contact_relationship:
+          tenantData.emergencyContact.relationship,
         emergency_contact_phone: tenantData.emergencyContact.phone,
         emergency_contact_email: tenantData.emergencyContact.email,
         emergency_contact_address: tenantData.emergencyContact.address,
@@ -398,8 +470,12 @@ export class ApiService {
         passport: tenantData.identification.passport,
         voter_id_number: tenantData.identification.voterIdNumber,
         agreement_number: tenantData.rentalAgreement.agreementNumber,
-        start_date: tenantData.rentalAgreement.startDate.toISOString().split('T')[0],
-        end_date: tenantData.rentalAgreement.endDate.toISOString().split('T')[0],
+        start_date: tenantData.rentalAgreement.startDate
+          .toISOString()
+          .split("T")[0],
+        end_date: tenantData.rentalAgreement.endDate
+          .toISOString()
+          .split("T")[0],
         rent_amount: tenantData.rentalAgreement.rentAmount,
         security_deposit: tenantData.rentalAgreement.securityDeposit,
         maintenance_charges: tenantData.rentalAgreement.maintenanceCharges,
@@ -409,8 +485,8 @@ export class ApiService {
         notice_period: tenantData.rentalAgreement.noticePeriod,
         renewal_terms: tenantData.rentalAgreement.renewalTerms,
         special_conditions: tenantData.rentalAgreement.specialConditions,
-        move_in_date: tenantData.moveInDate.toISOString().split('T')[0],
-        move_out_date: tenantData.moveOutDate?.toISOString().split('T')[0],
+        move_in_date: tenantData.moveInDate.toISOString().split("T")[0],
+        move_out_date: tenantData.moveOutDate?.toISOString().split("T")[0],
         is_active: tenantData.isActive,
       })
       .select()
@@ -432,7 +508,8 @@ export class ApiService {
       .select("*")
       .order("due_date", { ascending: false });
 
-    if (error) throw new Error(`Failed to fetch rent payments: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to fetch rent payments: ${error.message}`);
 
     return data.map(this.transformRentPayment);
   }
@@ -440,7 +517,9 @@ export class ApiService {
   /**
    * Create rent payment
    */
-  static async createRentPayment(paymentData: Omit<RentPayment, "id" | "createdAt" | "updatedAt">): Promise<RentPayment> {
+  static async createRentPayment(
+    paymentData: Omit<RentPayment, "id" | "createdAt" | "updatedAt">
+  ): Promise<RentPayment> {
     const { data, error } = await supabase
       .from("rent_payments")
       .insert({
@@ -449,8 +528,8 @@ export class ApiService {
         property_id: paymentData.propertyId,
         unit_id: paymentData.unitId,
         amount: paymentData.amount,
-        due_date: paymentData.dueDate.toISOString().split('T')[0],
-        paid_date: paymentData.paidDate?.toISOString().split('T')[0],
+        due_date: paymentData.dueDate.toISOString().split("T")[0],
+        paid_date: paymentData.paidDate?.toISOString().split("T")[0],
         status: paymentData.status,
         payment_method: paymentData.paymentMethod,
         transaction_id: paymentData.transactionId,
@@ -463,7 +542,8 @@ export class ApiService {
       .select()
       .single();
 
-    if (error) throw new Error(`Failed to create rent payment: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to create rent payment: ${error.message}`);
 
     return this.transformRentPayment(data);
   }
@@ -476,13 +556,16 @@ export class ApiService {
   static async getInsurancePolicies(): Promise<InsurancePolicy[]> {
     const { data, error } = await supabase
       .from("insurance_policies")
-      .select(`
+      .select(
+        `
         *,
         premium_payments (*)
-      `)
+      `
+      )
       .order("created_at", { ascending: false });
 
-    if (error) throw new Error(`Failed to fetch insurance policies: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to fetch insurance policies: ${error.message}`);
 
     return data.map(this.transformInsurancePolicy);
   }
@@ -490,7 +573,9 @@ export class ApiService {
   /**
    * Create insurance policy
    */
-  static async createInsurancePolicy(policyData: Omit<InsurancePolicy, "id" | "documents" | "premiumHistory">): Promise<InsurancePolicy> {
+  static async createInsurancePolicy(
+    policyData: Omit<InsurancePolicy, "id" | "documents" | "premiumHistory">
+  ): Promise<InsurancePolicy> {
     const { data, error } = await supabase
       .from("insurance_policies")
       .insert({
@@ -500,23 +585,289 @@ export class ApiService {
         family_member_id: policyData.familyMemberId,
         premium_amount: policyData.premiumAmount,
         coverage_amount: policyData.coverageAmount,
-        start_date: policyData.startDate.toISOString().split('T')[0],
-        end_date: policyData.endDate.toISOString().split('T')[0],
-        renewal_date: policyData.renewalDate.toISOString().split('T')[0],
+        start_date: policyData.startDate.toISOString().split("T")[0],
+        end_date: policyData.endDate.toISOString().split("T")[0],
+        renewal_date: policyData.renewalDate.toISOString().split("T")[0],
         status: policyData.status,
       })
       .select()
       .single();
 
-    if (error) throw new Error(`Failed to create insurance policy: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to create insurance policy: ${error.message}`);
 
     return this.transformInsurancePolicy({ ...data, premium_payments: [] });
+  }
+
+  // ==================== INSURANCE POLICIES ====================
+
+  /**
+   * Get all insurance policies
+   */
+  static async getInsurancePolicies(): Promise<InsurancePolicy[]> {
+    const { data, error } = await supabase
+      .from("insurance_policies")
+      .select(
+        `
+        *,
+        premium_payments (*)
+      `
+      )
+      .order("created_at", { ascending: false });
+
+    if (error)
+      throw new Error(`Failed to fetch insurance policies: ${error.message}`);
+
+    return data.map(this.transformInsurancePolicy);
+  }
+
+  /**
+   * Get insurance policy by ID
+   */
+  static async getInsurancePolicyById(
+    id: string
+  ): Promise<InsurancePolicy | null> {
+    const { data, error } = await supabase
+      .from("insurance_policies")
+      .select(
+        `
+        *,
+        premium_payments (*)
+      `
+      )
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") return null;
+      throw new Error(`Failed to fetch insurance policy: ${error.message}`);
+    }
+
+    return this.transformInsurancePolicy(data);
+  }
+
+  /**
+   * Get policies by type
+   */
+  static async getPoliciesByType(
+    type: InsurancePolicy["type"]
+  ): Promise<InsurancePolicy[]> {
+    const { data, error } = await supabase
+      .from("insurance_policies")
+      .select(
+        `
+        *,
+        premium_payments (*)
+      `
+      )
+      .eq("type", type)
+      .order("created_at", { ascending: false });
+
+    if (error)
+      throw new Error(`Failed to fetch policies by type: ${error.message}`);
+
+    return data.map(this.transformInsurancePolicy);
+  }
+
+  /**
+   * Get policies by family member
+   */
+  static async getPoliciesByFamilyMember(
+    familyMemberId: string
+  ): Promise<InsurancePolicy[]> {
+    const { data, error } = await supabase
+      .from("insurance_policies")
+      .select(
+        `
+        *,
+        premium_payments (*)
+      `
+      )
+      .eq("family_member_id", familyMemberId)
+      .order("created_at", { ascending: false });
+
+    if (error)
+      throw new Error(
+        `Failed to fetch policies by family member: ${error.message}`
+      );
+
+    return data.map(this.transformInsurancePolicy);
+  }
+
+  /**
+   * Create insurance policy
+   */
+  static async createInsurancePolicy(
+    policyData: Omit<InsurancePolicy, "id" | "documents" | "premiumHistory">
+  ): Promise<InsurancePolicy> {
+    const { data, error } = await supabase
+      .from("insurance_policies")
+      .insert({
+        policy_number: policyData.policyNumber,
+        type: policyData.type,
+        provider: policyData.provider,
+        family_member_id: policyData.familyMemberId,
+        premium_amount: policyData.premiumAmount,
+        coverage_amount: policyData.coverageAmount,
+        start_date: policyData.startDate.toISOString().split("T")[0],
+        end_date: policyData.endDate.toISOString().split("T")[0],
+        renewal_date: policyData.renewalDate.toISOString().split("T")[0],
+        status: policyData.status,
+      })
+      .select()
+      .single();
+
+    if (error)
+      throw new Error(`Failed to create insurance policy: ${error.message}`);
+
+    return this.transformInsurancePolicy({ ...data, premium_payments: [] });
+  }
+
+  /**
+   * Update insurance policy
+   */
+  static async updateInsurancePolicy(
+    id: string,
+    updates: Partial<InsurancePolicy>
+  ): Promise<InsurancePolicy> {
+    const updateData: any = {};
+
+    if (updates.policyNumber) updateData.policy_number = updates.policyNumber;
+    if (updates.type) updateData.type = updates.type;
+    if (updates.provider) updateData.provider = updates.provider;
+    if (updates.familyMemberId)
+      updateData.family_member_id = updates.familyMemberId;
+    if (updates.premiumAmount !== undefined)
+      updateData.premium_amount = updates.premiumAmount;
+    if (updates.coverageAmount !== undefined)
+      updateData.coverage_amount = updates.coverageAmount;
+    if (updates.startDate)
+      updateData.start_date = updates.startDate.toISOString().split("T")[0];
+    if (updates.endDate)
+      updateData.end_date = updates.endDate.toISOString().split("T")[0];
+    if (updates.renewalDate)
+      updateData.renewal_date = updates.renewalDate.toISOString().split("T")[0];
+    if (updates.status) updateData.status = updates.status;
+
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("insurance_policies")
+      .update(updateData)
+      .eq("id", id)
+      .select(
+        `
+        *,
+        premium_payments (*)
+      `
+      )
+      .single();
+
+    if (error)
+      throw new Error(`Failed to update insurance policy: ${error.message}`);
+
+    return this.transformInsurancePolicy(data);
+  }
+
+  /**
+   * Delete insurance policy
+   */
+  static async deleteInsurancePolicy(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("insurance_policies")
+      .delete()
+      .eq("id", id);
+
+    if (error)
+      throw new Error(`Failed to delete insurance policy: ${error.message}`);
+  }
+
+  /**
+   * Add premium payment
+   */
+  static async addPremiumPayment(
+    policyId: string,
+    payment: Omit<PremiumPayment, "id">
+  ): Promise<PremiumPayment> {
+    const { data, error } = await supabase
+      .from("premium_payments")
+      .insert({
+        policy_id: policyId,
+        amount: payment.amount,
+        paid_date: payment.paidDate.toISOString().split("T")[0],
+        due_date: payment.dueDate.toISOString().split("T")[0],
+        payment_method: payment.paymentMethod,
+      })
+      .select()
+      .single();
+
+    if (error)
+      throw new Error(`Failed to add premium payment: ${error.message}`);
+
+    return {
+      id: data.id,
+      amount: data.amount,
+      paidDate: new Date(data.paid_date),
+      dueDate: new Date(data.due_date),
+      paymentMethod: data.payment_method,
+    };
+  }
+
+  /**
+   * Get policies expiring soon
+   */
+  static async getPoliciesExpiringSoon(
+    days: number = 30
+  ): Promise<InsurancePolicy[]> {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + days);
+
+    const { data, error } = await supabase
+      .from("insurance_policies")
+      .select(
+        `
+        *,
+        premium_payments (*)
+      `
+      )
+      .lte("renewal_date", futureDate.toISOString().split("T")[0])
+      .gte("renewal_date", new Date().toISOString().split("T")[0])
+      .eq("status", "active")
+      .order("renewal_date", { ascending: true });
+
+    if (error)
+      throw new Error(`Failed to fetch expiring policies: ${error.message}`);
+
+    return data.map(this.transformInsurancePolicy);
+  }
+
+  /**
+   * Get expired policies
+   */
+  static async getExpiredPolicies(): Promise<InsurancePolicy[]> {
+    const today = new Date().toISOString().split("T")[0];
+
+    const { data, error } = await supabase
+      .from("insurance_policies")
+      .select(
+        `
+        *,
+        premium_payments (*)
+      `
+      )
+      .lt("renewal_date", today)
+      .order("renewal_date", { ascending: false });
+
+    if (error)
+      throw new Error(`Failed to fetch expired policies: ${error.message}`);
+
+    return data.map(this.transformInsurancePolicy);
   }
 
   // ==================== DOCUMENTS ====================
 
   /**
-   * Get documents
+   * Get all documents
    */
   static async getDocuments(): Promise<Document[]> {
     const { data, error } = await supabase
@@ -530,9 +881,213 @@ export class ApiService {
   }
 
   /**
+   * Get document by ID
+   */
+  static async getDocumentById(id: string): Promise<Document | null> {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") return null;
+      throw new Error(`Failed to fetch document: ${error.message}`);
+    }
+
+    return this.transformDocument(data);
+  }
+
+  /**
+   * Get documents by family member
+   */
+  static async getDocumentsByFamilyMember(familyMemberId: string): Promise<Document[]> {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("family_member_id", familyMemberId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(`Failed to fetch documents by family member: ${error.message}`);
+
+    return data.map(this.transformDocument);
+  }
+
+  /**
+   * Get documents by property
+   */
+  static async getDocumentsByProperty(propertyId: string, propertyType: string): Promise<Document[]> {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("property_id", propertyId)
+      .eq("property_type", propertyType)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(`Failed to fetch documents by property: ${error.message}`);
+
+    return data.map(this.transformDocument);
+  }
+
+  /**
+   * Get documents by insurance policy
+   */
+  static async getDocumentsByInsurancePolicy(policyId: string): Promise<Document[]> {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("insurance_policy_id", policyId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(`Failed to fetch documents by insurance policy: ${error.message}`);
+
+    return data.map(this.transformDocument);
+  }
+
+  /**
+   * Get documents by category
+   */
+  static async getDocumentsByCategory(category: DocumentCategory): Promise<Document[]> {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("category", category)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(`Failed to fetch documents by category: ${error.message}`);
+
+    return data.map(this.transformDocument);
+  }
+
+  /**
+   * Get expiring documents
+   */
+  static async getExpiringDocuments(days: number = 30): Promise<Document[]> {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + days);
+
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .not("expiry_date", "is", null)
+      .lte("expiry_date", futureDate.toISOString().split('T')[0])
+      .gte("expiry_date", new Date().toISOString().split('T')[0])
+      .order("expiry_date", { ascending: true });
+
+    if (error) throw new Error(`Failed to fetch expiring documents: ${error.message}`);
+
+    return data.map(this.transformDocument);
+  }
+
+  /**
+   * Get expired documents
+   */
+  static async getExpiredDocuments(): Promise<Document[]> {
+    const today = new Date().toISOString().split('T')[0];
+
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .not("expiry_date", "is", null)
+      .lt("expiry_date", today)
+      .order("expiry_date", { ascending: false });
+
+    if (error) throw new Error(`Failed to fetch expired documents: ${error.message}`);
+
+    return data.map(this.transformDocument);
+  }
+
+  /**
+   * Search documents with criteria
+   */
+  static async searchDocuments(criteria: {
+    query?: string;
+    category?: DocumentCategory;
+    familyMemberId?: string;
+    propertyId?: string;
+    insurancePolicyId?: string;
+    tags?: string[];
+    isExpiring?: boolean;
+    expiryDateRange?: { start?: Date; end?: Date };
+    issuedDateRange?: { start?: Date; end?: Date };
+  }): Promise<Document[]> {
+    let query = supabase.from("documents").select("*");
+
+    // Apply filters
+    if (criteria.category) {
+      query = query.eq("category", criteria.category);
+    }
+
+    if (criteria.familyMemberId) {
+      query = query.eq("family_member_id", criteria.familyMemberId);
+    }
+
+    if (criteria.propertyId) {
+      query = query.eq("property_id", criteria.propertyId);
+    }
+
+    if (criteria.insurancePolicyId) {
+      query = query.eq("insurance_policy_id", criteria.insurancePolicyId);
+    }
+
+    if (criteria.expiryDateRange?.start) {
+      query = query.gte("expiry_date", criteria.expiryDateRange.start.toISOString().split('T')[0]);
+    }
+
+    if (criteria.expiryDateRange?.end) {
+      query = query.lte("expiry_date", criteria.expiryDateRange.end.toISOString().split('T')[0]);
+    }
+
+    if (criteria.issuedDateRange?.start) {
+      query = query.gte("issued_date", criteria.issuedDateRange.start.toISOString().split('T')[0]);
+    }
+
+    if (criteria.issuedDateRange?.end) {
+      query = query.lte("issued_date", criteria.issuedDateRange.end.toISOString().split('T')[0]);
+    }
+
+    if (criteria.isExpiring) {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + 30);
+      query = query
+        .not("expiry_date", "is", null)
+        .lte("expiry_date", futureDate.toISOString().split('T')[0])
+        .gte("expiry_date", new Date().toISOString().split('T')[0]);
+    }
+
+    // Text search (if supported by your database setup)
+    if (criteria.query) {
+      query = query.or(`title.ilike.%${criteria.query}%,document_number.ilike.%${criteria.query}%,issuer.ilike.%${criteria.query}%`);
+    }
+
+    query = query.order("created_at", { ascending: false });
+
+    const { data, error } = await query;
+
+    if (error) throw new Error(`Failed to search documents: ${error.message}`);
+
+    let results = data.map(this.transformDocument);
+
+    // Client-side filtering for tags (since PostgreSQL array search can be complex)
+    if (criteria.tags && criteria.tags.length > 0) {
+      results = results.filter(doc => 
+        criteria.tags!.some(tag => 
+          doc.tags.some(docTag => 
+            docTag.toLowerCase().includes(tag.toLowerCase())
+          )
+        )
+      );
+    }
+
+    return results;
+  }
+
+  /**
    * Create document
    */
-  static async createDocument(documentData: Omit<Document, "id" | "createdAt" | "updatedAt">): Promise<Document> {
+  static async createDocument(
+    documentData: Omit<Document, "id" | "createdAt" | "updatedAt">
+  ): Promise<Document> {
     const { data, error } = await supabase
       .from("documents")
       .insert({
@@ -543,11 +1098,11 @@ export class ApiService {
         file_size: documentData.fileSize,
         mime_type: documentData.mimeType,
         family_member_id: documentData.familyMemberId,
-        property_type: documentData.propertyId ? 'building' : null, // You might need to adjust this logic
+        property_type: documentData.propertyId ? "building" : null, // You might need to adjust this logic
         property_id: documentData.propertyId,
         insurance_policy_id: documentData.insurancePolicyId,
-        expiry_date: documentData.expiryDate?.toISOString().split('T')[0],
-        issued_date: documentData.issuedDate?.toISOString().split('T')[0],
+        expiry_date: documentData.expiryDate?.toISOString().split("T")[0],
+        issued_date: documentData.issuedDate?.toISOString().split("T")[0],
         issuer: documentData.issuer,
         document_number: documentData.documentNumber,
         tags: documentData.tags,
@@ -560,6 +1115,162 @@ export class ApiService {
     return this.transformDocument(data);
   }
 
+  /**
+   * Create document from file
+   */
+  static async createDocumentFromFile(
+    file: File,
+    metadata: {
+      title: string;
+      category: DocumentCategory;
+      familyMemberId?: string;
+      propertyId?: string;
+      propertyType?: string;
+      insurancePolicyId?: string;
+      expiryDate?: Date;
+      issuedDate?: Date;
+      issuer?: string;
+      documentNumber?: string;
+      tags?: string[];
+    }
+  ): Promise<Document> {
+    // Convert file to base64
+    const base64Data = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const documentData = {
+      title: metadata.title,
+      category: metadata.category,
+      fileData: base64Data,
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+      familyMemberId: metadata.familyMemberId,
+      propertyId: metadata.propertyId,
+      insurancePolicyId: metadata.insurancePolicyId,
+      expiryDate: metadata.expiryDate,
+      issuedDate: metadata.issuedDate,
+      issuer: metadata.issuer,
+      documentNumber: metadata.documentNumber,
+      tags: metadata.tags || [],
+    };
+
+    const { data, error } = await supabase
+      .from("documents")
+      .insert({
+        title: documentData.title,
+        category: documentData.category,
+        file_data: documentData.fileData,
+        file_name: documentData.fileName,
+        file_size: documentData.fileSize,
+        mime_type: documentData.mimeType,
+        family_member_id: documentData.familyMemberId,
+        property_type: metadata.propertyType,
+        property_id: documentData.propertyId,
+        insurance_policy_id: documentData.insurancePolicyId,
+        expiry_date: documentData.expiryDate?.toISOString().split('T')[0],
+        issued_date: documentData.issuedDate?.toISOString().split('T')[0],
+        issuer: documentData.issuer,
+        document_number: documentData.documentNumber,
+        tags: documentData.tags,
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(`Failed to create document from file: ${error.message}`);
+
+    return this.transformDocument(data);
+  }
+
+  /**
+   * Update document
+   */
+  static async updateDocument(id: string, updates: Partial<Document>): Promise<Document> {
+    const updateData: any = {};
+    
+    if (updates.title) updateData.title = updates.title;
+    if (updates.category) updateData.category = updates.category;
+    if (updates.familyMemberId !== undefined) updateData.family_member_id = updates.familyMemberId;
+    if (updates.propertyId !== undefined) updateData.property_id = updates.propertyId;
+    if (updates.insurancePolicyId !== undefined) updateData.insurance_policy_id = updates.insurancePolicyId;
+    if (updates.expiryDate !== undefined) {
+      updateData.expiry_date = updates.expiryDate?.toISOString().split('T')[0];
+    }
+    if (updates.issuedDate !== undefined) {
+      updateData.issued_date = updates.issuedDate?.toISOString().split('T')[0];
+    }
+    if (updates.issuer !== undefined) updateData.issuer = updates.issuer;
+    if (updates.documentNumber !== undefined) updateData.document_number = updates.documentNumber;
+    if (updates.tags) updateData.tags = updates.tags;
+
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("documents")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Failed to update document: ${error.message}`);
+
+    return this.transformDocument(data);
+  }
+
+  /**
+   * Delete document
+   */
+  static async deleteDocument(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("documents")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw new Error(`Failed to delete document: ${error.message}`);
+  }
+
+  /**
+   * Get document statistics
+   */
+  static async getDocumentStats(): Promise<{
+    totalDocuments: number;
+    documentsByCategory: Record<DocumentCategory, number>;
+    expiringDocuments: number;
+    expiredDocuments: number;
+    documentsWithoutExpiry: number;
+  }> {
+    const [allDocs, expiring, expired] = await Promise.all([
+      this.getDocuments(),
+      this.getExpiringDocuments(30),
+      this.getExpiredDocuments()
+    ]);
+
+    const documentsByCategory = {} as Record<DocumentCategory, number>;
+    const categories: DocumentCategory[] = [
+      "aadhar", "pan", "driving_license", "passport", "house_documents",
+      "business_documents", "insurance_documents", "bank_documents",
+      "educational_certificates", "medical_records"
+    ];
+
+    categories.forEach(category => {
+      documentsByCategory[category] = allDocs.filter(doc => doc.category === category).length;
+    });
+
+    const documentsWithoutExpiry = allDocs.filter(doc => !doc.expiryDate).length;
+
+    return {
+      totalDocuments: allDocs.length,
+      documentsByCategory,
+      expiringDocuments: expiring.length,
+      expiredDocuments: expired.length,
+      documentsWithoutExpiry
+    };
+  }
+
   // ==================== TRANSFORMATION METHODS ====================
 
   private static transformFamilyMember(data: any): FamilyMember {
@@ -569,7 +1280,9 @@ export class ApiService {
       nickname: data.nickname,
       profilePhoto: data.profile_photo,
       relationship: data.relationship,
-      dateOfBirth: data.date_of_birth ? new Date(data.date_of_birth) : undefined,
+      dateOfBirth: data.date_of_birth
+        ? new Date(data.date_of_birth)
+        : undefined,
       contactInfo: {
         phone: data.phone,
         email: data.email,
@@ -685,15 +1398,17 @@ export class ApiService {
       roadAccess: data.road_access,
       electricityConnection: data.electricity_connection,
       isLeased: data.is_leased,
-      leaseTerms: data.lease_type ? {
-        leaseType: data.lease_type,
-        rentAmount: data.rent_amount,
-        rentFrequency: data.rent_frequency,
-        securityDeposit: data.lease_security_deposit,
-        leaseDuration: data.lease_duration,
-        renewalTerms: data.renewal_terms,
-        restrictions: data.restrictions || [],
-      } : undefined,
+      leaseTerms: data.lease_type
+        ? {
+            leaseType: data.lease_type,
+            rentAmount: data.rent_amount,
+            rentFrequency: data.rent_frequency,
+            securityDeposit: data.lease_security_deposit,
+            leaseDuration: data.lease_duration,
+            renewalTerms: data.renewal_terms,
+            restrictions: data.restrictions || [],
+          }
+        : undefined,
       images: data.images || [],
       rentHistory: [], // Will be populated separately if needed
       maintenanceRecords: [], // Will be populated separately if needed
@@ -710,7 +1425,9 @@ export class ApiService {
         firstName: data.first_name,
         lastName: data.last_name,
         fullName: data.full_name,
-        dateOfBirth: data.date_of_birth ? new Date(data.date_of_birth) : undefined,
+        dateOfBirth: data.date_of_birth
+          ? new Date(data.date_of_birth)
+          : undefined,
         occupation: data.occupation,
         employer: data.employer,
         monthlyIncome: data.monthly_income,
@@ -752,17 +1469,20 @@ export class ApiService {
         renewalTerms: data.renewal_terms,
         specialConditions: data.special_conditions || [],
       },
-      references: data.tenant_references?.map((ref: any) => ({
-        name: ref.name,
-        relationship: ref.relationship,
-        phone: ref.phone,
-        email: ref.email,
-        address: ref.address,
-        verified: ref.verified,
-      })) || [],
+      references:
+        data.tenant_references?.map((ref: any) => ({
+          name: ref.name,
+          relationship: ref.relationship,
+          phone: ref.phone,
+          email: ref.email,
+          address: ref.address,
+          verified: ref.verified,
+        })) || [],
       documents: [], // Will be populated separately if needed
       moveInDate: new Date(data.move_in_date),
-      moveOutDate: data.move_out_date ? new Date(data.move_out_date) : undefined,
+      moveOutDate: data.move_out_date
+        ? new Date(data.move_out_date)
+        : undefined,
       isActive: data.is_active,
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at),
@@ -806,13 +1526,14 @@ export class ApiService {
       renewalDate: new Date(data.renewal_date),
       status: data.status,
       documents: [], // Will be populated separately if needed
-      premiumHistory: data.premium_payments?.map((payment: any) => ({
-        id: payment.id,
-        amount: payment.amount,
-        paidDate: new Date(payment.paid_date),
-        dueDate: new Date(payment.due_date),
-        paymentMethod: payment.payment_method,
-      })) || [],
+      premiumHistory:
+        data.premium_payments?.map((payment: any) => ({
+          id: payment.id,
+          amount: payment.amount,
+          paidDate: new Date(payment.paid_date),
+          dueDate: new Date(payment.due_date),
+          paymentMethod: payment.payment_method,
+        })) || [],
     };
   }
 
@@ -849,23 +1570,121 @@ export class ApiService {
   }
 
   /**
+   * Get documents by family member
+   */
+  static async getDocumentsByFamilyMember(familyMemberId: string): Promise<Document[]> {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("family_member_id", familyMemberId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(`Failed to fetch documents by family member: ${error.message}`);
+
+    return data.map(this.transformDocument);
+  }
+
+  /**
+   * Get documents by insurance policy
+   */
+  static async getDocumentsByInsurancePolicy(policyId: string): Promise<Document[]> {
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .eq("insurance_policy_id", policyId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw new Error(`Failed to fetch documents by insurance policy: ${error.message}`);
+
+    return data.map(this.transformDocument);
+  }
+
+  /**
+   * Get expiring documents
+   */
+  static async getExpiringDocuments(days: number = 30): Promise<Document[]> {
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(today.getDate() + days);
+
+    const { data, error } = await supabase
+      .from("documents")
+      .select("*")
+      .not("expiry_date", "is", null)
+      .gte("expiry_date", today.toISOString().split('T')[0])
+      .lte("expiry_date", futureDate.toISOString().split('T')[0])
+      .order("expiry_date", { ascending: true });
+
+    if (error) throw new Error(`Failed to fetch expiring documents: ${error.message}`);
+
+    return data.map(this.transformDocument);
+  }
+
+  /**
+   * Get document statistics
+   */
+  static async getDocumentStats() {
+    try {
+      const [allDocs, expiring, expired] = await Promise.all([
+        this.getDocuments(),
+        this.getExpiringDocuments(30),
+        this.getExpiredDocuments(),
+      ]);
+
+      const statsByCategory: Record<DocumentCategory, number> = {
+        aadhar: 0,
+        pan: 0,
+        driving_license: 0,
+        passport: 0,
+        house_documents: 0,
+        business_documents: 0,
+        insurance_documents: 0,
+        bank_documents: 0,
+        educational_certificates: 0,
+        medical_records: 0,
+      };
+
+      allDocs.forEach(doc => {
+        if (statsByCategory[doc.category] !== undefined) {
+          statsByCategory[doc.category]++;
+        }
+      });
+
+      return {
+        totalDocuments: allDocs.length,
+        documentsByCategory: statsByCategory,
+        expiringDocuments: expiring.length,
+        expiredDocuments: expired.length,
+        documentsWithoutExpiry: allDocs.filter(doc => !doc.expiryDate).length,
+      };
+    } catch (error) {
+      this.handleError(error, 'getDocumentStats');
+    }
+  }
+
+  /**
    * Get dashboard summary data
    */
   static async getDashboardSummary() {
     try {
-      const [buildings, flats, lands, tenants, rentPayments, expiredDocs] = await Promise.all([
-        this.getBuildings(),
-        this.getFlats(),
-        this.getLands(),
-        this.getTenants(),
-        this.getRentPayments(),
-        this.getExpiredDocuments(),
-      ]);
+      const [buildings, flats, lands, tenants, rentPayments, expiredDocs] =
+        await Promise.all([
+          this.getBuildings(),
+          this.getFlats(),
+          this.getLands(),
+          this.getTenants(),
+          this.getRentPayments(),
+          this.getExpiredDocuments(),
+        ]);
 
       const totalProperties = buildings.length + flats.length + lands.length;
-      const activeTenants = tenants.filter(t => t.isActive).length;
-      const pendingPayments = rentPayments.filter(p => p.status === 'pending').length;
-      const overduePayments = rentPayments.filter(p => p.status === 'overdue').length;
+      const activeTenants = tenants.filter((t) => t.isActive).length;
+      const pendingPayments = rentPayments.filter(
+        (p) => p.status === "pending"
+      ).length;
+      const overduePayments = rentPayments.filter(
+        (p) => p.status === "overdue"
+      ).length;
 
       return {
         totalProperties,
@@ -875,7 +1694,7 @@ export class ApiService {
         expiredDocuments: expiredDocs.length,
       };
     } catch (error) {
-      this.handleError(error, 'getDashboardSummary');
+      this.handleError(error, "getDashboardSummary");
     }
   }
 
@@ -887,9 +1706,10 @@ export class ApiService {
       .from("documents")
       .select("*")
       .not("expiry_date", "is", null)
-      .lt("expiry_date", new Date().toISOString().split('T')[0]);
+      .lt("expiry_date", new Date().toISOString().split("T")[0]);
 
-    if (error) throw new Error(`Failed to fetch expired documents: ${error.message}`);
+    if (error)
+      throw new Error(`Failed to fetch expired documents: ${error.message}`);
 
     return data.map(this.transformDocument);
   }

@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Document, DocumentCategory, FamilyMember } from "@/types";
-import { documentService } from "@/services/DocumentService";
-import { localStorageService } from "@/services/LocalStorageService";
+import { Document, DocumentCategory, FamilyMember, InsurancePolicy } from "@/types";
+import { ApiService } from "@/services/ApiService";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -40,7 +39,8 @@ export function DocumentUploadForm({
   const [isUploading, setIsUploading] = useState(false);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
-  const [insurancePolicies, setInsurancePolicies] = useState<any[]>([]);
+  const [insurancePolicies, setInsurancePolicies] = useState<InsurancePolicy[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   const {
     register,
@@ -67,11 +67,30 @@ export function DocumentUploadForm({
   const selectedCategory = watch("category");
 
   useEffect(() => {
-    // Load related data for dropdowns
-    setFamilyMembers(localStorageService.getFamilyMembers());
-    setProperties(localStorageService.getProperties());
-    setInsurancePolicies(localStorageService.getInsurancePolicies());
+    loadRelatedData();
   }, []);
+
+  const loadRelatedData = async () => {
+    try {
+      setLoadingData(true);
+      const [members, policies] = await Promise.all([
+        ApiService.getFamilyMembers(),
+        ApiService.getInsurancePolicies(),
+        // TODO: Add properties when they're migrated
+        // ApiService.getProperties(),
+      ]);
+      
+      setFamilyMembers(members);
+      setInsurancePolicies(policies);
+      // setProperties(properties); // TODO: Uncomment when properties are migrated
+      setProperties([]); // Temporary empty array
+    } catch (error) {
+      console.error("Failed to load related data:", error);
+      toast.error("Failed to load form data");
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
@@ -105,6 +124,7 @@ export function DocumentUploadForm({
         category: data.category,
         familyMemberId: data.familyMemberId || undefined,
         propertyId: data.propertyId || undefined,
+        propertyType: data.propertyId ? 'building' : undefined, // TODO: Make this dynamic when properties are migrated
         insurancePolicyId: data.insurancePolicyId || undefined,
         expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
         issuedDate: data.issuedDate ? new Date(data.issuedDate) : undefined,
@@ -113,8 +133,8 @@ export function DocumentUploadForm({
         tags,
       };
 
-      // Create document from file
-      await documentService.createDocumentFromFile(selectedFile, metadata);
+      // Create document from file using API
+      await ApiService.createDocumentFromFile(selectedFile, metadata);
 
       toast.success("Document uploaded successfully!");
       reset();
@@ -130,10 +150,25 @@ export function DocumentUploadForm({
     }
   };
 
-  const categories = documentService.getAllCategories();
+  const categories = [
+    { value: "aadhar", label: "Aadhar Card" },
+    { value: "pan", label: "PAN Card" },
+    { value: "driving_license", label: "Driving License" },
+    { value: "passport", label: "Passport" },
+    { value: "house_documents", label: "House Documents" },
+    { value: "business_documents", label: "Business Documents" },
+    { value: "insurance_documents", label: "Insurance Documents" },
+    { value: "bank_documents", label: "Bank Documents" },
+    { value: "educational_certificates", label: "Educational Certificates" },
+    { value: "medical_records", label: "Medical Records" },
+  ];
 
   if (isUploading) {
     return <LoadingState message="Uploading document..." />;
+  }
+
+  if (loadingData) {
+    return <LoadingState message="Loading form data..." />;
   }
 
   return (
@@ -224,7 +259,7 @@ export function DocumentUploadForm({
                 value={policy.id}
                 className="text-gray-900 bg-white"
               >
-                {policy.policyNumber} - {policy.type}
+                {policy.policyNumber} - {policy.type.toUpperCase()} ({policy.provider})
               </option>
             ))}
           </Select>

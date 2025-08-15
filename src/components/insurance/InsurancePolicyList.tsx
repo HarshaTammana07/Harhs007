@@ -9,8 +9,7 @@ import {
   Button,
 } from "@/components/ui";
 import { InsurancePolicy, FamilyMember } from "@/types";
-import { insuranceService } from "@/services/InsuranceService";
-import { familyMemberService } from "@/services/FamilyMemberService";
+import { ApiService } from "@/services/ApiService";
 import { InsurancePolicyForm } from "./InsurancePolicyForm";
 import { PolicyDocuments } from "./PolicyDocuments";
 import toast from "react-hot-toast";
@@ -18,11 +17,13 @@ import toast from "react-hot-toast";
 interface InsurancePolicyListProps {
   type: InsurancePolicy["type"];
   onBack: () => void;
+  refreshTrigger?: number;
 }
 
 export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
   type,
   onBack,
+  refreshTrigger = 0,
 }) => {
   const [policies, setPolicies] = useState<InsurancePolicy[]>([]);
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
@@ -35,16 +36,26 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
   useEffect(() => {
     loadPolicies();
     loadFamilyMembers();
-  }, [type]);
+  }, [type, refreshTrigger]); // Reload when type or refreshTrigger changes
 
-  const loadPolicies = () => {
-    const allPolicies = insuranceService.getPoliciesByType(type);
-    setPolicies(allPolicies);
+  const loadPolicies = async () => {
+    try {
+      const allPolicies = await ApiService.getPoliciesByType(type);
+      setPolicies(allPolicies);
+    } catch (error) {
+      console.error("Failed to load policies:", error);
+      toast.error("Failed to load policies");
+    }
   };
 
-  const loadFamilyMembers = () => {
-    const members = familyMemberService.getAllFamilyMembers();
-    setFamilyMembers(members);
+  const loadFamilyMembers = async () => {
+    try {
+      const members = await ApiService.getFamilyMembers();
+      setFamilyMembers(members);
+    } catch (error) {
+      console.error("Failed to load family members:", error);
+      toast.error("Failed to load family members");
+    }
   };
 
   const getFamilyMemberName = (familyMemberId: string): string => {
@@ -66,7 +77,11 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
   };
 
   const getDaysUntilRenewal = (policy: InsurancePolicy): number => {
-    return insuranceService.getDaysUntilRenewal(policy);
+    const today = new Date();
+    const renewalDate = new Date(policy.renewalDate);
+    const diffTime = renewalDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
 
   const getRenewalStatus = (
@@ -98,8 +113,8 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
       )
     ) {
       try {
-        insuranceService.deletePolicy(policy.id);
-        loadPolicies();
+        await ApiService.deleteInsurancePolicy(policy.id);
+        await loadPolicies();
         toast.success("Policy deleted successfully");
       } catch (error) {
         console.error("Error deleting policy:", error);
@@ -113,8 +128,8 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
     setSelectedPolicy(null);
   };
 
-  const handleFormSave = () => {
-    loadPolicies();
+  const handleFormSave = async () => {
+    await loadPolicies();
   };
 
   const filteredPolicies = policies.filter(

@@ -2,11 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Document, DocumentCategory } from "@/types";
-import {
-  documentService,
-  DocumentSearchCriteria,
-} from "@/services/DocumentService";
-import { localStorageService } from "@/services/LocalStorageService";
+import { ApiService } from "@/services/ApiService";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
@@ -18,12 +14,31 @@ import { DocumentPreviewModal } from "./DocumentPreviewModal";
 import { DocumentFilters } from "./DocumentFilters";
 import { DocumentStats } from "./DocumentStats";
 import { ExpiryReminders } from "./ExpiryReminders";
-import { useClientSideEffect } from "@/hooks/useClientSide";
+import toast from "react-hot-toast";
 import {
   PlusIcon,
   FunnelIcon,
   ChartBarIcon,
 } from "@heroicons/react/24/outline";
+
+// Document search criteria interface
+interface DocumentSearchCriteria {
+  query?: string;
+  category?: DocumentCategory;
+  familyMemberId?: string;
+  propertyId?: string;
+  insurancePolicyId?: string;
+  tags?: string[];
+  isExpiring?: boolean;
+  expiryDateRange?: {
+    start?: Date;
+    end?: Date;
+  };
+  issuedDateRange?: {
+    start?: Date;
+    end?: Date;
+  };
+}
 
 export const DocumentManagement: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -39,32 +54,42 @@ export const DocumentManagement: React.FC = () => {
     null
   );
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Load documents on component mount (client-side only)
-  useClientSideEffect(() => {
+  // Load documents on component mount
+  useEffect(() => {
     loadDocuments();
-  }, []);
+  }, [refreshTrigger]);
 
   // Apply search and filters when criteria changes
   useEffect(() => {
-    const filtered = documentService.searchDocuments(searchCriteria);
-    setFilteredDocuments(filtered);
+    applyFilters();
   }, [searchCriteria, documents]);
 
-  const loadDocuments = () => {
-    // Don't try to load documents during SSR
-    if (typeof window === "undefined") {
-      return;
-    }
-
+  const loadDocuments = async () => {
     setIsLoading(true);
     try {
-      const allDocuments = documentService.getDocuments();
+      const allDocuments = await ApiService.getDocuments();
       setDocuments(allDocuments);
     } catch (error) {
       console.error("Error loading documents:", error);
+      toast.error("Failed to load documents");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const applyFilters = async () => {
+    try {
+      if (Object.keys(searchCriteria).length === 0) {
+        setFilteredDocuments(documents);
+      } else {
+        const filtered = await ApiService.searchDocuments(searchCriteria);
+        setFilteredDocuments(filtered);
+      }
+    } catch (error) {
+      console.error("Error filtering documents:", error);
+      setFilteredDocuments(documents); // Fallback to all documents
     }
   };
 
@@ -78,16 +103,20 @@ export const DocumentManagement: React.FC = () => {
   };
 
   const handleDocumentUpload = () => {
-    loadDocuments(); // Refresh documents after upload
+    setRefreshTrigger(prev => prev + 1); // Trigger refresh after upload
     setShowUploadModal(false);
   };
 
-  const handleDocumentDelete = (documentId: string) => {
-    try {
-      documentService.deleteDocument(documentId);
-      loadDocuments(); // Refresh documents after deletion
-    } catch (error) {
-      console.error("Error deleting document:", error);
+  const handleDocumentDelete = async (documentId: string) => {
+    if (window.confirm("Are you sure you want to delete this document? This action cannot be undone.")) {
+      try {
+        await ApiService.deleteDocument(documentId);
+        setRefreshTrigger(prev => prev + 1); // Trigger refresh after deletion
+        toast.success("Document deleted successfully");
+      } catch (error) {
+        console.error("Error deleting document:", error);
+        toast.error("Failed to delete document");
+      }
     }
   };
 
@@ -96,11 +125,19 @@ export const DocumentManagement: React.FC = () => {
     setShowPreviewModal(true);
   };
 
-  const handleDocumentDownload = (documentId: string) => {
+  const handleDocumentDownload = (document: Document) => {
     try {
-      documentService.downloadDocument(documentId);
+      // Create download link from base64 data
+      const link = document.createElement('a');
+      link.href = document.fileData;
+      link.download = document.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Document downloaded");
     } catch (error) {
       console.error("Error downloading document:", error);
+      toast.error("Failed to download document");
     }
   };
 
@@ -190,7 +227,7 @@ export const DocumentManagement: React.FC = () => {
       </Card>
 
       {/* Expiry Reminders */}
-      <ExpiryReminders />
+      <ExpiryReminders refreshTrigger={refreshTrigger} />
 
       {/* Document List */}
       <DocumentList
@@ -234,7 +271,10 @@ export const DocumentManagement: React.FC = () => {
         title="Document Statistics"
         size="lg"
       >
-        <DocumentStats onClose={() => setShowStatsModal(false)} />
+        <DocumentStats 
+          onClose={() => setShowStatsModal(false)} 
+          refreshTrigger={refreshTrigger}
+        />
       </Modal>
 
       {/* Preview Modal */}

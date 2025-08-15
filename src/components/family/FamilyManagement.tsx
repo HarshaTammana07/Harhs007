@@ -5,10 +5,10 @@ import { FamilyMember } from "@/types";
 import { FamilyMemberList } from "./FamilyMemberList";
 import { FamilyMemberForm } from "./FamilyMemberForm";
 import { FamilyMemberDetail } from "./FamilyMemberDetail";
-import { familyMemberService } from "@/services/FamilyMemberService";
+import { ApiService } from "@/services/ApiService";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { useClientSideEffect } from "@/hooks/useClientSide";
+import toast from "react-hot-toast";
 
 export const FamilyManagement: React.FC = () => {
   const [members, setMembers] = useState<FamilyMember[]>([]);
@@ -23,25 +23,21 @@ export const FamilyManagement: React.FC = () => {
   );
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
 
-  // Load family members on component mount (client-side only)
-  useClientSideEffect(() => {
+  // Load family members on component mount
+  useEffect(() => {
     loadFamilyMembers();
   }, []);
 
-  const loadFamilyMembers = () => {
-    // Don't try to load family members during SSR
-    if (typeof window === "undefined") {
-      return;
-    }
-
+  const loadFamilyMembers = async () => {
     try {
       setLoading(true);
       setError(null);
-      const familyMembers = familyMemberService.getAllFamilyMembers();
+      const familyMembers = await ApiService.getFamilyMembers();
       setMembers(familyMembers);
     } catch (err) {
       console.error("Error loading family members:", err);
       setError("Failed to load family members. Please try again.");
+      toast.error("Failed to load family members");
     } finally {
       setLoading(false);
     }
@@ -62,37 +58,48 @@ export const FamilyManagement: React.FC = () => {
     setShowDetail(true);
   };
 
-  const handleDeleteMember = async (memberId: string) => {
+  const handleDeleteMember = async (member: FamilyMember) => {
     if (
       window.confirm(
-        "Are you sure you want to delete this family member? This action cannot be undone."
+        `Are you sure you want to delete ${member.fullName}? This action cannot be undone.`
       )
     ) {
       try {
-        familyMemberService.deleteFamilyMember(memberId);
-        loadFamilyMembers(); // Refresh the list
+        setLoading(true);
+        await ApiService.deleteFamilyMember(member.id);
+        await loadFamilyMembers(); // Refresh the list
+        toast.success("Family member deleted successfully");
       } catch (err) {
         console.error("Error deleting family member:", err);
         setError("Failed to delete family member. Please try again.");
+        toast.error("Failed to delete family member");
+      } finally {
+        setLoading(false);
       }
     }
   };
 
-  const handleFormSubmit = (memberData: any) => {
+  const handleFormSubmit = async (memberData: unknown) => {
     try {
+      setLoading(true);
       if (editingMember) {
         // Update existing member
-        familyMemberService.updateFamilyMember(editingMember.id, memberData);
+        await ApiService.updateFamilyMember(editingMember.id, memberData);
+        toast.success("Family member updated successfully");
       } else {
         // Create new member
-        familyMemberService.createFamilyMember(memberData);
+        await ApiService.createFamilyMember(memberData);
+        toast.success("Family member created successfully");
       }
-      loadFamilyMembers(); // Refresh the list
+      await loadFamilyMembers(); // Refresh the list
       setShowForm(false);
       setEditingMember(null);
     } catch (err) {
       console.error("Error saving family member:", err);
       setError("Failed to save family member. Please try again.");
+      toast.error("Failed to save family member");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -151,8 +158,8 @@ export const FamilyManagement: React.FC = () => {
         <FamilyMemberForm
           member={editingMember}
           isOpen={showForm}
-          onSubmit={handleFormSubmit}
-          onCancel={handleFormCancel}
+          onSave={handleFormSubmit}
+          onClose={handleFormCancel}
         />
 
         {/* Family Member Detail Modal */}
@@ -167,7 +174,7 @@ export const FamilyManagement: React.FC = () => {
             }}
             onDelete={() => {
               handleDetailClose();
-              handleDeleteMember(selectedMember.id);
+              handleDeleteMember(selectedMember);
             }}
           />
         )}

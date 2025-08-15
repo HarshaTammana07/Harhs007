@@ -13,8 +13,7 @@ import {
 } from "@/components/ui";
 
 import { InsurancePolicy, FamilyMember, Document } from "@/types";
-import { insuranceService } from "@/services/InsuranceService";
-import { familyMemberService } from "@/services/FamilyMemberService";
+import { ApiService } from "@/services/ApiService";
 import { fileService } from "@/services/FileService";
 import toast from "react-hot-toast";
 
@@ -91,9 +90,14 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
     }
   }, [isOpen, policy, defaultType, setValue]);
 
-  const loadFamilyMembers = () => {
-    const members = familyMemberService.getAllFamilyMembers();
-    setFamilyMembers(members);
+  const loadFamilyMembers = async () => {
+    try {
+      const members = await ApiService.getFamilyMembers();
+      setFamilyMembers(members);
+    } catch (error) {
+      console.error("Failed to load family members:", error);
+      toast.error("Failed to load family members");
+    }
   };
 
   const handleFileUpload = async (files: File[]) => {
@@ -133,22 +137,25 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
     setIsSubmitting(true);
     try {
       const policyData = {
-        ...data,
+        policyNumber: data.policyNumber,
+        type: data.type,
+        provider: data.provider,
+        familyMemberId: data.familyMemberId,
         premiumAmount: Number(data.premiumAmount),
         coverageAmount: Number(data.coverageAmount),
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
         renewalDate: new Date(data.renewalDate),
-        documents,
+        status: data.status,
       };
 
       if (policy) {
         // Update existing policy
-        insuranceService.updatePolicy(policy.id, policyData);
+        await ApiService.updateInsurancePolicy(policy.id, policyData);
         toast.success("Policy updated successfully");
       } else {
         // Create new policy
-        insuranceService.createPolicy(policyData);
+        await ApiService.createInsurancePolicy(policyData);
         toast.success("Policy created successfully");
       }
 
