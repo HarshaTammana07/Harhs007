@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { InsuranceTypeCard } from "./InsuranceTypeCard";
-import { insuranceService } from "@/services/InsuranceService";
+import { ApiService } from "@/services/ApiService";
 import { InsurancePolicy } from "@/types";
+import toast from "react-hot-toast";
 
 // Icons for different insurance types
 const CarIcon = () => (
@@ -79,11 +80,13 @@ const HealthIcon = () => (
 interface InsuranceOverviewProps {
   onSelectType: (type: InsurancePolicy["type"]) => void;
   onAddNew: (type: InsurancePolicy["type"]) => void;
+  refreshTrigger?: number;
 }
 
 export const InsuranceOverview: React.FC<InsuranceOverviewProps> = ({
   onSelectType,
   onAddNew,
+  refreshTrigger = 0,
 }) => {
   const [stats, setStats] = useState<
     Record<
@@ -97,13 +100,54 @@ export const InsuranceOverview: React.FC<InsuranceOverviewProps> = ({
     health: { count: 0, expiringSoon: 0, expired: 0 },
   });
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     loadStats();
-  }, []);
+  }, [refreshTrigger]); // Reload when refreshTrigger changes
 
-  const loadStats = () => {
-    const policyStats = insuranceService.getPolicyStatsByType();
-    setStats(policyStats);
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+      const allPolicies = await ApiService.getInsurancePolicies();
+      const expiringSoon = await ApiService.getPoliciesExpiringSoon(30);
+      const expired = await ApiService.getExpiredPolicies();
+
+      const newStats = {
+        car: { count: 0, expiringSoon: 0, expired: 0 },
+        bike: { count: 0, expiringSoon: 0, expired: 0 },
+        LIC: { count: 0, expiringSoon: 0, expired: 0 },
+        health: { count: 0, expiringSoon: 0, expired: 0 },
+      };
+
+      // Count total policies by type
+      allPolicies.forEach(policy => {
+        if (newStats[policy.type]) {
+          newStats[policy.type].count++;
+        }
+      });
+
+      // Count expiring soon by type
+      expiringSoon.forEach(policy => {
+        if (newStats[policy.type]) {
+          newStats[policy.type].expiringSoon++;
+        }
+      });
+
+      // Count expired by type
+      expired.forEach(policy => {
+        if (newStats[policy.type]) {
+          newStats[policy.type].expired++;
+        }
+      });
+
+      setStats(newStats);
+    } catch (error) {
+      console.error("Failed to load insurance stats:", error);
+      toast.error("Failed to load insurance statistics");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const insuranceTypes = [

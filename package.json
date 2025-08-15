@@ -13,7 +13,11 @@
     "type-check": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:api": "node scripts/test-api-migration.js",
+    "test:family": "vitest run --testPathPattern=family",
+    "check:supabase": "node scripts/check-supabase.js",
+    "check:production": "node scripts/deploy-production.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.7",

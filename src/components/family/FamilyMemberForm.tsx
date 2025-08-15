@@ -11,6 +11,7 @@ import {
   getInitials,
 } from "@/utils/familyMemberUtils";
 import { fileService } from "@/services/FileService";
+import toast from "react-hot-toast";
 import Image from "next/image";
 
 interface FamilyMemberFormProps {
@@ -19,7 +20,7 @@ interface FamilyMemberFormProps {
   onClose: () => void;
   onSave: (
     member: Omit<FamilyMember, "id" | "createdAt" | "updatedAt">
-  ) => void;
+  ) => Promise<void>;
   loading?: boolean;
 }
 
