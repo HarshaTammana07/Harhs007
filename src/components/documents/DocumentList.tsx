@@ -1,0 +1,348 @@
+"use client";
+
+import { useState } from "react";
+import { Document } from "@/types";
+import { documentService } from "@/services/DocumentService";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import {
+  EyeIcon,
+  ArrowDownTrayIcon,
+  TrashIcon,
+  DocumentIcon,
+  PhotoIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline";
+import { formatDistanceToNow, format } from "date-fns";
+
+interface DocumentListProps {
+  documents: Document[];
+  onView: (document: Document) => void;
+  onDownload: (documentId: string) => void;
+  onDelete: (documentId: string) => void;
+}
+
+export function DocumentList({
+  documents,
+  onView,
+  onDownload,
+  onDelete,
+}: DocumentListProps) {
+  const [sortBy, setSortBy] = useState<
+    "title" | "category" | "createdAt" | "expiryDate"
+  >("createdAt");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const sortedDocuments = [...documents].sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
+
+    switch (sortBy) {
+      case "title":
+        aValue = a.title.toLowerCase();
+        bValue = b.title.toLowerCase();
+        break;
+      case "category":
+        aValue = documentService.getCategoryDisplayName(a.category);
+        bValue = documentService.getCategoryDisplayName(b.category);
+        break;
+      case "createdAt":
+        aValue = new Date(a.createdAt);
+        bValue = new Date(b.createdAt);
+        break;
+      case "expiryDate":
+        aValue = a.expiryDate ? new Date(a.expiryDate) : new Date(0);
+        bValue = b.expiryDate ? new Date(b.expiryDate) : new Date(0);
+        break;
+      default:
+        aValue = a.createdAt;
+        bValue = b.createdAt;
+    }
+
+    if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const handleSort = (field: typeof sortBy) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const getFileIcon = (mimeType: string) => {
+    if (mimeType.startsWith("image/")) {
+      return <PhotoIcon className="h-5 w-5 text-blue-500" />;
+    }
+    return <DocumentIcon className="h-5 w-5 text-gray-500" />;
+  };
+
+  const getExpiryStatus = (document: Document) => {
+    if (!document.expiryDate) return null;
+
+    const now = new Date();
+    const expiryDate = new Date(document.expiryDate);
+    const daysUntilExpiry = Math.ceil(
+      (expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysUntilExpiry < 0) {
+      return {
+        status: "expired",
+        message: `Expired ${Math.abs(daysUntilExpiry)} days ago`,
+        icon: <ExclamationTriangleIcon className="h-4 w-4 text-red-500" />,
+        className: "text-red-600 bg-red-50",
+      };
+    } else if (daysUntilExpiry <= 30) {
+      return {
+        status: "expiring",
+        message: `Expires in ${daysUntilExpiry} days`,
+        icon: <ClockIcon className="h-4 w-4 text-yellow-500" />,
+        className: "text-yellow-600 bg-yellow-50",
+      };
+    }
+
+    return null;
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  if (documents.length === 0) {
+    return (
+      <Card className="p-8 text-center">
+        <DocumentIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          No documents found
+        </h3>
+        <p className="text-gray-500">
+          Upload your first document or adjust your search filters.
+        </p>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Sort Controls */}
+      <Card className="p-4">
+        <div className="flex flex-wrap gap-2">
+          <span className="text-sm font-medium text-gray-700">Sort by:</span>
+          <button
+            onClick={() => handleSort("title")}
+            className={`text-sm px-2 py-1 rounded ${
+              sortBy === "title"
+                ? "bg-blue-100 text-blue-700"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            Title {sortBy === "title" && (sortOrder === "asc" ? "↑" : "↓")}
+          </button>
+          <button
+            onClick={() => handleSort("category")}
+            className={`text-sm px-2 py-1 rounded ${
+              sortBy === "category"
+                ? "bg-blue-100 text-blue-700"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            Category{" "}
+            {sortBy === "category" && (sortOrder === "asc" ? "↑" : "↓")}
+          </button>
+          <button
+            onClick={() => handleSort("createdAt")}
+            className={`text-sm px-2 py-1 rounded ${
+              sortBy === "createdAt"
+                ? "bg-blue-100 text-blue-700"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            Created{" "}
+            {sortBy === "createdAt" && (sortOrder === "asc" ? "↑" : "↓")}
+          </button>
+          <button
+            onClick={() => handleSort("expiryDate")}
+            className={`text-sm px-2 py-1 rounded ${
+              sortBy === "expiryDate"
+                ? "bg-blue-100 text-blue-700"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            Expiry{" "}
+            {sortBy === "expiryDate" && (sortOrder === "asc" ? "↑" : "↓")}
+          </button>
+        </div>
+      </Card>
+
+      {/* Document Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {sortedDocuments.map((document) => {
+          const expiryStatus = getExpiryStatus(document);
+
+          return (
+            <Card
+              key={document.id}
+              className="p-4 hover:shadow-md transition-shadow"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {getFileIcon(document.mimeType)}
+                  <div className="min-w-0 flex-1">
+                    <h3
+                      className="font-medium text-gray-900 truncate"
+                      title={document.title}
+                    >
+                      {document.title}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {documentService.getCategoryDisplayName(
+                        document.category
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-1 ml-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onView(document)}
+                    title="View document"
+                  >
+                    <EyeIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onDownload(document.id)}
+                    title="Download document"
+                  >
+                    <ArrowDownTrayIcon className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onDelete(document.id)}
+                    title="Delete document"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Document Info */}
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">File:</span>
+                  <span
+                    className="text-gray-900 truncate ml-2"
+                    title={document.fileName}
+                  >
+                    {document.fileName}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Size:</span>
+                  <span className="text-gray-900">
+                    {formatFileSize(document.fileSize)}
+                  </span>
+                </div>
+
+                {document.documentNumber && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Number:</span>
+                    <span
+                      className="text-gray-900 truncate ml-2"
+                      title={document.documentNumber}
+                    >
+                      {document.documentNumber}
+                    </span>
+                  </div>
+                )}
+
+                {document.issuer && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Issuer:</span>
+                    <span
+                      className="text-gray-900 truncate ml-2"
+                      title={document.issuer}
+                    >
+                      {document.issuer}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Created:</span>
+                  <span className="text-gray-900">
+                    {formatDistanceToNow(new Date(document.createdAt), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </div>
+
+                {document.expiryDate && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Expires:</span>
+                    <span className="text-gray-900">
+                      {format(new Date(document.expiryDate), "MMM dd, yyyy")}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Expiry Status */}
+              {expiryStatus && (
+                <div
+                  className={`mt-3 p-2 rounded-md flex items-center gap-2 ${expiryStatus.className}`}
+                >
+                  {expiryStatus.icon}
+                  <span className="text-sm font-medium">
+                    {expiryStatus.message}
+                  </span>
+                </div>
+              )}
+
+              {/* Tags */}
+              {document.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {document.tags.slice(0, 3).map((tag, index) => (
+                    <span
+                      key={index}
+                      className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  {document.tags.length > 3 && (
+                    <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                      +{document.tags.length - 3} more
+                    </span>
+                  )}
+                </div>
+              )}
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Results Summary */}
+      <div className="text-center text-sm text-gray-500 pt-4">
+        Showing {documents.length} document{documents.length !== 1 ? "s" : ""}
+      </div>
+    </div>
+  );
+}

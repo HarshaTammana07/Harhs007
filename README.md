@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Family Business Management System
+
+A comprehensive Next.js React application designed to centrally manage all aspects of the Tammana family's business operations and personal documentation. The system handles rental property management, insurance policies, government documents, and family member information using local storage.
+
+## Features
+
+- **Family Member Management**: Maintain detailed profiles with photos and personal information
+- **Rental Property Management**: Track properties, tenants, rent payments, and maintenance
+- **Insurance Management**: Monitor policies, renewals, and premium payments
+- **Document Management**: Store and organize important documents digitally
+- **Dashboard**: Comprehensive overview with alerts and upcoming deadlines
+- **Mobile Responsive**: Optimized for all device sizes
+
+## Technology Stack
+
+- **Frontend**: React 18, Next.js 14, TypeScript
+- **Styling**: Tailwind CSS
+- **Forms**: React Hook Form
+- **UI Components**: Headless UI
+- **Notifications**: React Hot Toast
+- **Data Storage**: Browser localStorage with JSON serialization
+- **File Storage**: Base64 encoding for documents and images
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` - Start development server with Turbopack
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+- `npm run type-check` - Run TypeScript type checking
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/                 # Next.js app directory
+├── components/          # React components
+│   ├── ui/             # Reusable UI components
+│   ├── forms/          # Form components
+│   └── layout/         # Layout components
+├── services/           # Business logic and API services
+├── types/              # TypeScript type definitions
+└── utils/              # Utility functions
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Authentication
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The system uses hardcoded family member credentials for authentication:
 
-## Deploy on Vercel
+- **Ravi**: ravi@family.com / ravi123 (Admin)
+- **Lakshmi**: lakshmi@family.com / lakshmi123 (Member)
+- **Harsha**: harsha@family.com / harsha123 (Admin)
+- **Manu**: manu@family.com / manu123 (Member)
+- **Nikitha**: nikitha@family.com / nikitha123 (Member)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Data Storage
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All data is stored locally in the browser's localStorage. The system provides:
+
+- Automatic data persistence
+- Export functionality (JSON format)
+- Import functionality for data restoration
+- Data validation and error handling
+
+## Contributing
+
+This is a private family project. For any issues or feature requests, please contact the development team.
+
+## License
+
+Private - All rights reserved by the Tammana family.

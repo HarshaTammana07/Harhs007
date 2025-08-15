@@ -1,0 +1,254 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Building, Apartment } from "@/types";
+import { propertyService } from "@/services/PropertyService";
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Button, LoadingState, Card, CardContent } from "@/components/ui";
+import { ApartmentList } from "@/components/properties/ApartmentList";
+import {
+  ArrowLeftIcon,
+  PlusIcon,
+  HomeIcon,
+  UsersIcon,
+  BuildingOfficeIcon,
+} from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
+
+export default function BuildingApartmentsPage() {
+  const params = useParams();
+  const router = useRouter();
+  const buildingId = params.buildingId as string;
+
+  const [building, setBuilding] = useState<Building | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadBuilding();
+  }, [buildingId]);
+
+  const loadBuilding = async () => {
+    try {
+      setLoading(true);
+      const buildingData = propertyService.getBuildingById(buildingId);
+      if (!buildingData) {
+        toast.error("Building not found");
+        router.push("/properties/buildings");
+        return;
+      }
+      setBuilding(buildingData);
+    } catch (error) {
+      console.error("Error loading building:", error);
+      toast.error("Failed to load building");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    router.push("/properties/buildings");
+  };
+
+  const handleAddApartment = () => {
+    router.push(`/properties/buildings/${buildingId}/apartments/new`);
+  };
+
+  const handleEditApartment = (apartmentId: string) => {
+    router.push(
+      `/properties/buildings/${buildingId}/apartments/${apartmentId}/edit`
+    );
+  };
+
+  const handleDeleteApartment = async (apartmentId: string) => {
+    if (window.confirm("Are you sure you want to delete this apartment?")) {
+      try {
+        propertyService.deleteApartment(buildingId, apartmentId);
+        toast.success("Apartment deleted successfully");
+        loadBuilding(); // Reload to refresh the list
+      } catch (error) {
+        console.error("Error deleting apartment:", error);
+        toast.error("Failed to delete apartment");
+      }
+    }
+  };
+
+  const handleViewTenant = (apartmentId: string) => {
+    router.push(
+      `/properties/buildings/${buildingId}/apartments/${apartmentId}/tenant`
+    );
+  };
+
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <AppLayout>
+          <LoadingState message="Loading building..." />
+        </AppLayout>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!building) {
+    return (
+      <ProtectedRoute>
+        <AppLayout>
+          <div className="text-center py-12">
+            <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              Building not found
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              The building you're looking for doesn't exist.
+            </p>
+            <div className="mt-6">
+              <Button onClick={handleBack}>
+                <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                Back to Buildings
+              </Button>
+            </div>
+          </div>
+        </AppLayout>
+      </ProtectedRoute>
+    );
+  }
+
+  const apartments = building.apartments || [];
+  const occupiedApartments = apartments.filter((apt) => apt.isOccupied).length;
+  const vacantApartments = apartments.length - occupiedApartments;
+  const occupancyRate =
+    apartments.length > 0 ? (occupiedApartments / apartments.length) * 100 : 0;
+
+  const breadcrumbItems = [
+    { label: "Properties", href: "/properties" },
+    { label: "Buildings", href: "/properties/buildings" },
+    {
+      label: building.name,
+      href: `/properties/buildings/${buildingId}/apartments`,
+    },
+  ];
+
+  return (
+    <ProtectedRoute>
+      <AppLayout>
+        <div className="space-y-6">
+          <Breadcrumb items={breadcrumbItems} />
+
+          {/* Building Header */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start space-x-4">
+                {building.images && building.images.length > 0 ? (
+                  <img
+                    src={building.images[0]}
+                    alt={building.name}
+                    className="w-20 h-20 object-cover rounded-lg"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <BuildingOfficeIcon className="h-8 w-8 text-gray-400" />
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    {building.name}
+                  </h1>
+                  <p className="text-gray-600 mt-1">{building.address}</p>
+                  <div className="flex items-center space-x-4 mt-2">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                      Building {building.buildingCode}
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      {building.totalFloors} Floors
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex space-x-3">
+                <Button variant="outline" onClick={handleBack}>
+                  <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                  Back
+                </Button>
+                <Button onClick={handleAddApartment}>
+                  <PlusIcon className="h-4 w-4 mr-2" />
+                  Add Apartment
+                </Button>
+              </div>
+            </div>
+
+            {/* Building Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">
+                  {apartments.length}
+                </div>
+                <div className="text-sm text-gray-600">Total Apartments</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">
+                  {occupiedApartments}
+                </div>
+                <div className="text-sm text-gray-600">Occupied</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-600">
+                  {vacantApartments}
+                </div>
+                <div className="text-sm text-gray-600">Vacant</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-indigo-600">
+                  {occupancyRate.toFixed(1)}%
+                </div>
+                <div className="text-sm text-gray-600">Occupancy Rate</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Apartments List */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
+                Apartments
+              </h2>
+              <Button onClick={handleAddApartment}>
+                <PlusIcon className="h-4 w-4 mr-2" />
+                Add Apartment
+              </Button>
+            </div>
+
+            {apartments.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <HomeIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">
+                    No apartments yet
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Get started by adding the first apartment to this building.
+                  </p>
+                  <div className="mt-6">
+                    <Button onClick={handleAddApartment}>
+                      <PlusIcon className="h-4 w-4 mr-2" />
+                      Add Apartment
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <ApartmentList
+                apartments={apartments}
+                buildingId={buildingId}
+                onEditApartment={handleEditApartment}
+                onDeleteApartment={handleDeleteApartment}
+                onViewTenant={handleViewTenant}
+              />
+            )}
+          </div>
+        </div>
+      </AppLayout>
+    </ProtectedRoute>
+  );
+}

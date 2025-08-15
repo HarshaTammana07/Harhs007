@@ -1,26 +1,354 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Light theme variables */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: 249 250 251;
+  --foreground: 15 23 42;
+  --card: 255 255 255;
+  --card-foreground: 15 23 42;
+  --popover: 255 255 255;
+  --popover-foreground: 15 23 42;
+  --primary: 59 130 246;
+  --primary-foreground: 255 255 255;
+  --secondary: 241 245 249;
+  --secondary-foreground: 15 23 42;
+  --muted: 241 245 249;
+  --muted-foreground: 100 116 139;
+  --accent: 241 245 249;
+  --accent-foreground: 15 23 42;
+  --destructive: 239 68 68;
+  --destructive-foreground: 255 255 255;
+  --border: 226 232 240;
+  --input: 226 232 240;
+  --ring: 59 130 246;
+  --radius: 0.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Modern Dark theme variables - High contrast & vibrant */
+.dark {
+  --background: 15 15 17;
+  --foreground: 255 255 255;
+  --card: 24 24 27;
+  --card-foreground: 250 250 250;
+  --popover: 24 24 27;
+  --popover-foreground: 250 250 250;
+  --primary: 99 102 241;
+  --primary-foreground: 255 255 255;
+  --secondary: 39 39 42;
+  --secondary-foreground: 250 250 250;
+  --muted: 39 39 42;
+  --muted-foreground: 161 161 170;
+  --accent: 39 39 42;
+  --accent-foreground: 250 250 250;
+  --destructive: 248 113 113;
+  --destructive-foreground: 255 255 255;
+  --border: 63 63 70;
+  --input: 39 39 42;
+  --ring: 99 102 241;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base styles */
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50;
+  @apply dark:bg-gradient-to-br dark:from-zinc-900 dark:via-gray-900 dark:to-black;
+  @apply text-slate-900 dark:text-white;
+  @apply min-h-screen;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-100 dark:bg-zinc-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 dark:bg-zinc-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-slate-400 dark:bg-zinc-500;
+}
+
+/* Component styles */
+@layer components {
+  /* Card styles */
+  .card-gradient {
+    @apply bg-gradient-to-br from-white via-slate-50 to-blue-50;
+    @apply dark:bg-gradient-to-br dark:from-zinc-800 dark:via-zinc-800 dark:to-zinc-900;
+    @apply border border-slate-200 dark:border-zinc-700;
+    @apply shadow-lg dark:shadow-2xl;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:shadow-xl hover:scale-105 hover:-translate-y-1;
+    @apply hover:border-primary-200 dark:hover:border-primary-500;
+    @apply dark:hover:shadow-primary-500/20;
+  }
+
+  /* Button styles */
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary-500 to-primary-600;
+    @apply hover:from-primary-600 hover:to-primary-700;
+    @apply text-white font-medium;
+    @apply shadow-lg hover:shadow-xl;
+    @apply transition-all duration-200;
+    @apply border-0;
+  }
+
+  .btn-secondary {
+    @apply bg-gradient-to-r from-secondary-500 to-secondary-600;
+    @apply hover:from-secondary-600 hover:to-secondary-700;
+    @apply text-white font-medium;
+    @apply shadow-md hover:shadow-lg;
+    @apply transition-all duration-200;
+  }
+
+  .btn-success {
+    @apply bg-gradient-to-r from-success-500 to-success-600;
+    @apply hover:from-success-600 hover:to-success-700;
+    @apply text-white font-medium;
+    @apply shadow-md hover:shadow-lg;
+    @apply transition-all duration-200;
+  }
+
+  .btn-warning {
+    @apply bg-gradient-to-r from-warning-500 to-warning-600;
+    @apply hover:from-warning-600 hover:to-warning-700;
+    @apply text-white font-medium;
+    @apply shadow-md hover:shadow-lg;
+    @apply transition-all duration-200;
+  }
+
+  .btn-error {
+    @apply bg-gradient-to-r from-error-500 to-error-600;
+    @apply hover:from-error-600 hover:to-error-700;
+    @apply text-white font-medium;
+    @apply shadow-md hover:shadow-lg;
+    @apply transition-all duration-200;
+  }
+
+  /* Property type specific styles */
+  .property-building {
+    @apply bg-gradient-to-br from-purple-50 to-purple-100;
+    @apply dark:bg-gradient-to-br dark:from-purple-900/20 dark:to-purple-800/20;
+    @apply border-purple-200 dark:border-purple-600;
+    @apply text-purple-700 dark:text-purple-300;
+  }
+
+  .property-flat {
+    @apply bg-gradient-to-br from-emerald-50 to-emerald-100;
+    @apply dark:bg-gradient-to-br dark:from-emerald-900/20 dark:to-emerald-800/20;
+    @apply border-emerald-200 dark:border-emerald-600;
+    @apply text-emerald-700 dark:text-emerald-300;
+  }
+
+  .property-land {
+    @apply bg-gradient-to-br from-yellow-50 to-yellow-100;
+    @apply dark:bg-gradient-to-br dark:from-yellow-900/20 dark:to-yellow-800/20;
+    @apply border-yellow-200 dark:border-yellow-600;
+    @apply text-yellow-700 dark:text-yellow-300;
+  }
+
+  /* Status badges */
+  .status-active {
+    @apply bg-gradient-to-r from-green-100 to-green-200;
+    @apply dark:bg-gradient-to-r dark:from-green-900/30 dark:to-green-800/30;
+    @apply text-green-800 dark:text-green-300;
+    @apply border border-green-300 dark:border-green-600;
+  }
+
+  .status-inactive {
+    @apply bg-gradient-to-r from-slate-100 to-slate-200;
+    @apply dark:bg-gradient-to-r dark:from-zinc-800 dark:to-zinc-700;
+    @apply text-slate-800 dark:text-zinc-300;
+    @apply border border-slate-300 dark:border-zinc-600;
+  }
+
+  .status-warning {
+    @apply bg-gradient-to-r from-yellow-100 to-yellow-200;
+    @apply dark:bg-gradient-to-r dark:from-yellow-900/30 dark:to-yellow-800/30;
+    @apply text-yellow-800 dark:text-yellow-300;
+    @apply border border-yellow-300 dark:border-yellow-600;
+  }
+
+  .status-error {
+    @apply bg-gradient-to-r from-red-100 to-red-200;
+    @apply dark:bg-gradient-to-r dark:from-red-900/30 dark:to-red-800/30;
+    @apply text-red-800 dark:text-red-300;
+    @apply border border-red-300 dark:border-red-600;
+  }
+
+  /* Input styles */
+  .input-field {
+    @apply bg-white dark:bg-zinc-800;
+    @apply border border-slate-300 dark:border-zinc-600;
+    @apply focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-500/30;
+    @apply transition-all duration-200;
+    @apply placeholder-slate-400 dark:placeholder-zinc-400;
+    @apply text-slate-900 dark:text-white;
+  }
+
+  /* Navigation styles */
+  .nav-item {
+    @apply transition-all duration-200 ease-out;
+    @apply hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100;
+    @apply dark:hover:bg-gradient-to-r dark:hover:from-primary-900/20 dark:hover:to-primary-800/20;
+    @apply hover:text-primary-700 dark:hover:text-primary-300;
+    @apply hover:shadow-md;
+    @apply text-slate-700 dark:text-zinc-300;
+  }
+
+  .nav-item-active {
+    @apply bg-gradient-to-r from-primary-100 to-primary-200;
+    @apply dark:bg-gradient-to-r dark:from-primary-900/30 dark:to-primary-800/30;
+    @apply text-primary-700 dark:text-primary-300;
+    @apply shadow-md;
+    @apply border-r-2 border-primary-500;
+  }
+
+  /* Animation classes */
+  .animate-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass-effect {
+    @apply bg-white bg-opacity-80 dark:bg-zinc-800 dark:bg-opacity-80;
+    @apply backdrop-blur-sm;
+    @apply border border-white border-opacity-20 dark:border-zinc-700 dark:border-opacity-20;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600;
+    @apply bg-clip-text text-transparent;
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  .dark .shadow-glow {
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+  }
+
+  /* Modern dark theme enhancements */
+  .dark-card {
+    @apply bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50;
+    @apply shadow-lg shadow-black/20;
+  }
+
+  .dark-card:hover {
+    @apply bg-zinc-800/70 border-zinc-600/50;
+    @apply shadow-xl shadow-black/30;
+  }
+
+  .neon-border {
+    @apply border border-primary-500/30;
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+  }
+
+  .dark .neon-border {
+    @apply border-primary-400/50;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+  }
+
+  /* High contrast text for dark mode */
+  .dark-text-primary {
+    @apply text-white;
+  }
+
+  .dark-text-secondary {
+    @apply text-zinc-300;
+  }
+
+  .dark-text-muted {
+    @apply text-zinc-400;
+  }
+
+  /* Enhanced dark mode shadows */
+  .dark .shadow-lg {
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.3),
+      0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .shadow-xl {
+    box-shadow:
+      0 20px 25px -5px rgba(0, 0, 0, 0.4),
+      0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+
+  .dark .shadow-2xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Vibrant hover effects for dark mode */
+  .dark .hover\:shadow-primary-500\/20:hover {
+    box-shadow:
+      0 20px 25px -5px rgba(99, 102, 241, 0.2),
+      0 10px 10px -5px rgba(99, 102, 241, 0.1);
+  }
+
+  /* Better focus rings for dark mode */
+  .dark .focus\:ring-primary-500\/30:focus {
+    --tw-ring-color: rgb(99 102 241 / 0.3);
+  }
 }
