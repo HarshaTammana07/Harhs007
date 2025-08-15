@@ -2,14 +2,13 @@
 
 import React, { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import {
   HomeIcon,
   UsersIcon,
   BuildingOfficeIcon,
   ShieldCheckIcon,
   DocumentTextIcon,
-  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -19,6 +18,8 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   isMobile: boolean;
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 const navigation = [
@@ -29,37 +30,86 @@ const navigation = [
   { name: "Rent Management", href: "/rent", icon: DocumentTextIcon },
   { name: "Insurance", href: "/insurance", icon: ShieldCheckIcon },
   { name: "Documents", href: "/documents", icon: DocumentTextIcon },
-  { name: "Theme Showcase", href: "/theme-showcase", icon: DocumentTextIcon },
-  { name: "File Demo", href: "/file-demo", icon: DocumentTextIcon },
-  { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isMobile }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  isOpen,
+  onClose,
+  isMobile,
+  isCollapsed = false,
+  onToggleCollapse,
+}) => {
   const pathname = usePathname();
 
   const SidebarContent = () => (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-white via-slate-50 to-blue-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-black px-6 pb-4">
-      <div className="flex h-16 shrink-0 items-center">
-        <img
-          className="h-8 w-auto"
-          src="/satyanarayana-fancy-stores.png"
-          alt="Satyanarayana Fancy Stores"
-          onError={(e) => {
-            // Fallback to text if image doesn't exist
-            const target = e.target as HTMLImageElement;
-            target.style.display = "none";
-            const parent = target.parentElement;
-            if (parent) {
-              parent.innerHTML =
-                '<span class="text-lg font-bold gradient-text">SFS</span>';
-            }
-          }}
-        />
-      </div>
+    <div
+      className={cn(
+        "flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-white via-slate-50 to-blue-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-black pb-4 transition-all duration-300",
+        isCollapsed && !isMobile ? "px-2" : "px-6"
+      )}
+    >
+      {/* Header with logo and collapse button */}
+      {isCollapsed && !isMobile ? (
+        /* Collapsed state - stack vertically */
+        <div className="flex flex-col h-20 shrink-0 items-center justify-center space-y-2">
+          {/* Collapse toggle button */}
+          {onToggleCollapse && (
+            <button
+              onClick={onToggleCollapse}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+              title="Expand sidebar"
+            >
+              <Bars3Icon className="h-4 w-4" />
+            </button>
+          )}
+          {/* Compact logo */}
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-md p-1.5 shadow-md">
+            <div className="text-white text-xs font-black text-center">SFS</div>
+          </div>
+        </div>
+      ) : (
+        /* Expanded state - horizontal layout */
+        <div className="flex h-16 shrink-0 items-center justify-between">
+          {/* Logo section */}
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg p-2 shadow-lg">
+              <div className="text-white text-center">
+                <div className="text-sm font-black leading-none">SFS</div>
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <div className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                Satyanarayana
+              </div>
+              <div className="text-xs text-slate-600 dark:text-slate-400 leading-tight">
+                Fancy Stores
+              </div>
+            </div>
+          </div>
+
+          {/* Collapse toggle button - only show on desktop */}
+          {!isMobile && onToggleCollapse && (
+            <button
+              onClick={onToggleCollapse}
+              className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:text-slate-300 dark:hover:bg-slate-800 transition-colors flex-shrink-0"
+              title="Collapse sidebar"
+            >
+              <Bars3Icon className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+      )}
+
       <nav className="flex flex-1 flex-col">
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
           <li>
-            <ul role="list" className="-mx-2 space-y-1">
+            <ul
+              role="list"
+              className={cn(
+                "space-y-1",
+                isCollapsed && !isMobile ? "mx-0" : "-mx-2"
+              )}
+            >
               {navigation.map((item) => (
                 <li key={item.name}>
                   <Link
@@ -68,9 +118,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isMobile }) => {
                       pathname === item.href
                         ? "nav-item-active"
                         : "nav-item text-slate-700 dark:text-zinc-200",
-                      "group flex gap-x-3 rounded-lg p-3 text-sm font-semibold leading-6 mx-1"
+                      "group flex rounded-lg text-sm font-semibold leading-6 transition-all duration-200",
+                      isCollapsed && !isMobile
+                        ? "p-2 justify-center mx-1 tooltip-container"
+                        : "gap-x-3 p-3 mx-1"
                     )}
                     onClick={isMobile ? onClose : undefined}
+                    title={isCollapsed && !isMobile ? item.name : undefined}
                   >
                     <item.icon
                       className={cn(
@@ -81,7 +135,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isMobile }) => {
                       )}
                       aria-hidden="true"
                     />
-                    {item.name}
+                    {(!isCollapsed || isMobile) && (
+                      <span className="transition-opacity duration-200">
+                        {item.name}
+                      </span>
+                    )}
+
+                    {/* Tooltip for collapsed state */}
+                    {isCollapsed && !isMobile && (
+                      <div className="tooltip">{item.name}</div>
+                    )}
                   </Link>
                 </li>
               ))}
@@ -152,7 +215,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isMobile }) => {
   }
 
   return (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-slate-200 dark:border-zinc-700 bg-gradient-to-b from-white via-slate-50 to-blue-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-black px-6 pb-4">
+    <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-slate-200 dark:border-zinc-700 bg-gradient-to-b from-white via-slate-50 to-blue-50 dark:from-zinc-900 dark:via-zinc-800 dark:to-black">
       <SidebarContent />
     </div>
   );

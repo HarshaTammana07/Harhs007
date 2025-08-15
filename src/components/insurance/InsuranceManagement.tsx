@@ -42,30 +42,28 @@ export const InsuranceManagement: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {viewMode === "overview" && (
-          <InsuranceOverview
-            onSelectType={handleSelectType}
-            onAddNew={handleAddNew}
-          />
-        )}
-
-        {viewMode === "list" && selectedType && (
-          <InsurancePolicyList
-            type={selectedType}
-            onBack={handleBackToOverview}
-          />
-        )}
-
-        {/* Add New Policy Form */}
-        <InsurancePolicyForm
-          isOpen={isAddFormOpen}
-          onClose={handleFormClose}
-          onSave={handleFormSave}
-          defaultType={selectedType || undefined}
+    <>
+      {viewMode === "overview" && (
+        <InsuranceOverview
+          onSelectType={handleSelectType}
+          onAddNew={handleAddNew}
         />
-      </div>
-    </div>
+      )}
+
+      {viewMode === "list" && selectedType && (
+        <InsurancePolicyList
+          type={selectedType}
+          onBack={handleBackToOverview}
+        />
+      )}
+
+      {/* Add New Policy Form */}
+      <InsurancePolicyForm
+        isOpen={isAddFormOpen}
+        onClose={handleFormClose}
+        onSave={handleFormSave}
+        defaultType={selectedType || undefined}
+      />
+    </>
   );
 };

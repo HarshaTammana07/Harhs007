@@ -12,6 +12,10 @@ interface AppLayoutProps {
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const sidebarWidth = sidebarCollapsed ? "lg:w-16" : "lg:w-64";
+  const contentMargin = sidebarCollapsed ? "lg:pl-16" : "lg:pl-64";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
@@ -23,12 +27,20 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       />
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <Sidebar isOpen={true} onClose={() => {}} isMobile={false} />
+      <div
+        className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col transition-all duration-300 ${sidebarWidth}`}
+      >
+        <Sidebar
+          isOpen={true}
+          onClose={() => {}}
+          isMobile={false}
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className={`transition-all duration-300 ${contentMargin}`}>
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
         <main className="py-6 animate-fade-in">

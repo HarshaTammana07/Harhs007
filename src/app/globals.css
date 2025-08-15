@@ -351,4 +351,33 @@ body {
   .dark .focus\:ring-primary-500\/30:focus {
     --tw-ring-color: rgb(99 102 241 / 0.3);
   }
+
+  /* Sidebar tooltip styles */
+  .tooltip-container {
+    @apply relative;
+  }
+
+  .tooltip {
+    @apply absolute left-full ml-2 px-2 py-1;
+    @apply bg-slate-900 dark:bg-zinc-800 text-white dark:text-zinc-200;
+    @apply text-xs rounded shadow-lg;
+    @apply opacity-0 pointer-events-none;
+    @apply transition-opacity duration-200;
+    @apply whitespace-nowrap z-50;
+    transform: translateY(-50%);
+    top: 50%;
+  }
+
+  .tooltip-container:hover .tooltip {
+    @apply opacity-100;
+  }
+
+  /* Sidebar collapse animation */
+  .sidebar-collapsed {
+    @apply w-16;
+  }
+
+  .sidebar-expanded {
+    @apply w-64;
+  }
 }

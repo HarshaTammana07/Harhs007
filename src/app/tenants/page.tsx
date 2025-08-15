@@ -38,6 +38,16 @@ export default function TenantsPage() {
         <div className="space-y-6">
           <Breadcrumb items={breadcrumbItems} />
 
+          {/* Header */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Tenant Management
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Manage tenant information and rental agreements
+            </p>
+          </div>
+
           {/* View Toggle */}
           <div className="flex items-center space-x-4">
             <button

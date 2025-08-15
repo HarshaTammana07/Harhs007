@@ -7,7 +7,6 @@ import {
   HomeIcon,
 } from "@heroicons/react/24/outline";
 import { LogoutButton } from "../auth/LogoutButton";
-import { ThemeToggle } from "../ui/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -90,9 +89,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         </div>
 
         <div className="flex items-center gap-x-4 lg:gap-x-6">
-          {/* Theme toggle */}
-          <ThemeToggle />
-
           {/* User info */}
           <div
             className="hidden lg:block lg:h-6 lg:w-px lg:bg-slate-200 dark:lg:bg-slate-700"
