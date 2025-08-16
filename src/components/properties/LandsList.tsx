@@ -33,7 +33,7 @@ export function LandsList() {
   const loadLands = async () => {
     try {
       setLoading(true);
-      const landsData = propertyService.getLands();
+      const landsData = await propertyService.getLands();
       setLands(landsData);
     } catch (error) {
       console.error("Error loading lands:", error);
@@ -90,9 +90,9 @@ export function LandsList() {
     }
 
     try {
-      propertyService.deleteLand(landId);
+      await propertyService.deleteLand(landId);
       toast.success("Land property deleted successfully");
-      loadLands();
+      await loadLands();
     } catch (error) {
       console.error("Error deleting land:", error);
       toast.error("Failed to delete land property");

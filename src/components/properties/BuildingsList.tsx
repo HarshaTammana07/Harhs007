@@ -37,7 +37,7 @@ export function BuildingsList() {
   const loadBuildings = async () => {
     try {
       setLoading(true);
-      const buildingsData = propertyService.getBuildings();
+      const buildingsData = await propertyService.getBuildings();
       setBuildings(buildingsData);
     } catch (error) {
       console.error("Error loading buildings:", error);
@@ -75,7 +75,7 @@ export function BuildingsList() {
 
   const handleDeleteBuilding = async (buildingId: string) => {
     try {
-      propertyService.deleteBuilding(buildingId);
+      await propertyService.deleteBuilding(buildingId);
       await loadBuildings();
       toast.success("Building deleted successfully");
     } catch (error) {
@@ -89,24 +89,18 @@ export function BuildingsList() {
   };
 
   const handleFormSubmit = async (
-    buildingData: Omit<Building, "id" | "createdAt" | "updatedAt">
+    buildingData: Omit<Building, "id" | "createdAt" | "updatedAt" | "apartments" | "documents">
   ) => {
     try {
       setFormLoading(true);
 
       if (editingBuilding) {
         // Update existing building
-        propertyService.updateBuilding(editingBuilding.id, buildingData);
+        await propertyService.updateBuilding(editingBuilding.id, buildingData);
         toast.success("Building updated successfully");
       } else {
-        // Create new building
-        const newBuilding: Building = {
-          ...buildingData,
-          id: `building_${Date.now()}`,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        propertyService.saveBuilding(newBuilding);
+        // Create new building - PropertyService now handles ID generation
+        await propertyService.saveBuilding(buildingData);
         toast.success("Building created successfully");
       }
 

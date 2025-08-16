@@ -30,7 +30,7 @@ export function FlatsList() {
   const loadFlats = async () => {
     try {
       setLoading(true);
-      const flatsData = propertyService.getFlats();
+      const flatsData = await propertyService.getFlats();
       setFlats(flatsData);
     } catch (error) {
       console.error("Error loading flats:", error);
@@ -82,9 +82,9 @@ export function FlatsList() {
     }
 
     try {
-      propertyService.deleteFlat(flatId);
+      await propertyService.deleteFlat(flatId);
       toast.success("Flat deleted successfully");
-      loadFlats();
+      await loadFlats();
     } catch (error) {
       console.error("Error deleting flat:", error);
       toast.error("Failed to delete flat");

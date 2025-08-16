@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -43,39 +43,89 @@ export default function ApartmentDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAddTenantForm, setShowAddTenantForm] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, [buildingId, apartmentId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const buildingData = propertyService.getBuildingById(buildingId);
+      console.log(
+        "Loading apartment detail - buildingId:",
+        buildingId,
+        "apartmentId:",
+        apartmentId
+      );
+
+      const buildingData = await propertyService.getBuildingById(buildingId);
+      console.log("Building data loaded:", buildingData);
       if (!buildingData) {
+        console.error("Building not found for ID:", buildingId);
         toast.error("Building not found");
         router.push("/properties/buildings");
         return;
       }
 
-      const apartmentData = propertyService.getApartmentById(
-        buildingId,
-        apartmentId
-      );
+      const apartmentData = await propertyService.getApartmentById(apartmentId);
+      console.log("Apartment data loaded:", apartmentData);
       if (!apartmentData) {
+        console.error(
+          "Apartment not found for buildingId:",
+          buildingId,
+          "apartmentId:",
+          apartmentId
+        );
         toast.error("Apartment not found");
         router.push(`/properties/buildings/${buildingId}/apartments`);
         return;
       }
 
+      // Fetch tenant data for this apartment
+      console.log("Fetching tenant for apartment:", apartmentId);
+      let apartmentTenant = null;
+      
+      try {
+        // Try efficient method first (requires property_id column)
+        apartmentTenant = await propertyService.getTenantByProperty(apartmentId, "apartment");
+        console.log("Apartment tenant found (efficient method):", apartmentTenant);
+      } catch (error) {
+        console.log("Efficient method failed, falling back to old method:", error.message);
+        
+        // Fallback: Get all tenants and filter (works with existing database)
+        const allTenants = await propertyService.getTenants();
+        apartmentTenant = allTenants.find(tenant => 
+          tenant.propertyId === apartmentId && tenant.propertyType === "apartment"
+        );
+        console.log("Apartment tenant found (fallback method):", apartmentTenant);
+      }
+
+      if (apartmentTenant) {
+        console.log("Tenant details:", {
+          id: apartmentTenant.id,
+          fullName: apartmentTenant.personalInfo?.fullName,
+          phone: apartmentTenant.contactInfo?.phone,
+          email: apartmentTenant.contactInfo?.email,
+          rentAmount: apartmentTenant.rentalAgreement?.rentAmount,
+        });
+      } else {
+        console.log("No tenant found for apartment:", apartmentId);
+      }
+
+      // Link tenant to apartment
+      const apartmentWithTenant = {
+        ...apartmentData,
+        currentTenant: apartmentTenant || null,
+      };
+
       setBuilding(buildingData);
-      setApartment(apartmentData);
+      setApartment(apartmentWithTenant);
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error("Failed to load apartment details");
     } finally {
       setLoading(false);
     }
-  };
+  }, [buildingId, apartmentId, router]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleBack = () => {
     router.push(`/properties/buildings/${buildingId}/apartments`);
@@ -89,7 +139,7 @@ export default function ApartmentDetailPage() {
 
   const handleDelete = async () => {
     try {
-      propertyService.deleteApartment(buildingId, apartmentId);
+      await propertyService.deleteApartment(apartmentId);
       toast.success("Apartment deleted successfully");
       router.push(`/properties/buildings/${buildingId}/apartments`);
     } catch (error) {
@@ -102,20 +152,33 @@ export default function ApartmentDetailPage() {
     setShowAddTenantForm(true);
   };
 
-  const handleTenantSubmit = async (tenant: any) => {
+  const handleTenantSubmit = async (tenant: unknown) => {
     try {
-      // Save tenant to property service
-      propertyService.saveTenant(tenant);
+      // Save tenant to property service with apartment reference
+      const tenantData = {
+        ...tenant,
+        propertyId: apartmentId,
+        propertyType: "apartment",
+        buildingId: buildingId,
+      };
 
-      // Update apartment with tenant
-      propertyService.updateApartment(buildingId, apartmentId, {
-        currentTenant: tenant,
+      console.log("Saving tenant with data:", tenantData);
+      console.log("Property linking fields:", {
+        propertyId: apartmentId,
+        propertyType: "apartment",
+        buildingId: buildingId,
+      });
+
+      await propertyService.saveTenant(tenantData);
+
+      // Update apartment occupancy status only
+      await propertyService.updateApartment(apartmentId, {
         isOccupied: true,
       });
 
       setShowAddTenantForm(false);
       toast.success("Tenant added successfully");
-      loadData(); // Reload data to show the new tenant
+      await loadData(); // Reload data to show the new tenant
     } catch (error) {
       console.error("Error adding tenant:", error);
       throw error; // Let the form handle the error
@@ -150,7 +213,7 @@ export default function ApartmentDetailPage() {
               Apartment not found
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              The apartment you're looking for doesn't exist.
+              The apartment you're looking for doesn&apos;t exist.
             </p>
             <div className="mt-6">
               <Button onClick={handleBack}>
@@ -288,7 +351,7 @@ export default function ApartmentDetailPage() {
                         Monthly Rent
                       </label>
                       <p className="text-lg font-semibold text-green-600">
-                        ₹{apartment.rentAmount.toLocaleString()}
+                        ₹{apartment.rentAmount?.toLocaleString() || "0"}
                       </p>
                     </div>
                   </div>
@@ -442,7 +505,8 @@ export default function ApartmentDetailPage() {
                               </span>
                               <span className="text-sm font-medium text-green-600">
                                 ₹
-                                {apartment.currentTenant.rentalAgreement.rentAmount.toLocaleString()}
+                                {apartment.currentTenant.rentalAgreement.rentAmount?.toLocaleString() ||
+                                  "0"}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
@@ -451,7 +515,8 @@ export default function ApartmentDetailPage() {
                               </span>
                               <span className="text-sm font-medium">
                                 ₹
-                                {apartment.currentTenant.rentalAgreement.securityDeposit.toLocaleString()}
+                                {apartment.currentTenant.rentalAgreement.securityDeposit?.toLocaleString() ||
+                                  "0"}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
@@ -515,7 +580,7 @@ export default function ApartmentDetailPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Monthly Rent</span>
                     <span className="text-sm font-medium text-green-600">
-                      ₹{apartment.rentAmount.toLocaleString()}
+                      ₹{apartment.rentAmount?.toLocaleString() || "0"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -523,13 +588,13 @@ export default function ApartmentDetailPage() {
                       Security Deposit
                     </span>
                     <span className="text-sm font-medium">
-                      ₹{apartment.securityDeposit.toLocaleString()}
+                      ₹{apartment.securityDeposit?.toLocaleString() || "0"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Annual Rent</span>
                     <span className="text-sm font-medium">
-                      ₹{(apartment.rentAmount * 12).toLocaleString()}
+                      ₹{((apartment.rentAmount || 0) * 12).toLocaleString()}
                     </span>
                   </div>
                   {apartment.rentHistory &&

@@ -32,7 +32,7 @@ export function PropertyTypeOverview() {
   const loadPropertyStats = async () => {
     try {
       setLoading(true);
-      const propertyStats = propertyService.getPropertyStatistics();
+      const propertyStats = await propertyService.getPropertyStatistics();
       setStats(propertyStats);
     } catch (error) {
       console.error("Error loading property statistics:", error);

@@ -165,6 +165,9 @@ export interface Tenant {
   moveInDate: Date;
   moveOutDate?: Date;
   isActive: boolean;
+  propertyId?: string;
+  propertyType?: string;
+  buildingId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

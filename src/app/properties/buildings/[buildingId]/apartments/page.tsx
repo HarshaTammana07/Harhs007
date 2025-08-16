@@ -33,7 +33,7 @@ export default function BuildingApartmentsPage() {
   const loadBuilding = async () => {
     try {
       setLoading(true);
-      const buildingData = propertyService.getBuildingById(buildingId);
+      const buildingData = await propertyService.getBuildingById(buildingId);
       if (!buildingData) {
         toast.error("Building not found");
         router.push("/properties/buildings");
@@ -65,9 +65,9 @@ export default function BuildingApartmentsPage() {
   const handleDeleteApartment = async (apartmentId: string) => {
     if (window.confirm("Are you sure you want to delete this apartment?")) {
       try {
-        propertyService.deleteApartment(buildingId, apartmentId);
+        await propertyService.deleteApartment(apartmentId);
         toast.success("Apartment deleted successfully");
-        loadBuilding(); // Reload to refresh the list
+        await loadBuilding(); // Reload to refresh the list
       } catch (error) {
         console.error("Error deleting apartment:", error);
         toast.error("Failed to delete apartment");
