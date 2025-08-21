@@ -14,10 +14,12 @@ export function useRealTimeFamilyMembers() {
 
   const loadMembers = useCallback(async () => {
     try {
+      setLoading(true);
       const data = await ApiService.getFamilyMembers();
       setMembers(data);
     } catch (error) {
       console.error("Failed to load family members:", error);
+      toast.error("Failed to load family members");
     } finally {
       setLoading(false);
     }
@@ -40,26 +42,12 @@ export function useRealTimeFamilyMembers() {
         (payload) => {
           console.log("Real-time update received:", payload);
 
-          switch (payload.eventType) {
-            case "INSERT":
-              toast.success(
-                `New family member added: ${payload.new.full_name}`
-              );
-              break;
-            case "UPDATE":
-              toast.info(`Family member updated: ${payload.new.full_name}`);
-              break;
-            case "DELETE":
-              toast.error(`Family member deleted`);
-              break;
-          }
-
-          // Reload data to get fresh state
+          // Immediately reload data when any change occurs
           loadMembers();
         }
       )
       .subscribe((status) => {
-        console.log("Subscription status:", status);
+        console.log("Family members subscription status:", status);
       });
 
     // Cleanup subscription on unmount

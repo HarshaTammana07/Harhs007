@@ -79,20 +79,39 @@ export default function ApartmentDetailPage() {
       // Fetch tenant data for this apartment
       console.log("Fetching tenant for apartment:", apartmentId);
       let apartmentTenant = null;
-      
+
       try {
         // Try efficient method first (requires property_id column)
-        apartmentTenant = await propertyService.getTenantByProperty(apartmentId, "apartment");
-        console.log("Apartment tenant found (efficient method):", apartmentTenant);
-      } catch (error) {
-        console.log("Efficient method failed, falling back to old method:", error.message);
-        
-        // Fallback: Get all tenants and filter (works with existing database)
-        const allTenants = await propertyService.getTenants();
-        apartmentTenant = allTenants.find(tenant => 
-          tenant.propertyId === apartmentId && tenant.propertyType === "apartment"
+        apartmentTenant = await propertyService.getTenantByProperty(
+          apartmentId,
+          "apartment"
         );
-        console.log("Apartment tenant found (fallback method):", apartmentTenant);
+        console.log(
+          "Apartment tenant found (efficient method):",
+          apartmentTenant
+        );
+      } catch (error) {
+        console.log(
+          "Efficient method failed, falling back to old method:",
+          error.message
+        );
+
+        // Fallback: Get all tenants and filter (works with existing database)
+        try {
+          const allTenants = await propertyService.getTenants();
+          apartmentTenant = allTenants.find(
+            (tenant) =>
+              tenant.propertyId === apartmentId &&
+              tenant.propertyType === "apartment"
+          );
+          console.log(
+            "Apartment tenant found (fallback method):",
+            apartmentTenant
+          );
+        } catch (fallbackError) {
+          console.error("Both methods failed to fetch tenant:", fallbackError);
+          apartmentTenant = null;
+        }
       }
 
       if (apartmentTenant) {
@@ -186,10 +205,18 @@ export default function ApartmentDetailPage() {
   };
 
   const handleViewTenant = () => {
+    console.log("handleViewTenant called");
+    console.log("apartment:", apartment);
+    console.log("apartment.currentTenant:", apartment?.currentTenant);
+
     if (apartment?.currentTenant) {
+      console.log("Navigating to tenant details page");
       router.push(
         `/properties/buildings/${buildingId}/apartments/${apartmentId}/tenant`
       );
+    } else {
+      console.log("No tenant found, cannot navigate");
+      toast.error("No tenant information available");
     }
   };
 

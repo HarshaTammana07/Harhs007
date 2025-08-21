@@ -36,13 +36,45 @@ export default function FlatDetailPage() {
   const loadFlat = async () => {
     try {
       setLoading(true);
-      const flatData = propertyService.getFlatById(flatId);
+      console.log("Loading flat with ID:", flatId);
+
+      const flatData = await propertyService.getFlatById(flatId);
+      console.log("Flat data loaded:", flatData);
+
       if (!flatData) {
         toast.error("Flat not found");
         router.push("/properties/flats");
         return;
       }
-      setFlat(flatData);
+
+      // Fetch tenant data for this flat
+      let tenantData = null;
+      try {
+        tenantData = await propertyService.getTenantByProperty(flatId, "flat");
+        console.log("Flat tenant found:", tenantData);
+      } catch (error) {
+        console.log("No tenant found or error fetching tenant:", error);
+        // Try fallback method
+        try {
+          const allTenants = await propertyService.getTenants();
+          tenantData = allTenants.find(
+            (tenant) =>
+              tenant.propertyId === flatId && tenant.propertyType === "flat"
+          );
+          console.log("Flat tenant found (fallback):", tenantData);
+        } catch (fallbackError) {
+          console.error("Both methods failed to fetch tenant:", fallbackError);
+        }
+      }
+
+      // Create flat object with tenant data
+      const flatWithTenant = {
+        ...flatData,
+        currentTenant: tenantData || null,
+        isOccupied: !!tenantData,
+      };
+
+      setFlat(flatWithTenant);
     } catch (error) {
       console.error("Error loading flat:", error);
       toast.error("Failed to load flat details");
@@ -67,20 +99,24 @@ export default function FlatDetailPage() {
 
   const handleTenantSubmit = async (tenant: any) => {
     try {
-      // Save tenant to property service
-      propertyService.saveTenant(tenant);
+      console.log("Adding tenant to flat:", flatId);
 
-      // Update flat with tenant
-      propertyService.updateFlat(flatId, {
-        currentTenant: tenant,
-        isOccupied: true,
-      });
+      // Save tenant to property service with flat reference
+      const tenantData = {
+        ...tenant,
+        propertyId: flatId,
+        propertyType: "flat",
+      };
+
+      console.log("Saving tenant with data:", tenantData);
+      await propertyService.saveTenant(tenantData);
 
       setShowAddTenantForm(false);
       toast.success("Tenant added successfully");
-      loadFlat(); // Reload data to show the new tenant
+      await loadFlat(); // Reload data to show the new tenant
     } catch (error) {
       console.error("Error adding tenant:", error);
+      toast.error("Failed to add tenant");
       throw error; // Let the form handle the error
     }
   };
@@ -222,7 +258,7 @@ export default function FlatDetailPage() {
                         <div>
                           <p className="text-sm text-gray-600">Monthly Rent</p>
                           <p className="font-medium text-gray-900">
-                            ₹{flat.rentAmount.toLocaleString()}
+                            ₹{(flat.rentAmount || 0).toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -236,7 +272,7 @@ export default function FlatDetailPage() {
                             Security Deposit
                           </p>
                           <p className="font-medium text-gray-900">
-                            ₹{flat.securityDeposit.toLocaleString()}
+                            ₹{(flat.securityDeposit || 0).toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -302,7 +338,9 @@ export default function FlatDetailPage() {
                         </p>
                         <p className="font-medium text-gray-900">
                           ₹
-                          {flat.specifications.maintenanceCharges.toLocaleString()}
+                          {(
+                            flat.specifications.maintenanceCharges || 0
+                          ).toLocaleString()}
                           /month
                         </p>
                       </div>

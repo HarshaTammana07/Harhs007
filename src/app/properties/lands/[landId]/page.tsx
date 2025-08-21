@@ -24,13 +24,13 @@ import {
   DocumentTextIcon,
   CalendarIcon,
 } from "@heroicons/react/24/outline";
-import { SimpleTenantForm } from "@/components/tenants/SimpleTenantForm";
+
 import { toast } from "react-hot-toast";
 
 export default function LandDetailPage() {
   const [land, setLand] = useState<Land | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showAddTenantForm, setShowAddTenantForm] = useState(false);
+
   const router = useRouter();
   const params = useParams();
   const landId = params.landId as string;
@@ -44,7 +44,11 @@ export default function LandDetailPage() {
   const loadLand = async () => {
     try {
       setLoading(true);
-      const landData = propertyService.getLandById(landId);
+      console.log("Loading land with ID:", landId);
+
+      const landData = await propertyService.getLandById(landId);
+      console.log("Land data loaded:", landData);
+
       if (landData) {
         setLand(landData);
       } else {
@@ -63,36 +67,8 @@ export default function LandDetailPage() {
     router.push(`/properties/lands/${landId}/edit`);
   };
 
-  const handleManageTenant = () => {
-    if (land?.currentTenant) {
-      router.push(`/properties/lands/${landId}/tenant`);
-    } else {
-      setShowAddTenantForm(true);
-    }
-  };
-
-  const handleTenantSubmit = async (tenant: any) => {
-    try {
-      // Save tenant to property service
-      propertyService.saveTenant(tenant);
-
-      // Update land with tenant
-      propertyService.updateLand(landId, {
-        currentTenant: tenant,
-        isLeased: true,
-      });
-
-      setShowAddTenantForm(false);
-      toast.success("Tenant added successfully");
-      loadLand(); // Reload data to show the new tenant
-    } catch (error) {
-      console.error("Error adding tenant:", error);
-      throw error; // Let the form handle the error
-    }
-  };
-
   const formatArea = (area: number, unit: string) => {
-    return `${area.toLocaleString()} ${unit}`;
+    return `${(area || 0).toLocaleString()} ${unit}`;
   };
 
   const getZoningColor = (zoning: string) => {
@@ -186,22 +162,6 @@ export default function LandDetailPage() {
               >
                 <PencilIcon className="h-4 w-4" />
                 <span>Edit</span>
-              </Button>
-              <Button
-                onClick={handleManageTenant}
-                className="flex items-center space-x-2"
-              >
-                {land.isLeased ? (
-                  <>
-                    <UserIcon className="h-4 w-4" />
-                    <span>Manage Tenant</span>
-                  </>
-                ) : (
-                  <>
-                    <UserPlusIcon className="h-4 w-4" />
-                    <span>Add Tenant</span>
-                  </>
-                )}
               </Button>
             </div>
           </div>
@@ -351,8 +311,9 @@ export default function LandDetailPage() {
                             Rent Amount
                           </div>
                           <div className="font-medium">
-                            ₹{land.leaseTerms.rentAmount.toLocaleString()}/
-                            {land.leaseTerms.rentFrequency}
+                            ₹
+                            {(land.leaseTerms.rentAmount || 0).toLocaleString()}
+                            /{land.leaseTerms.rentFrequency}
                           </div>
                         </div>
                       </div>
@@ -390,7 +351,9 @@ export default function LandDetailPage() {
                             </div>
                             <div className="font-medium">
                               ₹
-                              {land.leaseTerms.securityDeposit.toLocaleString()}
+                              {(
+                                land.leaseTerms.securityDeposit || 0
+                              ).toLocaleString()}
                             </div>
                           </div>
                         </div>
@@ -430,69 +393,6 @@ export default function LandDetailPage() {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              {/* Current Tenant */}
-              {land.isLeased && land.currentTenant ? (
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                      Current Tenant
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <UserIcon className="h-5 w-5 text-gray-400" />
-                        <div>
-                          <div className="font-medium">
-                            {land.currentTenant.personalInfo.fullName}
-                          </div>
-                          <div className="text-sm text-gray-600">
-                            {land.currentTenant.personalInfo.occupation}
-                          </div>
-                        </div>
-                      </div>
-                      {land.currentTenant.contactInfo.phone && (
-                        <div className="text-sm text-gray-600">
-                          Phone: {land.currentTenant.contactInfo.phone}
-                        </div>
-                      )}
-                      {land.currentTenant.contactInfo.email && (
-                        <div className="text-sm text-gray-600">
-                          Email: {land.currentTenant.contactInfo.email}
-                        </div>
-                      )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleManageTenant}
-                        className="w-full mt-3"
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                      Tenant Status
-                    </h3>
-                    <div className="text-center py-4">
-                      <div className="text-gray-400 mb-2">
-                        <UserIcon className="h-8 w-8 mx-auto" />
-                      </div>
-                      <p className="text-gray-600 mb-4">No tenant assigned</p>
-                      <Button
-                        onClick={handleManageTenant}
-                        size="sm"
-                        className="w-full"
-                      >
-                        Add Tenant
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
               {/* Quick Stats */}
               <Card>
                 <CardContent className="p-6">
@@ -503,19 +403,19 @@ export default function LandDetailPage() {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Documents</span>
                       <span className="font-medium">
-                        {land.documents.length}
+                        {land.documents?.length || 0}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Rent History</span>
                       <span className="font-medium">
-                        {land.rentHistory.length}
+                        {land.rentHistory?.length || 0}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Maintenance Records</span>
                       <span className="font-medium">
-                        {land.maintenanceRecords.length}
+                        {land.maintenanceRecords?.length || 0}
                       </span>
                     </div>
                   </div>
@@ -523,17 +423,6 @@ export default function LandDetailPage() {
               </Card>
             </div>
           </div>
-
-          {/* Add Tenant Form Modal */}
-          {showAddTenantForm && (
-            <SimpleTenantForm
-              isOpen={showAddTenantForm}
-              onSubmit={handleTenantSubmit}
-              onCancel={() => setShowAddTenantForm(false)}
-              defaultRent={land.leaseTerms?.rentAmount || 0}
-              title="Add Tenant to Land"
-            />
-          )}
         </div>
       </AppLayout>
     </ProtectedRoute>

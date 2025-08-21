@@ -21,7 +21,8 @@ import {
   PencilIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import { TenantDetail, TenantForm } from "@/components/tenants";
+import { TenantDetail } from "@/components/tenants";
+import { SimpleTenantForm } from "@/components/tenants/SimpleTenantForm";
 import toast from "react-hot-toast";
 
 export default function TenantDetailPage() {
@@ -43,24 +44,42 @@ export default function TenantDetailPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const buildingData = propertyService.getBuildingById(buildingId);
+      const buildingData = await propertyService.getBuildingById(buildingId);
       if (!buildingData) {
         toast.error("Building not found");
         router.push("/properties/buildings");
         return;
       }
 
-      const apartmentData = propertyService.getApartmentById(
-        buildingId,
-        apartmentId
-      );
+      const apartmentData = await propertyService.getApartmentById(apartmentId);
       if (!apartmentData) {
         toast.error("Apartment not found");
         router.push(`/properties/buildings/${buildingId}/apartments`);
         return;
       }
 
-      if (!apartmentData.currentTenant) {
+      // Fetch tenant data for this apartment
+      let tenantData = null;
+      try {
+        tenantData = await propertyService.getTenantByProperty(
+          apartmentId,
+          "apartment"
+        );
+      } catch (error) {
+        console.log("Failed to fetch tenant, trying fallback method:", error);
+        try {
+          const allTenants = await propertyService.getTenants();
+          tenantData = allTenants.find(
+            (tenant) =>
+              tenant.propertyId === apartmentId &&
+              tenant.propertyType === "apartment"
+          );
+        } catch (fallbackError) {
+          console.error("Both methods failed to fetch tenant:", fallbackError);
+        }
+      }
+
+      if (!tenantData) {
         toast.error("No tenant found for this apartment");
         router.push(
           `/properties/buildings/${buildingId}/apartments/${apartmentId}`
@@ -68,8 +87,14 @@ export default function TenantDetailPage() {
         return;
       }
 
+      // Create apartment object with tenant data
+      const apartmentWithTenant = {
+        ...apartmentData,
+        currentTenant: tenantData,
+      };
+
       setBuilding(buildingData);
-      setApartment(apartmentData);
+      setApartment(apartmentWithTenant);
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error("Failed to load tenant details");
@@ -92,56 +117,55 @@ export default function TenantDetailPage() {
   const handleDeleteTenant = async (tenant: Tenant) => {
     if (
       !confirm(
-        `Are you sure you want to remove tenant ${tenant.personalInfo.fullName}?`
+        `Are you sure you want to delete tenant ${tenant.personalInfo.fullName}? This action cannot be undone.`
       )
     ) {
       return;
     }
 
     try {
-      // Update apartment to remove tenant
-      propertyService.updateApartment(buildingId, apartmentId, {
-        currentTenant: undefined,
+      console.log("Deleting tenant:", tenant.id);
+
+      // Delete tenant from database
+      await propertyService.deleteTenant(tenant.id);
+      console.log("Tenant deleted from database");
+
+      // Update apartment to mark as vacant
+      await propertyService.updateApartment(apartmentId, {
         isOccupied: false,
       });
+      console.log("Apartment marked as vacant");
 
-      toast.success("Tenant removed successfully");
+      toast.success("Tenant deleted successfully");
       router.push(
         `/properties/buildings/${buildingId}/apartments/${apartmentId}`
       );
     } catch (error) {
-      console.error("Error removing tenant:", error);
-      toast.error("Failed to remove tenant");
+      console.error("Error deleting tenant:", error);
+      toast.error(`Failed to delete tenant: ${error.message}`);
     }
   };
 
-  const handleTenantSubmit = async (
-    tenantData: Omit<Tenant, "id" | "createdAt" | "updatedAt">
-  ) => {
+  const handleTenantSubmit = async (tenantData: Tenant) => {
     try {
       if (editingTenant) {
+        console.log("Updating tenant with data:", tenantData);
+
         // Update existing tenant
-        const updatedTenant: Tenant = {
-          ...editingTenant,
-          ...tenantData,
-          updatedAt: new Date(),
-        };
-
-        // Update tenant in property service
-        propertyService.updateTenant(editingTenant.id, updatedTenant);
-
-        // Update apartment with updated tenant
-        propertyService.updateApartment(buildingId, apartmentId, {
-          currentTenant: updatedTenant,
-        });
+        const updatedTenant = await propertyService.updateTenant(
+          editingTenant.id,
+          tenantData
+        );
+        console.log("Tenant updated successfully:", updatedTenant);
 
         toast.success("Tenant updated successfully");
         setShowEditForm(false);
         setEditingTenant(null);
-        loadData();
+        await loadData(); // Reload data to show updates
       }
     } catch (error) {
       console.error("Error updating tenant:", error);
+      toast.error(`Failed to update tenant: ${error.message}`);
       throw error;
     }
   };
@@ -226,7 +250,7 @@ export default function TenantDetailPage() {
 
           {/* Edit Tenant Form Modal */}
           {showEditForm && editingTenant && (
-            <TenantForm
+            <SimpleTenantForm
               tenant={editingTenant}
               onSubmit={handleTenantSubmit}
               onCancel={() => {
