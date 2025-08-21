@@ -8,11 +8,12 @@ import { FamilyMemberDetail } from "./FamilyMemberDetail";
 import { ApiService } from "@/services/ApiService";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { useRealTimeFamilyMembers } from "@/hooks/useRealTimeData";
 import toast from "react-hot-toast";
 
 export const FamilyManagement: React.FC = () => {
-  const [members, setMembers] = useState<FamilyMember[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Use real-time hook for automatic data synchronization
+  const { members, loading, refresh: loadFamilyMembers } = useRealTimeFamilyMembers();
   const [error, setError] = useState<string | null>(null);
 
   // Modal states
@@ -22,26 +23,6 @@ export const FamilyManagement: React.FC = () => {
     null
   );
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
-
-  // Load family members on component mount
-  useEffect(() => {
-    loadFamilyMembers();
-  }, []);
-
-  const loadFamilyMembers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const familyMembers = await ApiService.getFamilyMembers();
-      setMembers(familyMembers);
-    } catch (err) {
-      console.error("Error loading family members:", err);
-      setError("Failed to load family members. Please try again.");
-      toast.error("Failed to load family members");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAddMember = () => {
     setEditingMember(null);
@@ -65,41 +46,33 @@ export const FamilyManagement: React.FC = () => {
       )
     ) {
       try {
-        setLoading(true);
         await ApiService.deleteFamilyMember(member.id);
-        await loadFamilyMembers(); // Refresh the list
-        toast.success("Family member deleted successfully");
+        // Real-time hook will automatically update the UI
       } catch (err) {
         console.error("Error deleting family member:", err);
         setError("Failed to delete family member. Please try again.");
         toast.error("Failed to delete family member");
-      } finally {
-        setLoading(false);
       }
     }
   };
 
   const handleFormSubmit = async (memberData: unknown) => {
     try {
-      setLoading(true);
       if (editingMember) {
         // Update existing member
         await ApiService.updateFamilyMember(editingMember.id, memberData);
-        toast.success("Family member updated successfully");
+        // Real-time hook will automatically update the UI
       } else {
         // Create new member
         await ApiService.createFamilyMember(memberData);
-        toast.success("Family member created successfully");
+        // Real-time hook will automatically update the UI
       }
-      await loadFamilyMembers(); // Refresh the list
       setShowForm(false);
       setEditingMember(null);
     } catch (err) {
       console.error("Error saving family member:", err);
       setError("Failed to save family member. Please try again.");
       toast.error("Failed to save family member");
-    } finally {
-      setLoading(false);
     }
   };
 

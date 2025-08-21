@@ -21,6 +21,7 @@ interface BuildingFormData {
   address: string;
   description: string;
   totalFloors: number;
+  totalApartments: number;
   constructionYear: number;
   amenities: string;
 }
@@ -59,6 +60,7 @@ export function BuildingForm({
       address: building?.address || "",
       description: building?.description || "",
       totalFloors: building?.totalFloors || 1,
+      totalApartments: building?.totalApartments || 1,
       constructionYear: building?.constructionYear || new Date().getFullYear(),
       amenities: "",
     },
@@ -91,7 +93,7 @@ export function BuildingForm({
       address: data.address,
       description: data.description,
       totalFloors: data.totalFloors,
-      totalApartments: building?.totalApartments || 0,
+      totalApartments: data.totalApartments,
       constructionYear: data.constructionYear,
       images,
       amenities: amenitiesList,
@@ -160,7 +162,7 @@ export function BuildingForm({
           </div>
 
           {/* Building Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Total Floors *
@@ -173,6 +175,21 @@ export function BuildingForm({
                   min: { value: 1, message: "Must be at least 1 floor" },
                 })}
                 error={errors.totalFloors?.message}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Total Apartments *
+              </label>
+              <Input
+                type="number"
+                min="1"
+                {...register("totalApartments", {
+                  required: "Total apartments is required",
+                  min: { value: 1, message: "Must be at least 1 apartment" },
+                })}
+                error={errors.totalApartments?.message}
               />
             </div>
 

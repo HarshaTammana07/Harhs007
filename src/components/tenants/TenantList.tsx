@@ -214,19 +214,19 @@ export function TenantList({
               (apt) => apt.currentTenant?.id === tenant.id
             );
             if (apartment) {
-              propertyService.updateApartment(propertyId, apartment.id, {
+              await propertyService.updateApartment(propertyId, apartment.id, {
                 currentTenant: undefined,
                 isOccupied: false,
               });
             }
           }
         } else if (propertyType === "flat") {
-          propertyService.updateFlat(propertyId, {
+          await propertyService.updateFlat(propertyId, {
             currentTenant: undefined,
             isOccupied: false,
           });
         } else if (propertyType === "land") {
-          propertyService.updateLand(propertyId, {
+          await propertyService.updateLand(propertyId, {
             currentTenant: undefined,
             isLeased: false,
           });
@@ -235,7 +235,7 @@ export function TenantList({
 
       // Remove from standalone tenants if exists
       try {
-        propertyService.deleteTenant(tenant.id);
+        await propertyService.deleteTenant(tenant.id);
       } catch (error) {
         // Tenant might not exist in standalone list, which is fine
       }
@@ -254,7 +254,7 @@ export function TenantList({
     try {
       if (editingTenant) {
         // Update existing tenant
-        propertyService.updateTenant(editingTenant.id, {
+        await propertyService.updateTenant(editingTenant.id, {
           ...tenantData,
           updatedAt: new Date(),
         });
@@ -266,7 +266,7 @@ export function TenantList({
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        propertyService.saveTenant(newTenant);
+        await propertyService.saveTenant(newTenant);
       }
 
       setShowTenantForm(false);

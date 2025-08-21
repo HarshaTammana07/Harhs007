@@ -73,7 +73,7 @@ export function TenantDashboard({
       const allTenants: Tenant[] = [];
 
       // Get tenants from buildings
-      const buildings = propertyService.getBuildings();
+      const buildings = await propertyService.getBuildings();
       buildings.forEach((building) => {
         building.apartments?.forEach((apartment) => {
           if (apartment.currentTenant) {
@@ -83,7 +83,7 @@ export function TenantDashboard({
       });
 
       // Get tenants from flats
-      const flats = propertyService.getFlats();
+      const flats = await propertyService.getFlats();
       flats.forEach((flat) => {
         if (flat.currentTenant) {
           allTenants.push(flat.currentTenant);
@@ -91,7 +91,7 @@ export function TenantDashboard({
       });
 
       // Get tenants from lands
-      const lands = propertyService.getLands();
+      const lands = await propertyService.getLands();
       lands.forEach((land) => {
         if (land.currentTenant) {
           allTenants.push(land.currentTenant);
