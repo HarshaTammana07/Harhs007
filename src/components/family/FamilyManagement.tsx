@@ -1,20 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FamilyMember } from "@/types";
 import { FamilyMemberList } from "./FamilyMemberList";
 import { FamilyMemberForm } from "./FamilyMemberForm";
 import { FamilyMemberDetail } from "./FamilyMemberDetail";
-import { ApiService } from "@/services/ApiService";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { useRealTimeFamilyMembers } from "@/hooks/useRealTimeData";
+import { useFamilyMembers } from "@/hooks/useFamilyMembers";
 import toast from "react-hot-toast";
 
 export const FamilyManagement: React.FC = () => {
-  // Use real-time hook for automatic data synchronization
-  const { members, loading, refresh: loadFamilyMembers } = useRealTimeFamilyMembers();
-  const [error, setError] = useState<string | null>(null);
+  // Use reliable family members hook for immediate state updates
+  const {
+    members,
+    loading,
+    error,
+    createMember,
+    updateMember,
+    deleteMember,
+    refresh,
+  } = useFamilyMembers();
 
   // Modal states
   const [showForm, setShowForm] = useState(false);
@@ -46,12 +52,10 @@ export const FamilyManagement: React.FC = () => {
       )
     ) {
       try {
-        await ApiService.deleteFamilyMember(member.id);
-        // Real-time hook will automatically update the UI
+        await deleteMember(member.id);
       } catch (err) {
         console.error("Error deleting family member:", err);
-        setError("Failed to delete family member. Please try again.");
-        toast.error("Failed to delete family member");
+        // Error handling is done in the hook
       }
     }
   };
@@ -60,19 +64,17 @@ export const FamilyManagement: React.FC = () => {
     try {
       if (editingMember) {
         // Update existing member
-        await ApiService.updateFamilyMember(editingMember.id, memberData);
-        // Real-time hook will automatically update the UI
+        await updateMember(editingMember.id, memberData);
       } else {
         // Create new member
-        await ApiService.createFamilyMember(memberData);
-        // Real-time hook will automatically update the UI
+        await createMember(memberData);
       }
+
       setShowForm(false);
       setEditingMember(null);
     } catch (err) {
       console.error("Error saving family member:", err);
-      setError("Failed to save family member. Please try again.");
-      toast.error("Failed to save family member");
+      // Error handling is done in the hook
     }
   };
 
@@ -95,7 +97,7 @@ export const FamilyManagement: React.FC = () => {
       <div className="text-center">
         <div className="text-red-600 text-lg font-medium">{error}</div>
         <button
-          onClick={loadFamilyMembers}
+          onClick={refresh}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
           Try Again

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ApiService } from "@/services/ApiService";
-import { buildingService } from "@/services/BuildingService";
+import { propertyService } from "@/services/PropertyService";
 
 export default function TestApartmentsPage() {
   const [result, setResult] = useState<any>(null);
@@ -17,12 +17,15 @@ export default function TestApartmentsPage() {
 
     try {
       console.log("=== APARTMENT DEBUG TEST ===");
-      
+
       // Step 1: Get all buildings
       console.log("1. Getting all buildings...");
       const buildings = await ApiService.getBuildings();
       console.log("Buildings found:", buildings.length);
-      console.log("Buildings:", buildings.map(b => ({ id: b.id, name: b.name })));
+      console.log(
+        "Buildings:",
+        buildings.map((b) => ({ id: b.id, name: b.name }))
+      );
 
       if (buildings.length === 0) {
         throw new Error("No buildings found. Create a building first.");
@@ -33,7 +36,9 @@ export default function TestApartmentsPage() {
 
       // Step 2: Check existing apartments for this building
       console.log("2. Getting existing apartments for building...");
-      const existingApartments = await ApiService.getApartmentsByBuildingId(testBuilding.id);
+      const existingApartments = await ApiService.getApartmentsByBuildingId(
+        testBuilding.id
+      );
       console.log("Existing apartments:", existingApartments.length);
       console.log("Apartments:", existingApartments);
 
@@ -57,8 +62,8 @@ export default function TestApartmentsPage() {
           powerBackup: true,
           waterSupply: "24/7",
           internetReady: true,
-          additionalFeatures: ["Test Feature"]
-        }
+          additionalFeatures: ["Test Feature"],
+        },
       };
 
       console.log("Creating apartment with data:", apartmentData);
@@ -67,25 +72,33 @@ export default function TestApartmentsPage() {
 
       // Step 4: Fetch apartments again to see if it appears
       console.log("4. Fetching apartments again...");
-      const updatedApartments = await ApiService.getApartmentsByBuildingId(testBuilding.id);
+      const updatedApartments = await ApiService.getApartmentsByBuildingId(
+        testBuilding.id
+      );
       console.log("Updated apartments count:", updatedApartments.length);
       console.log("Updated apartments:", updatedApartments);
 
       // Step 5: Test with PropertyService
       console.log("5. Testing with PropertyService...");
-      const propertyServiceApartments = await buildingService.getApartmentsByBuildingId(testBuilding.id);
-      console.log("PropertyService apartments:", propertyServiceApartments.length);
+      const propertyServiceApartments =
+        await propertyService.getApartmentsByBuildingId(testBuilding.id);
+      console.log(
+        "PropertyService apartments:",
+        propertyServiceApartments.length
+      );
 
       setResult({
         buildingUsed: { id: testBuilding.id, name: testBuilding.name },
         existingApartments: existingApartments.length,
-        createdApartment: { id: createdApartment.id, doorNumber: createdApartment.doorNumber },
+        createdApartment: {
+          id: createdApartment.id,
+          doorNumber: createdApartment.doorNumber,
+        },
         updatedApartmentsCount: updatedApartments.length,
         propertyServiceCount: propertyServiceApartments.length,
         success: true,
-        message: "Apartment test completed successfully!"
+        message: "Apartment test completed successfully!",
       });
-
     } catch (err: any) {
       console.error("Apartment test error:", err);
       setError(err.message);
@@ -134,20 +147,20 @@ export default function TestApartmentsPage() {
         buildingId,
         building: building ? { id: building.id, name: building.name } : null,
         apartmentsCount: apartments.length,
-        apartments: apartments.map(a => ({ 
-          id: a.id, 
-          doorNumber: a.doorNumber, 
-          buildingId: a.buildingId 
+        apartments: apartments.map((a) => ({
+          id: a.id,
+          doorNumber: a.doorNumber,
+          buildingId: a.buildingId,
         })),
         rawDatabaseCount: rawApartments?.length || 0,
-        rawDatabaseData: rawApartments?.map(a => ({ 
-          id: a.id, 
-          door_number: a.door_number, 
-          building_id: a.building_id 
-        })) || [],
-        message: "Specific building test completed!"
+        rawDatabaseData:
+          rawApartments?.map((a) => ({
+            id: a.id,
+            door_number: a.door_number,
+            building_id: a.building_id,
+          })) || [],
+        message: "Specific building test completed!",
       });
-
     } catch (err: any) {
       console.error("Specific building test error:", err);
       setError(err.message);
@@ -159,7 +172,7 @@ export default function TestApartmentsPage() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">🏠 Apartment Debug Test</h1>
-      
+
       <div className="space-y-4 mb-8">
         <button
           onClick={testApartmentFlow}
@@ -168,7 +181,7 @@ export default function TestApartmentsPage() {
         >
           {loading ? "Testing..." : "Test Full Apartment Flow"}
         </button>
-        
+
         <div className="flex gap-2">
           <input
             type="text"
@@ -206,19 +219,38 @@ export default function TestApartmentsPage() {
       <div className="mt-8 bg-gray-50 border border-gray-200 rounded p-4">
         <h3 className="font-semibold mb-2">Debug Steps:</h3>
         <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
-          <li><strong>Test Full Flow</strong> - Creates apartment and checks if it appears</li>
-          <li><strong>Test Specific Building</strong> - Debug a specific building ID</li>
-          <li><strong>Check Console</strong> - Detailed logs of all operations</li>
-          <li><strong>Compare Results</strong> - API vs Database direct query</li>
+          <li>
+            <strong>Test Full Flow</strong> - Creates apartment and checks if it
+            appears
+          </li>
+          <li>
+            <strong>Test Specific Building</strong> - Debug a specific building
+            ID
+          </li>
+          <li>
+            <strong>Check Console</strong> - Detailed logs of all operations
+          </li>
+          <li>
+            <strong>Compare Results</strong> - API vs Database direct query
+          </li>
         </ol>
-        
+
         <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
           <h4 className="font-semibold text-yellow-800">Common Issues:</h4>
           <ul className="text-sm text-yellow-700 mt-1 space-y-1">
-            <li>• <strong>Building ID Mismatch:</strong> UUID vs String format</li>
-            <li>• <strong>Foreign Key Issue:</strong> building_id not linking properly</li>
-            <li>• <strong>Transform Error:</strong> Data transformation failing</li>
-            <li>• <strong>Query Issue:</strong> SQL query not finding records</li>
+            <li>
+              • <strong>Building ID Mismatch:</strong> UUID vs String format
+            </li>
+            <li>
+              • <strong>Foreign Key Issue:</strong> building_id not linking
+              properly
+            </li>
+            <li>
+              • <strong>Transform Error:</strong> Data transformation failing
+            </li>
+            <li>
+              • <strong>Query Issue:</strong> SQL query not finding records
+            </li>
           </ul>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Building, Apartment } from "@/types";
-import { buildingService } from "@/services/BuildingService";
+import { propertyService } from "@/services/PropertyService";
 
 interface BuildingFormData {
   name: string;
@@ -30,7 +30,9 @@ const initialFormData: BuildingFormData = {
 
 export default function BuildingManagement() {
   const [buildings, setBuildings] = useState<Building[]>([]);
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
+    null
+  );
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [formData, setFormData] = useState<BuildingFormData>(initialFormData);
   const [isEditing, setIsEditing] = useState(false);
@@ -47,7 +49,7 @@ export default function BuildingManagement() {
     try {
       setLoading(true);
       console.log("Loading buildings...");
-      const data = await buildingService.getBuildings();
+      const data = await propertyService.getBuildings();
       console.log("Buildings loaded:", data);
       setBuildings(data);
     } catch (err: any) {
@@ -61,7 +63,7 @@ export default function BuildingManagement() {
   const loadApartments = async (buildingId: string) => {
     try {
       console.log("Loading apartments for building ID:", buildingId);
-      const data = await buildingService.getApartmentsByBuildingId(buildingId);
+      const data = await propertyService.getApartmentsByBuildingId(buildingId);
       console.log("Apartments loaded:", data.length, data);
       setApartments(data);
     } catch (err: unknown) {
@@ -81,18 +83,21 @@ export default function BuildingManagement() {
     try {
       if (isEditing && selectedBuilding) {
         console.log("Updating building:", selectedBuilding.id);
-        const updated = await buildingService.updateBuilding(selectedBuilding.id, formData);
+        const updated = await propertyService.updateBuilding(
+          selectedBuilding.id,
+          formData
+        );
         console.log("Building updated:", updated);
-        setBuildings(buildings.map(b => b.id === updated.id ? updated : b));
+        setBuildings(buildings.map((b) => (b.id === updated.id ? updated : b)));
         setSuccess("Building updated successfully!");
       } else {
         console.log("Creating new building...");
-        const newBuilding = await buildingService.createBuilding(formData);
+        const newBuilding = await propertyService.saveBuilding(formData);
         console.log("Building created:", newBuilding);
         setBuildings([newBuilding, ...buildings]);
         setSuccess("Building created successfully!");
       }
-      
+
       resetForm();
     } catch (err: unknown) {
       console.error("Error in handleSubmit:", err);
@@ -123,8 +128,8 @@ export default function BuildingManagement() {
 
     try {
       setLoading(true);
-      await buildingService.deleteBuilding(id);
-      setBuildings(buildings.filter(b => b.id !== id));
+      await propertyService.deleteBuilding(id);
+      setBuildings(buildings.filter((b) => b.id !== id));
       setSuccess("Building deleted successfully!");
       if (selectedBuilding?.id === id) {
         setSelectedBuilding(null);
@@ -138,7 +143,10 @@ export default function BuildingManagement() {
   };
 
   const handleViewDetails = (building: Building) => {
-    console.log("Redirecting to apartment management for building:", building.name);
+    console.log(
+      "Redirecting to apartment management for building:",
+      building.name
+    );
     // Redirect to the proper apartment management page
     window.location.href = `/properties/buildings/${building.id}/apartments`;
   };
@@ -149,25 +157,35 @@ export default function BuildingManagement() {
     setSelectedBuilding(null);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: name === 'totalFloors' || name === 'totalApartments' || name === 'constructionYear' 
-        ? parseInt(value) || 0 
-        : value
+      [name]:
+        name === "totalFloors" ||
+        name === "totalApartments" ||
+        name === "constructionYear"
+          ? parseInt(value) || 0
+          : value,
     }));
   };
 
   const handleAmenitiesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const amenities = e.target.value.split(',').map(a => a.trim()).filter(a => a);
-    setFormData(prev => ({ ...prev, amenities }));
+    const amenities = e.target.value
+      .split(",")
+      .map((a) => a.trim())
+      .filter((a) => a);
+    setFormData((prev) => ({ ...prev, amenities }));
   };
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Building Management</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Building Management
+        </h1>
         <p className="text-gray-600">Manage your buildings and apartments</p>
       </div>
 
@@ -189,7 +207,7 @@ export default function BuildingManagement() {
           <h2 className="text-xl font-semibold mb-4">
             {isEditing ? "Edit Building" : "Add New Building"}
           </h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -299,7 +317,7 @@ export default function BuildingManagement() {
               </label>
               <input
                 type="text"
-                value={formData.amenities.join(', ')}
+                value={formData.amenities.join(", ")}
                 onChange={handleAmenitiesChange}
                 placeholder="Parking, Elevator, Security, Garden"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -312,9 +330,13 @@ export default function BuildingManagement() {
                 disabled={loading}
                 className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
               >
-                {loading ? "Saving..." : isEditing ? "Update Building" : "Create Building"}
+                {loading
+                  ? "Saving..."
+                  : isEditing
+                    ? "Update Building"
+                    : "Create Building"}
               </button>
-              
+
               {isEditing && (
                 <button
                   type="button"
@@ -330,20 +352,29 @@ export default function BuildingManagement() {
 
         {/* Buildings List */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Buildings ({buildings.length})</h2>
-          
+          <h2 className="text-xl font-semibold mb-4">
+            Buildings ({buildings.length})
+          </h2>
+
           {loading && buildings.length === 0 ? (
             <p className="text-gray-500">Loading buildings...</p>
           ) : buildings.length === 0 ? (
-            <p className="text-gray-500">No buildings found. Create your first building!</p>
+            <p className="text-gray-500">
+              No buildings found. Create your first building!
+            </p>
           ) : (
             <div className="space-y-4">
               {buildings.map((building) => (
-                <div key={building.id} className="border border-gray-200 rounded-lg p-4">
+                <div
+                  key={building.id}
+                  className="border border-gray-200 rounded-lg p-4"
+                >
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <h3 className="font-semibold text-lg">{building.name}</h3>
-                      <p className="text-sm text-gray-600">Code: {building.buildingCode}</p>
+                      <p className="text-sm text-gray-600">
+                        Code: {building.buildingCode}
+                      </p>
                     </div>
                     <div className="flex gap-2">
                       <button
@@ -366,15 +397,17 @@ export default function BuildingManagement() {
                       </button>
                     </div>
                   </div>
-                  
-                  <p className="text-sm text-gray-700 mb-2">{building.address}</p>
-                  
+
+                  <p className="text-sm text-gray-700 mb-2">
+                    {building.address}
+                  </p>
+
                   <div className="flex gap-4 text-sm text-gray-600">
                     <span>Floors: {building.totalFloors}</span>
                     <span>Apartments: {building.totalApartments}</span>
                     <span>Built: {building.constructionYear}</span>
                   </div>
-                  
+
                   {building.amenities && building.amenities.length > 0 && (
                     <div className="mt-2">
                       <div className="flex flex-wrap gap-1">
@@ -413,23 +446,39 @@ export default function BuildingManagement() {
                   ✕
                 </button>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <h3 className="font-semibold mb-2">Building Information</h3>
                   <div className="space-y-2 text-sm">
-                    <p><strong>Code:</strong> {selectedBuilding.buildingCode}</p>
-                    <p><strong>Address:</strong> {selectedBuilding.address}</p>
-                    <p><strong>Description:</strong> {selectedBuilding.description || "N/A"}</p>
-                    <p><strong>Floors:</strong> {selectedBuilding.totalFloors}</p>
-                    <p><strong>Total Apartments:</strong> {selectedBuilding.totalApartments}</p>
-                    <p><strong>Construction Year:</strong> {selectedBuilding.constructionYear}</p>
+                    <p>
+                      <strong>Code:</strong> {selectedBuilding.buildingCode}
+                    </p>
+                    <p>
+                      <strong>Address:</strong> {selectedBuilding.address}
+                    </p>
+                    <p>
+                      <strong>Description:</strong>{" "}
+                      {selectedBuilding.description || "N/A"}
+                    </p>
+                    <p>
+                      <strong>Floors:</strong> {selectedBuilding.totalFloors}
+                    </p>
+                    <p>
+                      <strong>Total Apartments:</strong>{" "}
+                      {selectedBuilding.totalApartments}
+                    </p>
+                    <p>
+                      <strong>Construction Year:</strong>{" "}
+                      {selectedBuilding.constructionYear}
+                    </p>
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="font-semibold mb-2">Amenities</h3>
-                  {selectedBuilding.amenities && selectedBuilding.amenities.length > 0 ? (
+                  {selectedBuilding.amenities &&
+                  selectedBuilding.amenities.length > 0 ? (
                     <div className="flex flex-wrap gap-1">
                       {selectedBuilding.amenities.map((amenity, index) => (
                         <span
@@ -445,23 +494,34 @@ export default function BuildingManagement() {
                   )}
                 </div>
               </div>
-              
+
               <div>
-                <h3 className="font-semibold mb-4">Apartments ({apartments.length})</h3>
+                <h3 className="font-semibold mb-4">
+                  Apartments ({apartments.length})
+                </h3>
                 {apartments.length === 0 ? (
-                  <p className="text-gray-500">No apartments found for this building.</p>
+                  <p className="text-gray-500">
+                    No apartments found for this building.
+                  </p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {apartments.map((apartment) => (
-                      <div key={apartment.id} className="border border-gray-200 rounded-lg p-3">
+                      <div
+                        key={apartment.id}
+                        className="border border-gray-200 rounded-lg p-3"
+                      >
                         <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium">Unit {apartment.doorNumber}</h4>
-                          <span className={`px-2 py-1 text-xs rounded ${
-                            apartment.isOccupied 
-                              ? 'bg-red-100 text-red-800' 
-                              : 'bg-green-100 text-green-800'
-                          }`}>
-                            {apartment.isOccupied ? 'Occupied' : 'Vacant'}
+                          <h4 className="font-medium">
+                            Unit {apartment.doorNumber}
+                          </h4>
+                          <span
+                            className={`px-2 py-1 text-xs rounded ${
+                              apartment.isOccupied
+                                ? "bg-red-100 text-red-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {apartment.isOccupied ? "Occupied" : "Vacant"}
                           </span>
                         </div>
                         <div className="text-sm text-gray-600 space-y-1">

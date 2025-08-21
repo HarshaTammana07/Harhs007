@@ -519,6 +519,88 @@ export class ApiService {
     return ApiService.transformFlat(data);
   }
 
+  /**
+   * Update flat
+   */
+  static async updateFlat(id: string, updates: Partial<Flat>): Promise<Flat> {
+    const updateData: any = {};
+
+    if (updates.name) updateData.name = updates.name;
+    if (updates.doorNumber) updateData.door_number = updates.doorNumber;
+    if (updates.address) updateData.address = updates.address;
+    if (updates.description !== undefined)
+      updateData.description = updates.description;
+    if (updates.bedroomCount) updateData.bedroom_count = updates.bedroomCount;
+    if (updates.bathroomCount)
+      updateData.bathroom_count = updates.bathroomCount;
+    if (updates.area) updateData.area = updates.area;
+    if (updates.floor !== undefined) updateData.floor = updates.floor;
+    if (updates.totalFloors) updateData.total_floors = updates.totalFloors;
+    if (updates.rentAmount) updateData.rent_amount = updates.rentAmount;
+    if (updates.securityDeposit)
+      updateData.security_deposit = updates.securityDeposit;
+    if (updates.isOccupied !== undefined)
+      updateData.is_occupied = updates.isOccupied;
+
+    if (updates.specifications) {
+      if (updates.specifications.furnished !== undefined)
+        updateData.furnished = updates.specifications.furnished;
+      if (updates.specifications.parking !== undefined)
+        updateData.parking = updates.specifications.parking;
+      if (updates.specifications.balcony !== undefined)
+        updateData.balcony = updates.specifications.balcony;
+      if (updates.specifications.airConditioning !== undefined)
+        updateData.air_conditioning = updates.specifications.airConditioning;
+      if (updates.specifications.powerBackup !== undefined)
+        updateData.power_backup = updates.specifications.powerBackup;
+      if (updates.specifications.waterSupply)
+        updateData.water_supply = updates.specifications.waterSupply;
+      if (updates.specifications.internetReady !== undefined)
+        updateData.internet_ready = updates.specifications.internetReady;
+      if (updates.specifications.societyName)
+        updateData.society_name = updates.specifications.societyName;
+      if (updates.specifications.maintenanceCharges)
+        updateData.maintenance_charges =
+          updates.specifications.maintenanceCharges;
+      if (updates.specifications.additionalFeatures)
+        updateData.additional_features =
+          updates.specifications.additionalFeatures;
+    }
+
+    if (updates.images) updateData.images = updates.images;
+
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("flats")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Failed to update flat: ${error.message}`);
+
+    return ApiService.transformFlat(data);
+  }
+
+  /**
+   * Get flat by ID
+   */
+  static async getFlatById(id: string): Promise<Flat | null> {
+    const { data, error } = await supabase
+      .from("flats")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") return null;
+      throw new Error(`Failed to fetch flat: ${error.message}`);
+    }
+
+    return ApiService.transformFlat(data);
+  }
+
   // ==================== LANDS ====================
 
   /**
@@ -578,6 +660,79 @@ export class ApiService {
       .single();
 
     if (error) throw new Error(`Failed to create land: ${error.message}`);
+
+    return ApiService.transformLand(data);
+  }
+
+  /**
+   * Get land by ID
+   */
+  static async getLandById(id: string): Promise<Land | null> {
+    const { data, error } = await supabase
+      .from("lands")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") return null;
+      throw new Error(`Failed to fetch land: ${error.message}`);
+    }
+
+    return ApiService.transformLand(data);
+  }
+
+  /**
+   * Update land
+   */
+  static async updateLand(id: string, updates: Partial<Land>): Promise<Land> {
+    const updateData: any = {};
+
+    if (updates.name) updateData.name = updates.name;
+    if (updates.address) updateData.address = updates.address;
+    if (updates.description !== undefined)
+      updateData.description = updates.description;
+    if (updates.surveyNumber) updateData.survey_number = updates.surveyNumber;
+    if (updates.area) updateData.area = updates.area;
+    if (updates.areaUnit) updateData.area_unit = updates.areaUnit;
+    if (updates.zoning) updateData.zoning = updates.zoning;
+    if (updates.soilType) updateData.soil_type = updates.soilType;
+    if (updates.waterSource) updateData.water_source = updates.waterSource;
+    if (updates.roadAccess !== undefined)
+      updateData.road_access = updates.roadAccess;
+    if (updates.electricityConnection !== undefined)
+      updateData.electricity_connection = updates.electricityConnection;
+    if (updates.isLeased !== undefined) updateData.is_leased = updates.isLeased;
+
+    if (updates.leaseTerms) {
+      if (updates.leaseTerms.leaseType)
+        updateData.lease_type = updates.leaseTerms.leaseType;
+      if (updates.leaseTerms.rentAmount)
+        updateData.rent_amount = updates.leaseTerms.rentAmount;
+      if (updates.leaseTerms.rentFrequency)
+        updateData.rent_frequency = updates.leaseTerms.rentFrequency;
+      if (updates.leaseTerms.securityDeposit)
+        updateData.lease_security_deposit = updates.leaseTerms.securityDeposit;
+      if (updates.leaseTerms.leaseDuration)
+        updateData.lease_duration = updates.leaseTerms.leaseDuration;
+      if (updates.leaseTerms.renewalTerms)
+        updateData.renewal_terms = updates.leaseTerms.renewalTerms;
+      if (updates.leaseTerms.restrictions)
+        updateData.restrictions = updates.leaseTerms.restrictions;
+    }
+
+    if (updates.images) updateData.images = updates.images;
+
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("lands")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw new Error(`Failed to update land: ${error.message}`);
 
     return ApiService.transformLand(data);
   }
@@ -731,7 +886,10 @@ export class ApiService {
   /**
    * Get tenant by property ID and type
    */
-  static async getTenantByProperty(propertyId: string, propertyType: string): Promise<Tenant | null> {
+  static async getTenantByProperty(
+    propertyId: string,
+    propertyType: string
+  ): Promise<Tenant | null> {
     const { data, error } = await supabase
       .from("tenants")
       .select(
@@ -821,6 +979,150 @@ export class ApiService {
     if (error) throw new Error(`Failed to create tenant: ${error.message}`);
 
     return ApiService.transformTenant({ ...data, tenant_references: [] });
+  }
+
+  /**
+   * Update tenant
+   */
+  static async updateTenant(
+    id: string,
+    updates: Partial<Tenant>
+  ): Promise<Tenant> {
+    const updateData: any = {};
+
+    if (updates.personalInfo) {
+      if (updates.personalInfo.firstName)
+        updateData.first_name = updates.personalInfo.firstName;
+      if (updates.personalInfo.lastName)
+        updateData.last_name = updates.personalInfo.lastName;
+      if (updates.personalInfo.fullName)
+        updateData.full_name = updates.personalInfo.fullName;
+      if (updates.personalInfo.dateOfBirth)
+        updateData.date_of_birth = updates.personalInfo.dateOfBirth
+          .toISOString()
+          .split("T")[0];
+      if (updates.personalInfo.occupation)
+        updateData.occupation = updates.personalInfo.occupation;
+      if (updates.personalInfo.employer)
+        updateData.employer = updates.personalInfo.employer;
+      if (updates.personalInfo.monthlyIncome)
+        updateData.monthly_income = updates.personalInfo.monthlyIncome;
+      if (updates.personalInfo.maritalStatus)
+        updateData.marital_status = updates.personalInfo.maritalStatus;
+      if (updates.personalInfo.familySize)
+        updateData.family_size = updates.personalInfo.familySize;
+      if (updates.personalInfo.nationality)
+        updateData.nationality = updates.personalInfo.nationality;
+      if (updates.personalInfo.religion)
+        updateData.religion = updates.personalInfo.religion;
+    }
+
+    if (updates.contactInfo) {
+      if (updates.contactInfo.phone)
+        updateData.phone = updates.contactInfo.phone;
+      if (updates.contactInfo.email)
+        updateData.email = updates.contactInfo.email;
+      if (updates.contactInfo.address)
+        updateData.address = updates.contactInfo.address;
+    }
+
+    if (updates.emergencyContact) {
+      if (updates.emergencyContact.name)
+        updateData.emergency_contact_name = updates.emergencyContact.name;
+      if (updates.emergencyContact.relationship)
+        updateData.emergency_contact_relationship =
+          updates.emergencyContact.relationship;
+      if (updates.emergencyContact.phone)
+        updateData.emergency_contact_phone = updates.emergencyContact.phone;
+      if (updates.emergencyContact.email)
+        updateData.emergency_contact_email = updates.emergencyContact.email;
+      if (updates.emergencyContact.address)
+        updateData.emergency_contact_address = updates.emergencyContact.address;
+    }
+
+    if (updates.identification) {
+      if (updates.identification.aadharNumber)
+        updateData.aadhar_number = updates.identification.aadharNumber;
+      if (updates.identification.panNumber)
+        updateData.pan_number = updates.identification.panNumber;
+      if (updates.identification.drivingLicense)
+        updateData.driving_license = updates.identification.drivingLicense;
+      if (updates.identification.passport)
+        updateData.passport = updates.identification.passport;
+      if (updates.identification.voterIdNumber)
+        updateData.voter_id_number = updates.identification.voterIdNumber;
+    }
+
+    if (updates.rentalAgreement) {
+      if (updates.rentalAgreement.agreementNumber)
+        updateData.agreement_number = updates.rentalAgreement.agreementNumber;
+      if (updates.rentalAgreement.startDate)
+        updateData.start_date = updates.rentalAgreement.startDate
+          .toISOString()
+          .split("T")[0];
+      if (updates.rentalAgreement.endDate)
+        updateData.end_date = updates.rentalAgreement.endDate
+          .toISOString()
+          .split("T")[0];
+      if (updates.rentalAgreement.rentAmount)
+        updateData.rent_amount = updates.rentalAgreement.rentAmount;
+      if (updates.rentalAgreement.securityDeposit)
+        updateData.security_deposit = updates.rentalAgreement.securityDeposit;
+      if (updates.rentalAgreement.maintenanceCharges)
+        updateData.maintenance_charges =
+          updates.rentalAgreement.maintenanceCharges;
+      if (updates.rentalAgreement.rentDueDate)
+        updateData.rent_due_date = updates.rentalAgreement.rentDueDate;
+      if (updates.rentalAgreement.paymentMethod)
+        updateData.payment_method = updates.rentalAgreement.paymentMethod;
+      if (updates.rentalAgreement.lateFeeAmount)
+        updateData.late_fee_amount = updates.rentalAgreement.lateFeeAmount;
+      if (updates.rentalAgreement.noticePeriod)
+        updateData.notice_period = updates.rentalAgreement.noticePeriod;
+      if (updates.rentalAgreement.renewalTerms)
+        updateData.renewal_terms = updates.rentalAgreement.renewalTerms;
+      if (updates.rentalAgreement.specialConditions)
+        updateData.special_conditions =
+          updates.rentalAgreement.specialConditions;
+    }
+
+    if (updates.moveInDate)
+      updateData.move_in_date = updates.moveInDate.toISOString().split("T")[0];
+    if (updates.moveOutDate)
+      updateData.move_out_date = updates.moveOutDate
+        .toISOString()
+        .split("T")[0];
+    if (updates.isActive !== undefined) updateData.is_active = updates.isActive;
+    if (updates.propertyId) updateData.property_id = updates.propertyId;
+    if (updates.propertyType) updateData.property_type = updates.propertyType;
+    if (updates.buildingId) updateData.building_id = updates.buildingId;
+
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("tenants")
+      .update(updateData)
+      .eq("id", id)
+      .select(
+        `
+        *,
+        tenant_references (*)
+      `
+      )
+      .single();
+
+    if (error) throw new Error(`Failed to update tenant: ${error.message}`);
+
+    return ApiService.transformTenant(data);
+  }
+
+  /**
+   * Delete tenant
+   */
+  static async deleteTenant(id: string): Promise<void> {
+    const { error } = await supabase.from("tenants").delete().eq("id", id);
+
+    if (error) throw new Error(`Failed to delete tenant: ${error.message}`);
   }
 
   // ==================== RENT PAYMENTS ====================
@@ -1017,7 +1319,10 @@ export class ApiService {
     if (error)
       throw new Error(`Failed to create insurance policy: ${error.message}`);
 
-    return ApiService.transformInsurancePolicy({ ...data, premium_payments: [] });
+    return ApiService.transformInsurancePolicy({
+      ...data,
+      premium_payments: [],
+    });
   }
 
   /**

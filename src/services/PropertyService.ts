@@ -41,7 +41,12 @@ export class PropertyService {
     }
   }
 
-  public async saveBuilding(building: Omit<Building, "id" | "createdAt" | "updatedAt" | "apartments" | "documents">): Promise<Building> {
+  public async saveBuilding(
+    building: Omit<
+      Building,
+      "id" | "createdAt" | "updatedAt" | "apartments" | "documents"
+    >
+  ): Promise<Building> {
     try {
       this.validateBuildingData(building);
       return await ApiService.createBuilding(building);
@@ -51,7 +56,10 @@ export class PropertyService {
     }
   }
 
-  public async updateBuilding(id: string, updates: Partial<Building>): Promise<Building> {
+  public async updateBuilding(
+    id: string,
+    updates: Partial<Building>
+  ): Promise<Building> {
     try {
       if (updates.name || updates.buildingCode || updates.address) {
         this.validateBuildingData(updates as unknown);
@@ -85,13 +93,18 @@ export class PropertyService {
     if (building.totalFloors !== undefined && building.totalFloors < 1) {
       throw new Error("Total floors must be at least 1");
     }
-    if (building.totalApartments !== undefined && building.totalApartments < 1) {
+    if (
+      building.totalApartments !== undefined &&
+      building.totalApartments < 1
+    ) {
       throw new Error("Total apartments must be at least 1");
     }
   }
 
   // Apartment Operations (within buildings) - Now using ApiService
-  public async getApartmentsByBuildingId(buildingId: string): Promise<Apartment[]> {
+  public async getApartmentsByBuildingId(
+    buildingId: string
+  ): Promise<Apartment[]> {
     try {
       return await ApiService.getApartmentsByBuildingId(buildingId);
     } catch (error) {
@@ -100,7 +113,9 @@ export class PropertyService {
     }
   }
 
-  public async getApartmentById(apartmentId: string): Promise<Apartment | null> {
+  public async getApartmentById(
+    apartmentId: string
+  ): Promise<Apartment | null> {
     try {
       return await ApiService.getApartmentById(apartmentId);
     } catch (error) {
@@ -111,7 +126,16 @@ export class PropertyService {
 
   public async addApartmentToBuilding(
     buildingId: string,
-    apartmentData: Omit<Apartment, "id" | "createdAt" | "updatedAt" | "currentTenant" | "rentHistory" | "maintenanceRecords" | "documents">
+    apartmentData: Omit<
+      Apartment,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "currentTenant"
+      | "rentHistory"
+      | "maintenanceRecords"
+      | "documents"
+    >
   ): Promise<Apartment> {
     try {
       this.validateApartmentData(apartmentData);
@@ -123,7 +147,10 @@ export class PropertyService {
     }
   }
 
-  public async updateApartment(apartmentId: string, updates: Partial<Apartment>): Promise<Apartment> {
+  public async updateApartment(
+    apartmentId: string,
+    updates: Partial<Apartment>
+  ): Promise<Apartment> {
     try {
       return await ApiService.updateApartment(apartmentId, updates);
     } catch (error) {
@@ -168,16 +195,25 @@ export class PropertyService {
 
   public async getFlatById(id: string): Promise<Flat | null> {
     try {
-      // Note: ApiService doesn't have getFlatById yet, so we'll get all and filter
-      const flats = await this.getFlats();
-      return flats.find((flat) => flat.id === id) || null;
+      return await ApiService.getFlatById(id);
     } catch (error) {
       console.error("PropertyService.getFlatById error:", error);
       throw new Error(`Failed to fetch flat: ${error.message}`);
     }
   }
 
-  public async saveFlat(flatData: Omit<Flat, "id" | "createdAt" | "updatedAt" | "currentTenant" | "rentHistory" | "maintenanceRecords" | "documents">): Promise<Flat> {
+  public async saveFlat(
+    flatData: Omit<
+      Flat,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "currentTenant"
+      | "rentHistory"
+      | "maintenanceRecords"
+      | "documents"
+    >
+  ): Promise<Flat> {
     try {
       this.validateFlatData(flatData);
       return await ApiService.createFlat(flatData);
@@ -189,8 +225,7 @@ export class PropertyService {
 
   public async updateFlat(id: string, updates: Partial<Flat>): Promise<Flat> {
     try {
-      // Note: ApiService doesn't have updateFlat yet, we'll need to add it
-      throw new Error("Update flat not yet implemented in ApiService");
+      return await ApiService.updateFlat(id, updates);
     } catch (error) {
       console.error("PropertyService.updateFlat error:", error);
       throw new Error(`Failed to update flat: ${error.message}`);
@@ -230,16 +265,25 @@ export class PropertyService {
 
   public async getLandById(id: string): Promise<Land | null> {
     try {
-      // Note: ApiService doesn't have getLandById yet, so we'll get all and filter
-      const lands = await this.getLands();
-      return lands.find((land) => land.id === id) || null;
+      return await ApiService.getLandById(id);
     } catch (error) {
       console.error("PropertyService.getLandById error:", error);
       throw new Error(`Failed to fetch land: ${error.message}`);
     }
   }
 
-  public async saveLand(landData: Omit<Land, "id" | "createdAt" | "updatedAt" | "currentTenant" | "rentHistory" | "maintenanceRecords" | "documents">): Promise<Land> {
+  public async saveLand(
+    landData: Omit<
+      Land,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "currentTenant"
+      | "rentHistory"
+      | "maintenanceRecords"
+      | "documents"
+    >
+  ): Promise<Land> {
     try {
       this.validateLandData(landData);
       return await ApiService.createLand(landData);
@@ -251,8 +295,7 @@ export class PropertyService {
 
   public async updateLand(id: string, updates: Partial<Land>): Promise<Land> {
     try {
-      // Note: ApiService doesn't have updateLand yet, we'll need to add it
-      throw new Error("Update land not yet implemented in ApiService");
+      return await ApiService.updateLand(id, updates);
     } catch (error) {
       console.error("PropertyService.updateLand error:", error);
       throw new Error(`Failed to update land: ${error.message}`);
@@ -290,7 +333,10 @@ export class PropertyService {
     }
   }
 
-  public async getTenantByProperty(propertyId: string, propertyType: string): Promise<Tenant | null> {
+  public async getTenantByProperty(
+    propertyId: string,
+    propertyType: string
+  ): Promise<Tenant | null> {
     try {
       return await ApiService.getTenantByProperty(propertyId, propertyType);
     } catch (error) {
@@ -299,24 +345,31 @@ export class PropertyService {
     }
   }
 
-  public async updateTenantPropertyLink(tenantId: string, propertyId: string, propertyType: string, buildingId?: string): Promise<void> {
+  public async updateTenantPropertyLink(
+    tenantId: string,
+    propertyId: string,
+    propertyType: string,
+    buildingId?: string
+  ): Promise<void> {
     try {
       const updateData: any = {
         property_id: propertyId,
         property_type: propertyType,
       };
-      
+
       if (buildingId) {
         updateData.building_id = buildingId;
       }
 
       const { error } = await ApiService.supabase
-        .from('tenants')
+        .from("tenants")
         .update(updateData)
-        .eq('id', tenantId);
+        .eq("id", tenantId);
 
       if (error) {
-        throw new Error(`Failed to update tenant property link: ${error.message}`);
+        throw new Error(
+          `Failed to update tenant property link: ${error.message}`
+        );
       }
     } catch (error) {
       console.error("PropertyService.updateTenantPropertyLink error:", error);
@@ -335,7 +388,12 @@ export class PropertyService {
     }
   }
 
-  public async saveTenant(tenantData: Omit<Tenant, "id" | "createdAt" | "updatedAt" | "references" | "documents">): Promise<Tenant> {
+  public async saveTenant(
+    tenantData: Omit<
+      Tenant,
+      "id" | "createdAt" | "updatedAt" | "references" | "documents"
+    >
+  ): Promise<Tenant> {
     try {
       this.validateTenantData(tenantData);
       return await ApiService.createTenant(tenantData);
@@ -345,10 +403,12 @@ export class PropertyService {
     }
   }
 
-  public async updateTenant(id: string, updates: Partial<Tenant>): Promise<Tenant> {
+  public async updateTenant(
+    id: string,
+    updates: Partial<Tenant>
+  ): Promise<Tenant> {
     try {
-      // Note: ApiService doesn't have updateTenant yet, we'll need to add it
-      throw new Error("Update tenant not yet implemented in ApiService");
+      return await ApiService.updateTenant(id, updates);
     } catch (error) {
       console.error("PropertyService.updateTenant error:", error);
       throw new Error(`Failed to update tenant: ${error.message}`);
@@ -357,8 +417,7 @@ export class PropertyService {
 
   public async deleteTenant(id: string): Promise<void> {
     try {
-      // Note: ApiService doesn't have deleteTenant yet, we'll need to add it
-      throw new Error("Delete tenant not yet implemented in ApiService");
+      await ApiService.deleteTenant(id);
     } catch (error) {
       console.error("PropertyService.deleteTenant error:", error);
       throw new Error(`Failed to delete tenant: ${error.message}`);
@@ -385,7 +444,7 @@ export class PropertyService {
   }> {
     try {
       console.log("PropertyService: Getting property statistics...");
-      
+
       // Try to get data, but handle failures gracefully
       let buildings = [];
       let flats = [];
@@ -507,7 +566,7 @@ export class PropertyService {
         this.getBuildings(),
         this.getFlats(),
         this.getLands(),
-        this.getTenants()
+        this.getTenants(),
       ]);
 
       return {
