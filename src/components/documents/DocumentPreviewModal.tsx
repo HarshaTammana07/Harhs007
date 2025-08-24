@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Document } from "@/types";
+import { useState, useEffect } from "react";
+import { Document, FamilyMember } from "@/types";
+import { ApiService } from "@/services/ApiService";
 import { documentService } from "@/services/DocumentService";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -35,6 +36,32 @@ export function DocumentPreviewModal({
   onDelete,
 }: DocumentPreviewModalProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [familyMember, setFamilyMember] = useState<FamilyMember | null>(null);
+  const [loadingFamilyMember, setLoadingFamilyMember] = useState(false);
+
+  // Load family member details when document has a family member association
+  useEffect(() => {
+    const loadFamilyMember = async () => {
+      if (document?.familyMemberId) {
+        setLoadingFamilyMember(true);
+        try {
+          const member = await ApiService.getFamilyMemberById(document.familyMemberId);
+          setFamilyMember(member);
+        } catch (error) {
+          console.error('Error loading family member:', error);
+          setFamilyMember(null);
+        } finally {
+          setLoadingFamilyMember(false);
+        }
+      } else {
+        setFamilyMember(null);
+      }
+    };
+
+    if (isOpen) {
+      loadFamilyMember();
+    }
+  }, [document?.familyMemberId, isOpen]);
 
   // Safety check
   if (!document) {
@@ -242,9 +269,22 @@ export function DocumentPreviewModal({
                       <UserIcon className="h-4 w-4" />
                       Associated Family Member
                     </label>
-                    <p className="text-gray-900">
-                      Family Member ID: {document.familyMemberId}
-                    </p>
+                    {loadingFamilyMember ? (
+                      <p className="text-gray-500 text-sm">Loading family member...</p>
+                    ) : familyMember ? (
+                      <div>
+                        <p className="text-gray-900 font-medium">
+                          {familyMember.fullName} ({familyMember.nickname})
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {familyMember.relationship}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm">
+                        Family member not found (ID: {document.familyMemberId})
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -333,7 +373,7 @@ export function DocumentPreviewModal({
                 Are you sure you want to delete this document?
               </p>
               <p className="text-sm text-red-600 mt-1">
-                This action cannot be undone. The document "{document.title}"
+                This action cannot be undone. The document &quot;{document.title}&quot;
                 will be permanently removed.
               </p>
             </div>

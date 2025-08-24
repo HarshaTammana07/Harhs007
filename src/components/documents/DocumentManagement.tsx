@@ -63,6 +63,20 @@ export const DocumentManagement: React.FC = () => {
 
   // Apply search and filters when criteria changes
   useEffect(() => {
+    const applyFilters = async () => {
+      try {
+        if (Object.keys(searchCriteria).length === 0) {
+          setFilteredDocuments(documents);
+        } else {
+          const filtered = await ApiService.searchDocuments(searchCriteria);
+          setFilteredDocuments(filtered);
+        }
+      } catch (error) {
+        console.error("Error filtering documents:", error);
+        setFilteredDocuments(documents); // Fallback to all documents
+      }
+    };
+
     applyFilters();
   }, [searchCriteria, documents]);
 
@@ -76,20 +90,6 @@ export const DocumentManagement: React.FC = () => {
       toast.error("Failed to load documents");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const applyFilters = async () => {
-    try {
-      if (Object.keys(searchCriteria).length === 0) {
-        setFilteredDocuments(documents);
-      } else {
-        const filtered = await ApiService.searchDocuments(searchCriteria);
-        setFilteredDocuments(filtered);
-      }
-    } catch (error) {
-      console.error("Error filtering documents:", error);
-      setFilteredDocuments(documents); // Fallback to all documents
     }
   };
 
@@ -125,19 +125,30 @@ export const DocumentManagement: React.FC = () => {
     setShowPreviewModal(true);
   };
 
-  const handleDocumentDownload = (document: Document) => {
+  const handleDocumentDownload = (doc: Document) => {
     try {
+      // Ensure the fileData is properly formatted
+      let dataUrl = doc.fileData;
+      
+      // If the data doesn't start with 'data:', add the proper prefix
+      if (!dataUrl.startsWith('data:')) {
+        dataUrl = `data:${doc.mimeType};base64,${dataUrl}`;
+      }
+      
       // Create download link from base64 data
       const link = document.createElement('a');
-      link.href = document.fileData;
-      link.download = document.fileName;
+      link.href = dataUrl;
+      link.download = doc.fileName;
+      
+      // Append to body, click, then remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success("Document downloaded");
+      
+      toast.success(`Downloaded ${doc.fileName}`);
     } catch (error) {
       console.error("Error downloading document:", error);
-      toast.error("Failed to download document");
+      toast.error("Failed to download document. Please try again.");
     }
   };
 
@@ -272,8 +283,7 @@ export const DocumentManagement: React.FC = () => {
         size="lg"
       >
         <DocumentStats 
-          onClose={() => setShowStatsModal(false)} 
-          refreshTrigger={refreshTrigger}
+          onClose={() => setShowStatsModal(false)}
         />
       </Modal>
 
@@ -286,7 +296,7 @@ export const DocumentManagement: React.FC = () => {
             setShowPreviewModal(false);
             setSelectedDocument(null);
           }}
-          onDownload={() => handleDocumentDownload(selectedDocument.id)}
+          onDownload={() => handleDocumentDownload(selectedDocument)}
           onDelete={() => {
             handleDocumentDelete(selectedDocument.id);
             setShowPreviewModal(false);
