@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { DocumentCategory, FamilyMember } from "@/types";
+import { DocumentCategory, FamilyMember, InsurancePolicy } from "@/types";
 import {
   DocumentSearchCriteria,
   documentService,
 } from "@/services/DocumentService";
+import { ApiService } from "@/services/ApiService";
 import { localStorageService } from "@/services/LocalStorageService";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -37,9 +38,10 @@ export function DocumentFilters({
   onCancel,
 }: DocumentFiltersProps) {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
-  const [properties, setProperties] = useState<any[]>([]);
-  const [insurancePolicies, setInsurancePolicies] = useState<any[]>([]);
+  const [properties, setProperties] = useState<unknown[]>([]);
+  const [insurancePolicies, setInsurancePolicies] = useState<InsurancePolicy[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   const { register, handleSubmit, reset, watch } =
     useForm<DocumentFiltersFormData>({
@@ -69,11 +71,34 @@ export function DocumentFilters({
     });
 
   useEffect(() => {
-    // Load related data for dropdowns
-    setFamilyMembers(localStorageService.getFamilyMembers());
-    setProperties(localStorageService.getProperties());
-    setInsurancePolicies(localStorageService.getInsurancePolicies());
-    setAvailableTags(documentService.getAllTags());
+    const loadRelatedData = async () => {
+      try {
+        setLoadingData(true);
+        const [members, policies] = await Promise.all([
+          ApiService.getFamilyMembers(),
+          ApiService.getInsurancePolicies(),
+          // TODO: Add properties when they're migrated to API
+          // ApiService.getProperties(),
+        ]);
+        
+        setFamilyMembers(members);
+        setInsurancePolicies(policies);
+        // setProperties(properties); // TODO: Uncomment when properties are migrated
+        setProperties(localStorageService.getProperties()); // Temporary fallback
+        setAvailableTags(documentService.getAllTags());
+      } catch (error) {
+        console.error('Failed to load filter data:', error);
+        // Fallback to localStorage for now
+        setFamilyMembers(localStorageService.getFamilyMembers());
+        setProperties(localStorageService.getProperties());
+        setInsurancePolicies(localStorageService.getInsurancePolicies());
+        setAvailableTags(documentService.getAllTags());
+      } finally {
+        setLoadingData(false);
+      }
+    };
+
+    loadRelatedData();
   }, []);
 
   const onSubmit = (data: DocumentFiltersFormData) => {
@@ -151,6 +176,15 @@ export function DocumentFilters({
 
   const categories = documentService.getAllCategories();
 
+  if (loadingData) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2 text-gray-600">Loading filter options...</span>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Category and Associations */}
@@ -190,7 +224,7 @@ export function DocumentFilters({
             {...register("propertyId")}
             placeholder="All properties"
           >
-            {properties.map((property) => (
+            {(properties as { id: string; address: string }[]).map((property) => (
               <option
                 key={property.id}
                 value={property.id}
@@ -214,7 +248,7 @@ export function DocumentFilters({
                 value={policy.id}
                 className="text-gray-900 bg-white"
               >
-                {policy.policyNumber} - {policy.type}
+                {policy.policyNumber} - {policy.type.toUpperCase()} ({policy.provider})
               </option>
             ))}
           </Select>

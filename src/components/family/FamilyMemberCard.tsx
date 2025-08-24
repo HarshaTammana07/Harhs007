@@ -12,6 +12,7 @@ import {
   hasAlerts,
   getAlertCount,
   getProfileCompletionPercentage,
+  formatDateWithoutTimezone,
 } from "@/utils/familyMemberUtils";
 
 interface FamilyMemberCardProps {
@@ -142,7 +143,7 @@ export function FamilyMemberCard({
           {member.dateOfBirth && !compact && (
             <div className="mt-2">
               <p className="text-xs text-gray-500">
-                Born: {new Date(member.dateOfBirth).toLocaleDateString()}
+                Born: {formatDateWithoutTimezone(member.dateOfBirth)}
               </p>
             </div>
           )}

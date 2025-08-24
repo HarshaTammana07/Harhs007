@@ -20,9 +20,10 @@ import { format } from "date-fns";
 
 interface ExpiryRemindersProps {
   onViewDocument?: (document: Document) => void;
+  refreshTrigger?: number;
 }
 
-export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
+export function ExpiryReminders({ onViewDocument, refreshTrigger }: ExpiryRemindersProps) {
   const [expiryInfo, setExpiryInfo] = useState<DocumentExpiryInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -33,6 +34,13 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
   useEffect(() => {
     loadExpiryInfo();
   }, []);
+
+  // Refresh data when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger !== undefined) {
+      loadExpiryInfo();
+    }
+  }, [refreshTrigger]);
 
   const loadExpiryInfo = () => {
     setIsLoading(true);
