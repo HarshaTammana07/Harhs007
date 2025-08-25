@@ -22,6 +22,8 @@ interface FamilyMemberCardProps {
   onDelete?: (member: FamilyMember) => void;
   showActions?: boolean;
   compact?: boolean;
+  documentCount?: number;
+  insuranceCount?: number;
 }
 
 export function FamilyMemberCard({
@@ -31,6 +33,8 @@ export function FamilyMemberCard({
   onDelete,
   showActions = true,
   compact = false,
+  documentCount,
+  insuranceCount,
 }: FamilyMemberCardProps) {
   const alertCount = getAlertCount(member);
   const hasAlert = hasAlerts(member);
@@ -128,10 +132,10 @@ export function FamilyMemberCard({
           {!compact && (
             <div className="mt-3 flex items-center space-x-4 text-xs text-gray-500">
               <span className="flex items-center">
-                📄 {member.documents.length} docs
+                📄 {documentCount ?? member.documents?.length ?? 0} docs
               </span>
               <span className="flex items-center">
-                🛡️ {member.insurancePolicies.length} policies
+                🛡️ {insuranceCount ?? member.insurancePolicies?.length ?? 0} policies
               </span>
               <span className="flex items-center">
                 ✅ {completionPercentage}% complete

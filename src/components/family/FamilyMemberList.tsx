@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { Grid } from "@/components/ui/Grid";
 import { LoadingState } from "@/components/ui/LoadingState";
+import { useFamilyMemberCounts } from "@/hooks/useFamilyMemberCounts";
 import {
   sortByRelationshipPriority,
   sortByAge,
@@ -44,6 +45,10 @@ export function FamilyMemberList({
     useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("relationship");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+
+  // Get dynamic counts for all family members
+  const familyMemberIds = useMemo(() => members.map(member => member.id), [members]);
+  const { getCountsForMember, loading: countsLoading } = useFamilyMemberCounts(familyMemberIds);
 
   // Filter and sort members
   const filteredAndSortedMembers = useMemo(() => {
@@ -241,17 +246,22 @@ export function FamilyMemberList({
           {/* Grid View */}
           {viewMode === "grid" && (
             <Grid cols={compact ? 4 : 3} gap="md">
-              {filteredAndSortedMembers.map((member) => (
-                <FamilyMemberCard
-                  key={member.id}
-                  member={member}
-                  onEdit={onEdit}
-                  onView={onView}
-                  onDelete={onDelete}
-                  showActions={showActions}
-                  compact={compact}
-                />
-              ))}
+              {filteredAndSortedMembers.map((member) => {
+                const counts = getCountsForMember(member.id);
+                return (
+                  <FamilyMemberCard
+                    key={member.id}
+                    member={member}
+                    onEdit={onEdit}
+                    onView={onView}
+                    onDelete={onDelete}
+                    showActions={showActions}
+                    compact={compact}
+                    documentCount={counts.documents}
+                    insuranceCount={counts.insurance}
+                  />
+                );
+              })}
             </Grid>
           )}
 
@@ -267,17 +277,22 @@ export function FamilyMemberList({
                         {relationship} ({relationshipMembers.length})
                       </h3>
                       <div className="space-y-2">
-                        {relationshipMembers.map((member) => (
-                          <FamilyMemberCard
-                            key={member.id}
-                            member={member}
-                            onEdit={onEdit}
-                            onView={onView}
-                            onDelete={onDelete}
-                            showActions={showActions}
-                            compact={true}
-                          />
-                        ))}
+                        {relationshipMembers.map((member) => {
+                          const counts = getCountsForMember(member.id);
+                          return (
+                            <FamilyMemberCard
+                              key={member.id}
+                              member={member}
+                              onEdit={onEdit}
+                              onView={onView}
+                              onDelete={onDelete}
+                              showActions={showActions}
+                              compact={true}
+                              documentCount={counts.documents}
+                              insuranceCount={counts.insurance}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
                   )

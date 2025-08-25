@@ -38,7 +38,11 @@ export class ApiService {
     if (error)
       throw new Error(`Failed to fetch family members: ${error.message}`);
 
-    return data.map(ApiService.transformFamilyMember);
+    // Get document and insurance counts for all family members
+    const familyMemberIds = data.map(member => member.id);
+    const counts = await this.getFamilyMemberCounts(familyMemberIds);
+
+    return data.map(member => ApiService.transformFamilyMemberWithCounts(member, counts[member.id] || { documents: 0, policies: 0 }));
   }
 
   /**
@@ -143,6 +147,63 @@ export class ApiService {
 
     if (error)
       throw new Error(`Failed to delete family member: ${error.message}`);
+  }
+
+  /**
+   * Get document and insurance counts for multiple family members
+   */
+  static async getFamilyMemberCounts(familyMemberIds: string[]): Promise<Record<string, { documents: number; policies: number }>> {
+    try {
+      const [documentsResult, policiesResult] = await Promise.all([
+        supabase
+          .from("documents")
+          .select("family_member_id")
+          .in("family_member_id", familyMemberIds),
+        supabase
+          .from("insurance_policies")
+          .select("family_member_id")
+          .in("family_member_id", familyMemberIds),
+      ]);
+
+      if (documentsResult.error) {
+        throw new Error(`Failed to fetch document counts: ${documentsResult.error.message}`);
+      }
+
+      if (policiesResult.error) {
+        throw new Error(`Failed to fetch policy counts: ${policiesResult.error.message}`);
+      }
+
+      // Count documents by family member
+      const documentCounts: Record<string, number> = {};
+      (documentsResult.data || []).forEach((doc: any) => {
+        documentCounts[doc.family_member_id] = (documentCounts[doc.family_member_id] || 0) + 1;
+      });
+
+      // Count policies by family member
+      const policyCounts: Record<string, number> = {};
+      (policiesResult.data || []).forEach((policy: any) => {
+        policyCounts[policy.family_member_id] = (policyCounts[policy.family_member_id] || 0) + 1;
+      });
+
+      // Combine results
+      const result: Record<string, { documents: number; policies: number }> = {};
+      familyMemberIds.forEach((id) => {
+        result[id] = {
+          documents: documentCounts[id] || 0,
+          policies: policyCounts[id] || 0,
+        };
+      });
+
+      return result;
+    } catch (error) {
+      console.error("Error fetching family member counts:", error);
+      // Return empty counts for all members
+      const result: Record<string, { documents: number; policies: number }> = {};
+      familyMemberIds.forEach((id) => {
+        result[id] = { documents: 0, policies: 0 };
+      });
+      return result;
+    }
   }
 
   // ==================== BUILDINGS ====================
@@ -2014,6 +2075,30 @@ export class ApiService {
     };
   }
 
+  private static transformFamilyMemberWithCounts(data: any, counts: { documents: number; policies: number }): FamilyMember {
+    return {
+      id: data.id,
+      fullName: data.full_name,
+      nickname: data.nickname,
+      profilePhoto: data.profile_photo,
+      relationship: data.relationship,
+      dateOfBirth: data.date_of_birth
+        ? new Date(data.date_of_birth)
+        : undefined,
+      contactInfo: {
+        phone: data.phone,
+        email: data.email,
+        address: data.address,
+      },
+      documents: [], // Will be populated separately if needed
+      insurancePolicies: [], // Will be populated separately if needed
+      documentCount: counts.documents,
+      insurancePolicyCount: counts.policies,
+      createdAt: new Date(data.created_at),
+      updatedAt: new Date(data.updated_at),
+    };
+  }
+
   private static transformBuilding(data: any): Building {
     return {
       id: data.id,
@@ -2101,7 +2186,7 @@ export class ApiService {
     };
   }
 
-  private static transformLand(data: any): Land {
+  private static transformLand(data: unknown): Land {
     return {
       id: data.id,
       type: "land",
