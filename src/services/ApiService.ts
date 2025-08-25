@@ -1148,25 +1148,36 @@ export class ApiService {
   static async createRentPayment(
     paymentData: Omit<RentPayment, "id" | "createdAt" | "updatedAt">
   ): Promise<RentPayment> {
+    // Ensure UUID fields are properly handled - convert empty strings to null
+    const insertData = {
+      tenant_id: paymentData.tenantId || null,
+      property_type: paymentData.propertyType,
+      property_id: paymentData.propertyId || null,
+      unit_id: paymentData.unitId || null, // This is optional, so null is fine
+      amount: paymentData.amount,
+      due_date: paymentData.dueDate.toISOString().split("T")[0],
+      paid_date: paymentData.paidDate?.toISOString().split("T")[0],
+      status: paymentData.status,
+      payment_method: paymentData.paymentMethod,
+      transaction_id: paymentData.transactionId || null,
+      receipt_number: paymentData.receiptNumber || null,
+      notes: paymentData.notes || null,
+      late_fee: paymentData.lateFee || 0,
+      discount: paymentData.discount || 0,
+      actual_amount_paid: paymentData.actualAmountPaid || paymentData.amount,
+    };
+
+    // Validate required UUID fields
+    if (!insertData.tenant_id) {
+      throw new Error("Tenant ID is required");
+    }
+    if (!insertData.property_id) {
+      throw new Error("Property ID is required");
+    }
+
     const { data, error } = await supabase
       .from("rent_payments")
-      .insert({
-        tenant_id: paymentData.tenantId,
-        property_type: paymentData.propertyType,
-        property_id: paymentData.propertyId,
-        unit_id: paymentData.unitId,
-        amount: paymentData.amount,
-        due_date: paymentData.dueDate.toISOString().split("T")[0],
-        paid_date: paymentData.paidDate?.toISOString().split("T")[0],
-        status: paymentData.status,
-        payment_method: paymentData.paymentMethod,
-        transaction_id: paymentData.transactionId,
-        receipt_number: paymentData.receiptNumber,
-        notes: paymentData.notes,
-        late_fee: paymentData.lateFee,
-        discount: paymentData.discount,
-        actual_amount_paid: paymentData.actualAmountPaid,
-      })
+      .insert(insertData)
       .select()
       .single();
 
@@ -1174,6 +1185,59 @@ export class ApiService {
       throw new Error(`Failed to create rent payment: ${error.message}`);
 
     return ApiService.transformRentPayment(data);
+  }
+
+  /**
+   * Update rent payment
+   */
+  static async updateRentPayment(
+    id: string,
+    updates: Partial<Omit<RentPayment, "id" | "createdAt" | "updatedAt">>
+  ): Promise<RentPayment> {
+    const updateData: any = {};
+
+    if (updates.tenantId) updateData.tenant_id = updates.tenantId;
+    if (updates.propertyType) updateData.property_type = updates.propertyType;
+    if (updates.propertyId) updateData.property_id = updates.propertyId;
+    if (updates.unitId !== undefined) updateData.unit_id = updates.unitId || null;
+    if (updates.amount !== undefined) updateData.amount = updates.amount;
+    if (updates.dueDate) updateData.due_date = updates.dueDate.toISOString().split("T")[0];
+    if (updates.paidDate) updateData.paid_date = updates.paidDate.toISOString().split("T")[0];
+    if (updates.status) updateData.status = updates.status;
+    if (updates.paymentMethod) updateData.payment_method = updates.paymentMethod;
+    if (updates.transactionId !== undefined) updateData.transaction_id = updates.transactionId || null;
+    if (updates.receiptNumber !== undefined) updateData.receipt_number = updates.receiptNumber || null;
+    if (updates.notes !== undefined) updateData.notes = updates.notes || null;
+    if (updates.lateFee !== undefined) updateData.late_fee = updates.lateFee || 0;
+    if (updates.discount !== undefined) updateData.discount = updates.discount || 0;
+    if (updates.actualAmountPaid !== undefined) updateData.actual_amount_paid = updates.actualAmountPaid;
+
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("rent_payments")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error)
+      throw new Error(`Failed to update rent payment: ${error.message}`);
+
+    return ApiService.transformRentPayment(data);
+  }
+
+  /**
+   * Delete rent payment
+   */
+  static async deleteRentPayment(id: string): Promise<void> {
+    const { error } = await supabase
+      .from("rent_payments")
+      .delete()
+      .eq("id", id);
+
+    if (error)
+      throw new Error(`Failed to delete rent payment: ${error.message}`);
   }
 
   // ==================== INSURANCE POLICIES ====================
@@ -2073,7 +2137,7 @@ export class ApiService {
     };
   }
 
-  private static transformTenant(data: any): Tenant {
+  private static transformTenant(data: unknown): Tenant {
     return {
       id: data.id,
       personalInfo: {
@@ -2125,7 +2189,7 @@ export class ApiService {
         specialConditions: data.special_conditions || [],
       },
       references:
-        data.tenant_references?.map((ref: any) => ({
+        data.tenant_references?.map((ref: unknown) => ({
           name: ref.name,
           relationship: ref.relationship,
           phone: ref.phone,
