@@ -85,10 +85,10 @@ export function TenantCard({
               <UserIcon className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {tenant.personalInfo.fullName}
               </h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
                 {tenant.personalInfo.occupation}
               </p>
             </div>
@@ -106,14 +106,14 @@ export function TenantCard({
 
         {/* Property Information */}
         {propertyInfo && (
-          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+          <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <div className="flex items-center space-x-2">
-              <MapPinIcon className="h-4 w-4 text-gray-400" />
+              <MapPinIcon className="h-4 w-4 text-gray-400 dark:text-gray-300" />
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {propertyInfo.propertyName}
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-600 dark:text-gray-400">
                   {propertyInfo.propertyType}
                   {propertyInfo.unitInfo && ` • ${propertyInfo.unitInfo}`}
                 </p>
@@ -125,15 +125,15 @@ export function TenantCard({
         {/* Contact Information */}
         <div className="space-y-2 mb-4">
           <div className="flex items-center space-x-2">
-            <PhoneIcon className="h-4 w-4 text-gray-400" />
-            <span className="text-sm text-gray-700">
+            <PhoneIcon className="h-4 w-4 text-gray-400 dark:text-gray-300" />
+            <span className="text-sm text-gray-700 dark:text-gray-300">
               {tenant.contactInfo.phone}
             </span>
           </div>
           {tenant.contactInfo.email && (
             <div className="flex items-center space-x-2">
-              <EnvelopeIcon className="h-4 w-4 text-gray-400" />
-              <span className="text-sm text-gray-700">
+              <EnvelopeIcon className="h-4 w-4 text-gray-400 dark:text-gray-300" />
+              <span className="text-sm text-gray-700 dark:text-gray-300">
                 {tenant.contactInfo.email}
               </span>
             </div>
@@ -143,19 +143,19 @@ export function TenantCard({
         {/* Rental Information */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="flex items-center space-x-2">
-            <CurrencyRupeeIcon className="h-4 w-4 text-gray-400" />
+            <CurrencyRupeeIcon className="h-4 w-4 text-gray-400 dark:text-gray-300" />
             <div>
-              <p className="text-xs text-gray-600">Monthly Rent</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-xs text-gray-600 dark:text-gray-400">Monthly Rent</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 {formatCurrency(tenant.rentalAgreement.rentAmount)}
               </p>
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <CalendarIcon className="h-4 w-4 text-gray-400" />
+            <CalendarIcon className="h-4 w-4 text-gray-400 dark:text-gray-300" />
             <div>
-              <p className="text-xs text-gray-600">Move-in Date</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-xs text-gray-600 dark:text-gray-400">Move-in Date</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 {formatDate(tenant.moveInDate)}
               </p>
             </div>
@@ -165,10 +165,10 @@ export function TenantCard({
         {/* Tenancy Duration */}
         <div className="mb-4">
           <div className="flex items-center space-x-2">
-            <CalendarIcon className="h-4 w-4 text-gray-400" />
+            <CalendarIcon className="h-4 w-4 text-gray-400 dark:text-gray-300" />
             <div>
-              <p className="text-xs text-gray-600">Tenancy Duration</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-xs text-gray-600 dark:text-gray-400">Tenancy Duration</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 {getTenancyDuration()}
               </p>
             </div>
@@ -176,17 +176,17 @@ export function TenantCard({
         </div>
 
         {/* Agreement Information */}
-        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-gray-600">Agreement</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-xs text-gray-600 dark:text-gray-400">Agreement</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {tenant.rentalAgreement.agreementNumber}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-gray-600">Security Deposit</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-xs text-gray-600 dark:text-gray-400">Security Deposit</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {formatCurrency(tenant.rentalAgreement.securityDeposit)}
               </p>
             </div>
@@ -197,16 +197,16 @@ export function TenantCard({
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-2">
-              <UserIcon className="h-4 w-4 text-gray-400" />
-              <span className="text-gray-600">Family Size:</span>
-              <span className="font-medium text-gray-900">
+              <UserIcon className="h-4 w-4 text-gray-400 dark:text-gray-300" />
+              <span className="text-gray-600 dark:text-gray-400">Family Size:</span>
+              <span className="font-medium text-gray-900 dark:text-white">
                 {tenant.personalInfo.familySize} member
                 {tenant.personalInfo.familySize !== 1 ? "s" : ""}
               </span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-gray-600">Status:</span>
-              <span className="font-medium text-gray-900 capitalize">
+              <span className="text-gray-600 dark:text-gray-400">Status:</span>
+              <span className="font-medium text-gray-900 dark:text-white capitalize">
                 {tenant.personalInfo.maritalStatus}
               </span>
             </div>
@@ -214,19 +214,19 @@ export function TenantCard({
         </div>
 
         {/* Emergency Contact */}
-        <div className="mb-4 p-3 bg-yellow-50 rounded-lg">
-          <p className="text-xs text-gray-600 mb-1">Emergency Contact</p>
+        <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Emergency Contact</p>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 {tenant.emergencyContact.name}
               </p>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 {tenant.emergencyContact.relationship}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-900">
+              <p className="text-sm text-gray-900 dark:text-white">
                 {tenant.emergencyContact.phone}
               </p>
             </div>
@@ -236,10 +236,10 @@ export function TenantCard({
         {/* Documents Count */}
         <div className="mb-4">
           <div className="flex items-center space-x-2">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               Documents: {tenant.documents.length}
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               References: {tenant.references.length}
             </div>
           </div>
@@ -247,7 +247,7 @@ export function TenantCard({
 
         {/* Actions */}
         {showActions && (
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex space-x-2">
               {onView && (
                 <Button

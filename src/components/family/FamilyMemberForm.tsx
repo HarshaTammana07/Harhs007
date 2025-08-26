@@ -223,11 +223,11 @@ export function FamilyMemberForm({
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Error Messages */}
           {errors.length > 0 && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md p-4">
               <div className="flex">
                 <div className="flex-shrink-0">
                   <svg
-                    className="h-5 w-5 text-red-400"
+                    className="h-5 w-5 text-red-400 dark:text-red-300"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -239,10 +239,10 @@ export function FamilyMemberForm({
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
+                  <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
                     Please fix the following errors:
                   </h3>
-                  <ul className="mt-2 text-sm text-red-700 list-disc list-inside">
+                  <ul className="mt-2 text-sm text-red-700 dark:text-red-300 list-disc list-inside">
                     {errors.map((error, index) => (
                       <li key={index}>{error}</li>
                     ))}
@@ -254,7 +254,7 @@ export function FamilyMemberForm({
 
           {/* Profile Photo Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">Profile Photo</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Profile Photo</h3>
             <div className="flex items-center space-x-6">
               {/* Photo Preview */}
               <div className="flex-shrink-0">
@@ -297,7 +297,7 @@ export function FamilyMemberForm({
                     </Button>
                   )}
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   JPG, PNG or GIF. Max size 5MB.
                 </p>
               </div>
@@ -319,7 +319,7 @@ export function FamilyMemberForm({
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Full Name *
               </label>
               <Input
@@ -333,7 +333,7 @@ export function FamilyMemberForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Nickname *
               </label>
               <Input
@@ -347,7 +347,7 @@ export function FamilyMemberForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Relationship *
               </label>
               <select
@@ -355,18 +355,18 @@ export function FamilyMemberForm({
                 onChange={(e) =>
                   handleInputChange("relationship", e.target.value)
                 }
-                className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
                 disabled={isSubmitting}
               >
-                <option value="" className="text-gray-500 bg-white">
+                <option value="" className="text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800">
                   Select relationship
                 </option>
                 {RELATIONSHIP_OPTIONS.map((relationship) => (
                   <option
                     key={relationship}
                     value={relationship}
-                    className="text-gray-900 bg-white"
+                    className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
                   >
                     {relationship}
                   </option>
@@ -375,7 +375,7 @@ export function FamilyMemberForm({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Date of Birth
               </label>
               <Input
@@ -391,12 +391,12 @@ export function FamilyMemberForm({
 
           {/* Contact Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
               Contact Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Phone Number
                 </label>
                 <Input
@@ -411,7 +411,7 @@ export function FamilyMemberForm({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Email Address
                 </label>
                 <Input
@@ -426,7 +426,7 @@ export function FamilyMemberForm({
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Address
                 </label>
                 <textarea
@@ -436,7 +436,7 @@ export function FamilyMemberForm({
                   }
                   placeholder="Enter address"
                   rows={3}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   disabled={isSubmitting}
                 />
               </div>
@@ -444,7 +444,7 @@ export function FamilyMemberForm({
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
             <Button
               type="button"
               variant="outline"

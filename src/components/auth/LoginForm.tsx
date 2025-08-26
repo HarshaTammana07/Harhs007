@@ -59,7 +59,7 @@ export function LoginForm() {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-indigo-900/30"></div>
 
       <div className="max-w-4xl w-full relative z-10">
-        <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border-0 overflow-hidden">
+        <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-2xl border-0 overflow-hidden">
           <div className="flex">
             {/* Left side - Logo and Branding */}
             <div className="w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 p-8 flex flex-col justify-center items-center text-white">
@@ -93,17 +93,17 @@ export function LoginForm() {
             <div className="w-1/2 p-8">
               <div className="max-w-sm mx-auto">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
                     Welcome Back
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 dark:text-gray-300">
                     Sign in to access your dashboard
                   </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                    <div className="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-md text-sm">
                       {error}
                     </div>
                   )}
@@ -186,9 +186,9 @@ export function LoginForm() {
                   </Button>
 
                   <div className="text-center">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-300">
                       <p className="mb-2 font-medium">Demo Credentials:</p>
-                      <div className="text-xs space-y-1 bg-gray-50 p-3 rounded-md">
+                      <div className="text-xs space-y-1 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
                         <p>
                           <strong>Admin:</strong> harsha@family.com / harsha123
                         </p>

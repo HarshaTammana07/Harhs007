@@ -99,12 +99,12 @@ export function FamilyMemberCard({
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <h3
-                className={`font-semibold text-gray-900 truncate ${compact ? "text-sm" : "text-lg"}`}
+                className={`font-semibold text-gray-900 dark:text-white truncate ${compact ? "text-sm" : "text-lg"}`}
               >
                 {member.fullName}
               </h3>
               <p
-                className={`text-gray-600 truncate ${compact ? "text-xs" : "text-sm"}`}
+                className={`text-gray-600 dark:text-gray-300 truncate ${compact ? "text-xs" : "text-sm"}`}
               >
                 {member.nickname}
               </p>
@@ -121,7 +121,7 @@ export function FamilyMemberCard({
           {/* Contact Info */}
           {!compact && (
             <div className="mt-2">
-              <p className="text-sm text-gray-500 truncate">
+              <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                 {formatContactInfo(member.contactInfo) ||
                   "No contact information"}
               </p>
@@ -130,7 +130,7 @@ export function FamilyMemberCard({
 
           {/* Stats */}
           {!compact && (
-            <div className="mt-3 flex items-center space-x-4 text-xs text-gray-500">
+            <div className="mt-3 flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
               <span className="flex items-center">
                 📄 {documentCount ?? member.documents?.length ?? 0} docs
               </span>
@@ -146,7 +146,7 @@ export function FamilyMemberCard({
           {/* Age */}
           {member.dateOfBirth && !compact && (
             <div className="mt-2">
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 Born: {formatDateWithoutTimezone(member.dateOfBirth)}
               </p>
             </div>

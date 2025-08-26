@@ -192,12 +192,18 @@ body {
 
   /* Input styles */
   .input-field {
-    @apply bg-white dark:bg-zinc-800;
-    @apply border border-slate-300 dark:border-zinc-600;
-    @apply focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary-500/30;
-    @apply transition-all duration-200;
+    @apply bg-gradient-to-br from-white via-slate-50 to-blue-50/30;
+    @apply dark:bg-gradient-to-br dark:from-zinc-800/80 dark:via-zinc-800/90 dark:to-zinc-900/50;
+    @apply backdrop-blur-sm;
+    @apply border border-slate-200/60 dark:border-zinc-600/50;
+    @apply shadow-sm hover:shadow-md;
+    @apply focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 dark:focus:ring-primary-400/30;
+    @apply focus:shadow-lg focus:shadow-primary-200/20 dark:focus:shadow-primary-500/10;
+    @apply transition-all duration-300 ease-out;
     @apply placeholder-slate-400 dark:placeholder-zinc-400;
     @apply text-slate-900 dark:text-white;
+    @apply hover:bg-gradient-to-br hover:from-white hover:via-blue-50/20 hover:to-indigo-50/30;
+    @apply dark:hover:bg-gradient-to-br dark:hover:from-zinc-700/80 dark:hover:via-zinc-800/90 dark:hover:to-zinc-900/60;
   }
 
   /* Navigation styles */

@@ -231,10 +231,10 @@ export function FamilyMemberDetail({
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {member.fullName}
                   </h2>
-                  <p className="text-lg text-gray-600">{member.nickname}</p>
+                  <p className="text-lg text-gray-600 dark:text-gray-300">{member.nickname}</p>
                   <div className="mt-2 flex items-center space-x-3">
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${relationshipColor}`}
@@ -242,7 +242,7 @@ export function FamilyMemberDetail({
                       {member.relationship}
                     </span>
                     {member.dateOfBirth && (
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         Age {calculateAge(member.dateOfBirth)}
                       </span>
                     )}
@@ -275,11 +275,11 @@ export function FamilyMemberDetail({
 
               {/* Alerts */}
               {hasAlert && (
-                <div className="mt-4 bg-orange-50 border border-orange-200 rounded-md p-3">
+                <div className="mt-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-md p-3">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
                       <svg
-                        className="h-5 w-5 text-orange-400"
+                        className="h-5 w-5 text-orange-400 dark:text-orange-300"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -291,7 +291,7 @@ export function FamilyMemberDetail({
                       </svg>
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm font-medium text-orange-800">
+                      <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
                         {alertCount} alert{alertCount !== 1 ? "s" : ""} require
                         attention
                       </p>
@@ -303,7 +303,7 @@ export function FamilyMemberDetail({
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-gray-200">
+          <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="-mb-px flex space-x-8">
               {[
                 { id: "overview", label: "Overview" },
@@ -318,11 +318,11 @@ export function FamilyMemberDetail({
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as unknown)}
+                  onClick={() => setActiveTab(tab.id as "overview" | "documents" | "insurance")}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
                       ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
                   {tab.label}
@@ -337,31 +337,31 @@ export function FamilyMemberDetail({
               <div className="space-y-6">
                 {/* Contact Information */}
                 <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Contact Information
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Phone
                       </label>
-                      <p className="mt-1 text-sm text-gray-900">
+                      <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                         {member.contactInfo.phone || "Not provided"}
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Email
                       </label>
-                      <p className="mt-1 text-sm text-gray-900">
+                      <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                         {member.contactInfo.email || "Not provided"}
                       </p>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Address
                       </label>
-                      <p className="mt-1 text-sm text-gray-900">
+                      <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                         {member.contactInfo.address || "Not provided"}
                       </p>
                     </div>
@@ -370,25 +370,25 @@ export function FamilyMemberDetail({
 
                 {/* Profile Completion */}
                 <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Profile Completion
                   </h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
                         Overall completion
                       </span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {completionPercentage}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${completionPercentage}%` }}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4 mt-4 text-xs text-gray-500">
+                    <div className="grid grid-cols-2 gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
                       <div className="flex items-center">
                         <span
                           className={`w-2 h-2 rounded-full mr-2 ${member.fullName ? "bg-green-500" : "bg-gray-300"}`}
@@ -444,7 +444,7 @@ export function FamilyMemberDetail({
                 {/* Upcoming Events */}
                 {upcomingEvents.length > 0 && (
                   <Card className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                       Upcoming Events
                     </h3>
                     <div className="space-y-3">
@@ -454,18 +454,18 @@ export function FamilyMemberDetail({
                           className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-md"
                         >
                           <div>
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
                               {event.title}
                             </p>
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                               {event.description}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
                               {event.date.toLocaleDateString()}
                             </p>
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                               {Math.ceil(
                                 (event.date.getTime() - new Date().getTime()) /
                                   (1000 * 60 * 60 * 24)
@@ -481,7 +481,7 @@ export function FamilyMemberDetail({
 
                 {/* Statistics */}
                 <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Statistics
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

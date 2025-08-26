@@ -39,10 +39,10 @@ export function ProtectedRoute({
       fallback || (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Authentication Required
             </h2>
-            <p className="text-gray-600">Redirecting to login...</p>
+            <p className="text-gray-600 dark:text-gray-300">Redirecting to login...</p>
           </div>
         </div>
       )
@@ -54,11 +54,11 @@ export function ProtectedRoute({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">
+          <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-2">
             Access Denied
           </h2>
-          <p className="text-gray-600">
-            You don't have permission to access this page.
+          <p className="text-gray-600 dark:text-gray-300">
+            You don&apos;t have permission to access this page.
           </p>
         </div>
       </div>

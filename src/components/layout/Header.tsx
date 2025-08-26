@@ -10,6 +10,7 @@ import { LogoutButton } from "../auth/LogoutButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { CompactThemeToggle } from "@/components/ui/ThemeToggle";
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -99,6 +100,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             <span className="hidden text-sm font-medium text-slate-700 dark:text-slate-300 lg:block">
               Welcome, {user?.name?.split(" ")[0] || "User"}
             </span>
+            <CompactThemeToggle />
             <LogoutButton />
           </div>
         </div>

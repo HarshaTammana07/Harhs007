@@ -199,10 +199,10 @@ export function TenantManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Tenant Management
           </h2>
-          <p className="text-gray-600">Manage all your tenants in one place</p>
+          <p className="text-gray-600 dark:text-gray-300">Manage all your tenants in one place</p>
         </div>
         <Button onClick={handleAddTenant} className="flex items-center">
           <PlusIcon className="h-4 w-4 mr-2" />
@@ -217,7 +217,7 @@ export function TenantManagement() {
           placeholder="Search by name, phone, occupation, building, or apartment..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
         />
       </div>
 
@@ -228,10 +228,10 @@ export function TenantManagement() {
             <div className="flex items-center">
               <UserIcon className="h-8 w-8 text-blue-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
                   Total Tenants
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {tenants.length}
                 </p>
               </div>
@@ -244,10 +244,10 @@ export function TenantManagement() {
             <div className="flex items-center">
               <UserIcon className="h-8 w-8 text-green-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
                   Active Tenants
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {tenants.filter((t) => t.isActive).length}
                 </p>
               </div>
@@ -260,10 +260,10 @@ export function TenantManagement() {
             <div className="flex items-center">
               <CurrencyRupeeIcon className="h-8 w-8 text-yellow-600" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
                   Total Monthly Rent
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   ₹
                   {tenants
                     .filter((t) => t.isActive)
@@ -283,10 +283,10 @@ export function TenantManagement() {
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-lg">
+                  <CardTitle className="text-lg text-gray-900 dark:text-white">
                     {tenant.personalInfo.fullName}
                   </CardTitle>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     {tenant.personalInfo.occupation}
                   </p>
                 </div>
@@ -310,15 +310,15 @@ export function TenantManagement() {
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
-              <div className="flex items-center text-sm text-gray-600">
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <PhoneIcon className="h-4 w-4 mr-2" />
                 {tenant.contactInfo.phone}
               </div>
-              <div className="flex items-center text-sm text-gray-600">
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <CurrencyRupeeIcon className="h-4 w-4 mr-2" />₹
                 {tenant.rentalAgreement.rentAmount.toLocaleString()}/month
               </div>
-              <div className="flex items-center text-sm text-gray-600">
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <CalendarIcon className="h-4 w-4 mr-2" />
                 {new Date(
                   tenant.rentalAgreement.startDate
@@ -337,7 +337,7 @@ export function TenantManagement() {
                   {tenant.isActive ? "Active" : "Inactive"}
                 </span>
                 {tenant.propertyType && (
-                  <span className="text-xs text-gray-500 capitalize">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                     {tenant.propertyType === "apartment" ? "Building" : tenant.propertyType}
                   </span>
                 )}
@@ -345,18 +345,18 @@ export function TenantManagement() {
               
               {/* Property Metadata Display */}
               {tenant.propertyMetadata && (
-                <div className="mt-3 p-2 bg-gray-50 rounded-md">
+                <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-700 rounded-md">
                   {tenant.propertyType === "apartment" && tenant.propertyMetadata.buildingName && (
                     <div className="space-y-1">
-                      <div className="flex items-center text-xs text-gray-700">
+                      <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
                         <BuildingOfficeIcon className="h-3 w-3 mr-1" />
                         <span className="font-medium">{tenant.propertyMetadata.buildingName}</span>
                         {tenant.propertyMetadata.buildingCode && (
-                          <span className="ml-1 text-gray-500">({tenant.propertyMetadata.buildingCode})</span>
+                          <span className="ml-1 text-gray-500 dark:text-gray-400">({tenant.propertyMetadata.buildingCode})</span>
                         )}
                       </div>
                       {tenant.propertyMetadata.apartmentDoorNumber && (
-                        <div className="text-xs text-gray-600">
+                        <div className="text-xs text-gray-600 dark:text-gray-300">
                           Door: {tenant.propertyMetadata.apartmentDoorNumber}
                           {tenant.propertyMetadata.apartmentFloor && (
                             <span className="ml-2">Floor: {tenant.propertyMetadata.apartmentFloor}</span>
@@ -364,7 +364,7 @@ export function TenantManagement() {
                         </div>
                       )}
                       {tenant.propertyMetadata.address && (
-                        <div className="text-xs text-gray-500 truncate">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                           {tenant.propertyMetadata.address}
                         </div>
                       )}
@@ -373,17 +373,17 @@ export function TenantManagement() {
                   
                   {tenant.propertyType === "flat" && tenant.propertyMetadata.flatName && (
                     <div className="space-y-1">
-                      <div className="flex items-center text-xs text-gray-700">
+                      <div className="flex items-center text-xs text-gray-700 dark:text-gray-300">
                         <HomeIcon className="h-3 w-3 mr-1" />
                         <span className="font-medium">{tenant.propertyMetadata.flatName}</span>
                       </div>
                       {tenant.propertyMetadata.flatDoorNumber && (
-                        <div className="text-xs text-gray-600">
+                        <div className="text-xs text-gray-600 dark:text-gray-300">
                           Door: {tenant.propertyMetadata.flatDoorNumber}
                         </div>
                       )}
                       {tenant.propertyMetadata.address && (
-                        <div className="text-xs text-gray-500 truncate">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                           {tenant.propertyMetadata.address}
                         </div>
                       )}
@@ -394,7 +394,7 @@ export function TenantManagement() {
               
               {/* Fallback for tenants without property assignment */}
               {!tenant.propertyMetadata && tenant.propertyId && (
-                <div className="text-xs text-blue-600 mt-1">
+                <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                   Property ID: {tenant.propertyId.substring(0, 8)}...
                 </div>
               )}
@@ -406,10 +406,10 @@ export function TenantManagement() {
       {filteredTenants.length === 0 && (
         <div className="text-center py-12">
           <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
             No tenants found
           </h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {searchTerm
               ? "Try adjusting your search terms."
               : "Get started by adding your first tenant."}
