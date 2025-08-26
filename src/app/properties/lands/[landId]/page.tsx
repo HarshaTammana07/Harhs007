@@ -134,13 +134,13 @@ export default function LandDetailPage() {
           {/* Header */}
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{land.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{land.name}</h1>
               <div className="flex items-center space-x-4 mt-2">
                 <span
                   className={`px-3 py-1 text-sm font-medium rounded-full ${
                     land.isLeased
-                      ? "bg-green-100 text-green-800"
-                      : "bg-orange-100 text-orange-800"
+                      ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                      : "bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300"
                   }`}
                 >
                   {land.isLeased ? "Leased" : "Vacant"}
@@ -173,7 +173,7 @@ export default function LandDetailPage() {
               {land.images && land.images.length > 0 && (
                 <Card>
                   <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                       Property Images
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -193,15 +193,15 @@ export default function LandDetailPage() {
               {/* Property Details */}
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Property Details
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-center space-x-3">
                       <MapPinIcon className="h-5 w-5 text-gray-400" />
                       <div>
-                        <div className="text-sm text-gray-600">Address</div>
-                        <div className="font-medium">{land.address}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-300">Address</div>
+                        <div className="font-medium text-gray-900 dark:text-white">{land.address}</div>
                       </div>
                     </div>
 
@@ -209,10 +209,10 @@ export default function LandDetailPage() {
                       <div className="flex items-center space-x-3">
                         <DocumentTextIcon className="h-5 w-5 text-gray-400" />
                         <div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-600 dark:text-gray-300">
                             Survey Number
                           </div>
-                          <div className="font-medium">{land.surveyNumber}</div>
+                          <div className="font-medium text-gray-900 dark:text-white">{land.surveyNumber}</div>
                         </div>
                       </div>
                     )}
@@ -220,8 +220,8 @@ export default function LandDetailPage() {
                     <div className="flex items-center space-x-3">
                       <TagIcon className="h-5 w-5 text-gray-400" />
                       <div>
-                        <div className="text-sm text-gray-600">Area</div>
-                        <div className="font-medium">
+                        <div className="text-sm text-gray-600 dark:text-gray-300">Area</div>
+                        <div className="font-medium text-gray-900 dark:text-white">
                           {formatArea(land.area, land.areaUnit)}
                         </div>
                       </div>
@@ -230,8 +230,8 @@ export default function LandDetailPage() {
                     <div className="flex items-center space-x-3">
                       <MapIcon className="h-5 w-5 text-gray-400" />
                       <div>
-                        <div className="text-sm text-gray-600">Zoning</div>
-                        <div className="font-medium capitalize">
+                        <div className="text-sm text-gray-600 dark:text-gray-300">Zoning</div>
+                        <div className="font-medium text-gray-900 dark:text-white capitalize">
                           {land.zoning}
                         </div>
                       </div>
@@ -241,8 +241,8 @@ export default function LandDetailPage() {
                       <div className="flex items-center space-x-3">
                         <div className="h-5 w-5 bg-yellow-400 rounded-full flex-shrink-0"></div>
                         <div>
-                          <div className="text-sm text-gray-600">Soil Type</div>
-                          <div className="font-medium">{land.soilType}</div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">Soil Type</div>
+                          <div className="font-medium text-gray-900 dark:text-white">{land.soilType}</div>
                         </div>
                       </div>
                     )}
@@ -251,10 +251,10 @@ export default function LandDetailPage() {
                       <div className="flex items-center space-x-3">
                         <div className="h-5 w-5 bg-blue-400 rounded-full flex-shrink-0"></div>
                         <div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-600 dark:text-gray-300">
                             Water Source
                           </div>
-                          <div className="font-medium">{land.waterSource}</div>
+                          <div className="font-medium text-gray-900 dark:text-white">{land.waterSource}</div>
                         </div>
                       </div>
                     )}
@@ -262,7 +262,7 @@ export default function LandDetailPage() {
 
                   {/* Features */}
                   <div className="mt-6">
-                    <h4 className="text-sm font-medium text-gray-900 mb-3">
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
                       Features
                     </h4>
                     <div className="flex flex-wrap gap-2">
@@ -277,7 +277,7 @@ export default function LandDetailPage() {
                         </span>
                       )}
                       {!land.roadAccess && !land.electricityConnection && (
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
                           No special features listed
                         </span>
                       )}
@@ -290,7 +290,7 @@ export default function LandDetailPage() {
                       <h4 className="text-sm font-medium text-gray-900 mb-2">
                         Description
                       </h4>
-                      <p className="text-gray-600">{land.description}</p>
+                      <p className="text-gray-600 dark:text-gray-300">{land.description}</p>
                     </div>
                   )}
                 </CardContent>
@@ -300,17 +300,17 @@ export default function LandDetailPage() {
               {land.isLeased && land.leaseTerms && (
                 <Card>
                   <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                       Lease Information
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex items-center space-x-3">
                         <BanknotesIcon className="h-5 w-5 text-gray-400" />
                         <div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-600 dark:text-gray-300">
                             Rent Amount
                           </div>
-                          <div className="font-medium">
+                          <div className="font-medium text-gray-900 dark:text-white">
                             ₹
                             {(land.leaseTerms.rentAmount || 0).toLocaleString()}
                             /{land.leaseTerms.rentFrequency}
@@ -321,10 +321,10 @@ export default function LandDetailPage() {
                       <div className="flex items-center space-x-3">
                         <CalendarIcon className="h-5 w-5 text-gray-400" />
                         <div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-600 dark:text-gray-300">
                             Lease Duration
                           </div>
-                          <div className="font-medium">
+                          <div className="font-medium text-gray-900 dark:text-white">
                             {land.leaseTerms.leaseDuration} years
                           </div>
                         </div>
@@ -333,10 +333,10 @@ export default function LandDetailPage() {
                       <div className="flex items-center space-x-3">
                         <TagIcon className="h-5 w-5 text-gray-400" />
                         <div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-gray-600 dark:text-gray-300">
                             Lease Type
                           </div>
-                          <div className="font-medium capitalize">
+                          <div className="font-medium text-gray-900 dark:text-white capitalize">
                             {land.leaseTerms.leaseType}
                           </div>
                         </div>
@@ -346,10 +346,10 @@ export default function LandDetailPage() {
                         <div className="flex items-center space-x-3">
                           <BanknotesIcon className="h-5 w-5 text-gray-400" />
                           <div>
-                            <div className="text-sm text-gray-600">
+                            <div className="text-sm text-gray-600 dark:text-gray-300">
                               Security Deposit
                             </div>
-                            <div className="font-medium">
+                            <div className="font-medium text-gray-900 dark:text-white">
                               ₹
                               {(
                                 land.leaseTerms.securityDeposit || 0
@@ -362,10 +362,10 @@ export default function LandDetailPage() {
 
                     {land.leaseTerms.renewalTerms && (
                       <div className="mt-4">
-                        <h4 className="text-sm font-medium text-gray-900 mb-2">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
                           Renewal Terms
                         </h4>
-                        <p className="text-gray-600">
+                        <p className="text-gray-600 dark:text-gray-300">
                           {land.leaseTerms.renewalTerms}
                         </p>
                       </div>
@@ -374,10 +374,10 @@ export default function LandDetailPage() {
                     {land.leaseTerms.restrictions &&
                       land.leaseTerms.restrictions.length > 0 && (
                         <div className="mt-4">
-                          <h4 className="text-sm font-medium text-gray-900 mb-2">
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">
                             Restrictions
                           </h4>
-                          <ul className="list-disc list-inside text-gray-600 space-y-1">
+                          <ul className="list-disc list-inside text-gray-600 dark:text-gray-300 space-y-1">
                             {land.leaseTerms.restrictions.map(
                               (restriction, index) => (
                                 <li key={index}>{restriction}</li>
@@ -396,25 +396,25 @@ export default function LandDetailPage() {
               {/* Quick Stats */}
               <Card>
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Quick Stats
                   </h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Documents</span>
-                      <span className="font-medium">
+                      <span className="text-gray-600 dark:text-gray-300">Documents</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
                         {land.documents?.length || 0}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Rent History</span>
-                      <span className="font-medium">
+                      <span className="text-gray-600 dark:text-gray-300">Rent History</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
                         {land.rentHistory?.length || 0}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Maintenance Records</span>
-                      <span className="font-medium">
+                      <span className="text-gray-600 dark:text-gray-300">Maintenance Records</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
                         {land.maintenanceRecords?.length || 0}
                       </span>
                     </div>
