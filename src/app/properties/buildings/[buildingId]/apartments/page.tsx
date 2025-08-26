@@ -95,19 +95,21 @@ export default function BuildingApartmentsPage() {
     return (
       <ProtectedRoute>
         <AppLayout>
-          <div className="text-center py-12">
-            <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
-              Building not found
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              The building you're looking for doesn't exist.
-            </p>
-            <div className="mt-6">
-              <Button onClick={handleBack}>
-                <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                Back to Buildings
-              </Button>
+          <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+            <div className="text-center py-12">
+              <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                Building not found
+              </h3>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                The building you're looking for doesn't exist.
+              </p>
+              <div className="mt-6">
+                <Button onClick={handleBack}>
+                  <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                  Back to Buildings
+                </Button>
+              </div>
             </div>
           </div>
         </AppLayout>
@@ -133,119 +135,121 @@ export default function BuildingApartmentsPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
-          <Breadcrumb items={breadcrumbItems} />
+        <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <div className="p-6">
+            <Breadcrumb items={breadcrumbItems} />
 
-          {/* Building Header */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-4">
-                {building.images && building.images.length > 0 ? (
-                  <img
-                    src={building.images[0]}
-                    alt={building.name}
-                    className="w-20 h-20 object-cover rounded-lg"
-                  />
-                ) : (
-                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <BuildingOfficeIcon className="h-8 w-8 text-gray-400" />
-                  </div>
-                )}
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    {building.name}
-                  </h1>
-                  <p className="text-gray-600 mt-1">{building.address}</p>
-                  <div className="flex items-center space-x-4 mt-2">
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                      Building {building.buildingCode}
-                    </span>
-                    <span className="text-sm text-gray-600">
-                      {building.totalFloors} Floors
-                    </span>
+            {/* Building Header */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mt-6">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start space-x-4">
+                  {building.images && building.images.length > 0 ? (
+                    <img
+                      src={building.images[0]}
+                      alt={building.name}
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                      <BuildingOfficeIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                    </div>
+                  )}
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {building.name}
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-300 mt-1">{building.address}</p>
+                    <div className="flex items-center space-x-4 mt-2">
+                      <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-medium">
+                        Building {building.buildingCode}
+                      </span>
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
+                        {building.totalFloors} Floors
+                      </span>
+                    </div>
                   </div>
                 </div>
+                <div className="flex space-x-3">
+                  <Button variant="outline" onClick={handleBack} className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                  <Button onClick={handleAddApartment}>
+                    <PlusIcon className="h-4 w-4 mr-2" />
+                    Add Apartment
+                  </Button>
+                </div>
               </div>
-              <div className="flex space-x-3">
-                <Button variant="outline" onClick={handleBack}>
-                  <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
+
+              {/* Building Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {apartments.length}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Total Apartments</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {occupiedApartments}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Occupied</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
+                    {vacantApartments}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Vacant</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                    {occupancyRate.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-300">Occupancy Rate</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Apartments List */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Apartments
+                </h2>
                 <Button onClick={handleAddApartment}>
                   <PlusIcon className="h-4 w-4 mr-2" />
                   Add Apartment
                 </Button>
               </div>
-            </div>
 
-            {/* Building Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-200">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {apartments.length}
-                </div>
-                <div className="text-sm text-gray-600">Total Apartments</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">
-                  {occupiedApartments}
-                </div>
-                <div className="text-sm text-gray-600">Occupied</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-600">
-                  {vacantApartments}
-                </div>
-                <div className="text-sm text-gray-600">Vacant</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-indigo-600">
-                  {occupancyRate.toFixed(1)}%
-                </div>
-                <div className="text-sm text-gray-600">Occupancy Rate</div>
-              </div>
+              {apartments.length === 0 ? (
+                <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                  <CardContent className="text-center py-12">
+                    <HomeIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
+                      No apartments yet
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                      Get started by adding the first apartment to this building.
+                    </p>
+                    <div className="mt-6">
+                      <Button onClick={handleAddApartment}>
+                        <PlusIcon className="h-4 w-4 mr-2" />
+                        Add Apartment
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <ApartmentList
+                  apartments={apartments}
+                  buildingId={buildingId}
+                  onEditApartment={handleEditApartment}
+                  onDeleteApartment={handleDeleteApartment}
+                  onViewTenant={handleViewTenant}
+                />
+              )}
             </div>
-          </div>
-
-          {/* Apartments List */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Apartments
-              </h2>
-              <Button onClick={handleAddApartment}>
-                <PlusIcon className="h-4 w-4 mr-2" />
-                Add Apartment
-              </Button>
-            </div>
-
-            {apartments.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <HomeIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">
-                    No apartments yet
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Get started by adding the first apartment to this building.
-                  </p>
-                  <div className="mt-6">
-                    <Button onClick={handleAddApartment}>
-                      <PlusIcon className="h-4 w-4 mr-2" />
-                      Add Apartment
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <ApartmentList
-                apartments={apartments}
-                buildingId={buildingId}
-                onEditApartment={handleEditApartment}
-                onDeleteApartment={handleDeleteApartment}
-                onViewTenant={handleViewTenant}
-              />
-            )}
           </div>
         </div>
       </AppLayout>

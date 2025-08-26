@@ -266,26 +266,26 @@ export function RentManagement() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "paid":
-        return <CheckCircleIcon className="h-4 w-4 text-green-600" />;
+        return <CheckCircleIcon className="h-4 w-4 text-green-600 dark:text-green-400" />;
       case "pending":
-        return <ClockIcon className="h-4 w-4 text-yellow-600" />;
+        return <ClockIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />;
       case "overdue":
-        return <ExclamationTriangleIcon className="h-4 w-4 text-red-600" />;
+        return <ExclamationTriangleIcon className="h-4 w-4 text-red-600 dark:text-red-400" />;
       default:
-        return <ClockIcon className="h-4 w-4 text-gray-600" />;
+        return <ClockIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "paid":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300";
       case "pending":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300";
       case "overdue":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300";
     }
   };
 
@@ -311,7 +311,7 @@ export function RentManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
       </div>
     );
   }
@@ -319,12 +319,12 @@ export function RentManagement() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-red-600 text-center">
+        <div className="text-red-600 dark:text-red-400 text-center">
           <ExclamationTriangleIcon className="h-12 w-12 mx-auto mb-4" />
-          <h3 className="text-lg font-medium">Something went wrong</h3>
-          <p className="text-sm mt-2">{error}</p>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Something went wrong</h3>
+          <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">{error}</p>
         </div>
-        <Button onClick={loadPayments} variant="outline">
+        <Button onClick={loadPayments} variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
           Try Again
         </Button>
       </div>
@@ -336,14 +336,14 @@ export function RentManagement() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-6 space-y-4 lg:space-y-0">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Rent Management</h2>
-          <p className="text-gray-600">Record and manage rent payments</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Rent Management</h2>
+          <p className="text-gray-600 dark:text-gray-300">Record and manage rent payments</p>
         </div>
         
         <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
           {/* Quick Search */}
           <div className="relative">
-            <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
             <input
               type="text"
               placeholder="Quick search..."
@@ -351,19 +351,19 @@ export function RentManagement() {
               onChange={(e) => {
                 setFilterCriteria({ ...filterCriteria, searchTerm: e.target.value });
               }}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64"
+              className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full sm:w-64 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
           
           <Button 
             variant="outline" 
             onClick={() => setShowFilters(true)}
-            className="flex items-center justify-center"
+            className="flex items-center justify-center border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             <FunnelIcon className="h-5 w-5 mr-2" />
             Filters
             {getActiveFiltersCount() > 0 && (
-              <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+              <span className="ml-2 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-xs font-medium px-2 py-0.5 rounded-full">
                 {getActiveFiltersCount()}
               </span>
             )}
@@ -372,7 +372,7 @@ export function RentManagement() {
           <Button 
             variant="outline" 
             onClick={handleExportToPdf}
-            className="flex items-center justify-center"
+            className="flex items-center justify-center border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
             disabled={payments.length === 0}
           >
             <DocumentArrowDownIcon className="h-5 w-5 mr-2" />
@@ -388,12 +388,12 @@ export function RentManagement() {
 
       {/* Filter Summary */}
       {getActiveFiltersCount() > 0 && (
-        <Card className="bg-blue-50 border-blue-200 mb-6">
+        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 mb-6">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
-                <FunnelIcon className="h-5 w-5 text-blue-600 mr-2" />
-                <span className="text-sm font-medium text-blue-900">
+                <FunnelIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
+                <span className="text-sm font-medium text-blue-900 dark:text-blue-300">
                   Showing {payments.length} payments with {getActiveFiltersCount()} active filter(s)
                 </span>
               </div>
@@ -404,7 +404,7 @@ export function RentManagement() {
                   const defaultFilters = defaultFilterCriteria || fallbackFilterCriteria;
                   setFilterCriteria(defaultFilters);
                 }}
-                className="text-blue-600 border-blue-300 hover:bg-blue-100"
+                className="text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30"
               >
                 Clear Filters
               </Button>
@@ -415,61 +415,61 @@ export function RentManagement() {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center">
-              <CurrencyRupeeIcon className="h-8 w-8 text-blue-600" />
+              <CurrencyRupeeIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Payments</p>
-                <p className="text-2xl font-bold text-gray-900">{statistics.totalPayments}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Payments</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.totalPayments}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center">
-              <CheckCircleIcon className="h-8 w-8 text-green-600" />
+              <CheckCircleIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Paid</p>
-                <p className="text-2xl font-bold text-gray-900">{statistics.paidPayments}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Paid</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.paidPayments}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center">
-              <ClockIcon className="h-8 w-8 text-yellow-600" />
+              <ClockIcon className="h-8 w-8 text-yellow-600 dark:text-yellow-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-gray-900">{statistics.pendingPayments}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Pending</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.pendingPayments}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center">
-              <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
+              <ExclamationTriangleIcon className="h-8 w-8 text-red-600 dark:text-red-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Overdue</p>
-                <p className="text-2xl font-bold text-gray-900">{statistics.overduePayments}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Overdue</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{statistics.overduePayments}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardContent className="p-4">
             <div className="flex items-center">
-              <CurrencyRupeeIcon className="h-8 w-8 text-green-600" />
+              <CurrencyRupeeIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Collected</p>
-                <p className="text-2xl font-bold text-gray-900">₹{statistics.totalAmount.toLocaleString()}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Collected</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">₹{statistics.totalAmount.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
@@ -479,15 +479,15 @@ export function RentManagement() {
       {/* Payments List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {payments.map((payment) => (
-          <Card key={payment.id} className="hover:shadow-lg transition-shadow">
+          <Card key={payment.id} className="hover:shadow-lg dark:hover:shadow-xl transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-lg flex items-center">
+                  <CardTitle className="text-lg flex items-center text-gray-900 dark:text-white">
                     {getStatusIcon(payment.status)}
                     <span className="ml-2">{payment.tenantName || "Unknown Tenant"}</span>
                   </CardTitle>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     {payment.receiptNumber}
                   </p>
                 </div>
@@ -496,6 +496,7 @@ export function RentManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleEditPayment(payment)}
+                    className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     <PencilIcon className="h-4 w-4" />
                   </Button>
@@ -503,7 +504,7 @@ export function RentManagement() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDeletePayment(payment)}
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border-gray-300 dark:border-gray-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
                     <TrashIcon className="h-4 w-4" />
                   </Button>
@@ -512,7 +513,7 @@ export function RentManagement() {
             </CardHeader>
             <CardContent className="space-y-2">
               {/* Property Information */}
-              <div className="flex items-center text-sm text-gray-600">
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <BuildingOfficeIcon className="h-4 w-4 mr-2" />
                 <span>
                   {payment.propertyName}
@@ -522,18 +523,18 @@ export function RentManagement() {
               </div>
 
               {/* Amount */}
-              <div className="flex items-center text-sm text-gray-600">
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <CurrencyRupeeIcon className="h-4 w-4 mr-2" />
                 <span>₹{payment.amount.toLocaleString()}</span>
                 {payment.actualAmountPaid !== payment.amount && (
-                  <span className="ml-2 text-green-600">
+                  <span className="ml-2 text-green-600 dark:text-green-400">
                     (Paid: ₹{payment.actualAmountPaid?.toLocaleString()})
                   </span>
                 )}
               </div>
 
               {/* Payment Date */}
-              <div className="flex items-center text-sm text-gray-600">
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <CalendarIcon className="h-4 w-4 mr-2" />
                 <span>
                   {payment.paidDate 
@@ -544,10 +545,10 @@ export function RentManagement() {
               </div>
 
               {/* Payment Method */}
-              <div className="flex items-center text-sm text-gray-600">
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <span className="capitalize">{payment.paymentMethod}</span>
                 {payment.transactionId && (
-                  <span className="ml-2 text-xs text-gray-500">
+                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                     ({payment.transactionId})
                   </span>
                 )}
@@ -558,26 +559,26 @@ export function RentManagement() {
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(payment.status)}`}>
                   {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
                 </span>
-                <span className="text-xs text-gray-500 capitalize">
+                <span className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                   {payment.propertyType}
                 </span>
               </div>
 
               {/* Late Fee or Discount */}
               {(payment.lateFee > 0 || payment.discount > 0) && (
-                <div className="text-xs text-gray-600 space-y-1">
+                <div className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
                   {payment.lateFee > 0 && (
-                    <div className="text-red-600">Late Fee: ₹{payment.lateFee}</div>
+                    <div className="text-red-600 dark:text-red-400">Late Fee: ₹{payment.lateFee}</div>
                   )}
                   {payment.discount > 0 && (
-                    <div className="text-green-600">Discount: ₹{payment.discount}</div>
+                    <div className="text-green-600 dark:text-green-400">Discount: ₹{payment.discount}</div>
                   )}
                 </div>
               )}
 
               {/* Notes */}
               {payment.notes && (
-                <div className="text-xs text-gray-500 italic">
+                <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                   &quot;{payment.notes}&quot;
                 </div>
               )}
@@ -588,11 +589,11 @@ export function RentManagement() {
 
       {payments.length === 0 && (
         <div className="text-center py-12">
-          <CurrencyRupeeIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <CurrencyRupeeIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
             {getActiveFiltersCount() === 0 ? "No payments recorded" : "No payments match your filters"}
           </h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {getActiveFiltersCount() === 0 
               ? "Get started by recording your first rent payment."
               : "Try adjusting your filter criteria to see more results."
@@ -607,7 +608,7 @@ export function RentManagement() {
             </div>
           ) : (
             <div className="mt-6">
-              <Button onClick={() => setShowFilters(true)} variant="outline">
+              <Button onClick={() => setShowFilters(true)} variant="outline" className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <FunnelIcon className="h-4 w-4 mr-2" />
                 Adjust Filters
               </Button>

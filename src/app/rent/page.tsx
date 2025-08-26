@@ -15,11 +15,13 @@ export default function RentManagementPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
-          <Breadcrumb items={breadcrumbItems} />
-          <ErrorBoundary>
-            <RentManagement />
-          </ErrorBoundary>
+        <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <div className="p-6">
+            <Breadcrumb items={breadcrumbItems} />
+            <ErrorBoundary>
+              <RentManagement />
+            </ErrorBoundary>
+          </div>
         </div>
       </AppLayout>
     </ProtectedRoute>

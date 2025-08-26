@@ -33,7 +33,7 @@ export const PolicyDocuments: React.FC<PolicyDocumentsProps> = ({
     if (mimeType.startsWith("image/")) {
       return (
         <svg
-          className="w-5 h-5 text-blue-500"
+          className="w-5 h-5 text-blue-500 dark:text-blue-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -49,7 +49,7 @@ export const PolicyDocuments: React.FC<PolicyDocumentsProps> = ({
     } else if (mimeType === "application/pdf") {
       return (
         <svg
-          className="w-5 h-5 text-red-500"
+          className="w-5 h-5 text-red-500 dark:text-red-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -65,7 +65,7 @@ export const PolicyDocuments: React.FC<PolicyDocumentsProps> = ({
     } else {
       return (
         <svg
-          className="w-5 h-5 text-gray-500"
+          className="w-5 h-5 text-gray-500 dark:text-gray-400"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -82,21 +82,22 @@ export const PolicyDocuments: React.FC<PolicyDocumentsProps> = ({
   };
 
   if (documents.length === 0) {
-    return <div className="text-sm text-gray-500">No documents uploaded</div>;
+    return <div className="text-sm text-gray-500 dark:text-gray-400">No documents uploaded</div>;
   }
 
   return (
     <>
       <div className="text-sm">
-        <span className="text-gray-500">Documents:</span>
+        <span className="text-gray-500 dark:text-gray-400">Documents:</span>
         <div className="flex items-center justify-between mt-1">
-          <span className="font-medium">
+          <span className="font-medium text-gray-900 dark:text-white">
             {documents.length} file(s) uploaded
           </span>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setIsModalOpen(true)}
+            className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             View All
           </Button>
@@ -108,29 +109,29 @@ export const PolicyDocuments: React.FC<PolicyDocumentsProps> = ({
         onClose={() => setIsModalOpen(false)}
         size="lg"
       >
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardHeader>
-            <CardTitle>Policy Documents - {policyNumber}</CardTitle>
+            <CardTitle className="text-gray-900 dark:text-white">Policy Documents - {policyNumber}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {documents.map((document) => (
                 <div
                   key={document.id}
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                  className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   <div className="flex items-center space-x-3">
                     {getFileIcon(document.mimeType)}
                     <div>
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-gray-900 dark:text-white">
                         {document.fileName}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
                         {fileService.formatFileSize(document.fileSize)} •{" "}
                         {document.mimeType}
                       </div>
                       {document.createdAt && (
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-gray-400 dark:text-gray-500">
                           Uploaded:{" "}
                           {new Date(document.createdAt).toLocaleDateString()}
                         </div>
@@ -155,6 +156,7 @@ export const PolicyDocuments: React.FC<PolicyDocumentsProps> = ({
                             `);
                           }
                         }}
+                        className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
                         Preview
                       </Button>
@@ -181,10 +183,15 @@ export const PolicyDocuments: React.FC<PolicyDocumentsProps> = ({
                   });
                 }}
                 disabled={documents.length === 0}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Download All ({documents.length})
               </Button>
-              <Button variant="outline" onClick={() => setIsModalOpen(false)}>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsModalOpen(false)}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
                 Close
               </Button>
             </div>

@@ -85,11 +85,11 @@ export default function NewApartmentPage() {
     return (
       <ProtectedRoute>
         <AppLayout>
-          <div className="text-center py-12">
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
               Building not found
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               The building you're looking for doesn't exist.
             </p>
           </div>
@@ -114,24 +114,26 @@ export default function NewApartmentPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
-          <Breadcrumb items={breadcrumbItems} />
+        <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <div className="p-6">
+            <Breadcrumb items={breadcrumbItems} />
 
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Adding apartment to: {building.name}
-            </h2>
-            <p className="text-gray-600">
-              Building {building.buildingCode} • {building.address}
-            </p>
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mt-6">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Adding apartment to: {building.name}
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                Building {building.buildingCode} • {building.address}
+              </p>
+            </div>
+
+            <ApartmentForm
+              building={building}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              isLoading={isSubmitting}
+            />
           </div>
-
-          <ApartmentForm
-            building={building}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            isLoading={isSubmitting}
-          />
         </div>
       </AppLayout>
     </ProtectedRoute>

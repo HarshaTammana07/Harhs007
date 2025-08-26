@@ -6,7 +6,9 @@ export default function DocumentsPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <DocumentManagement />
+        <div className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <DocumentManagement />
+        </div>
       </AppLayout>
     </ProtectedRoute>
   );

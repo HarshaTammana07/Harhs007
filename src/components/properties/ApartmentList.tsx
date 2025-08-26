@@ -114,11 +114,11 @@ export function ApartmentList({
   return (
     <div className="space-y-6">
       {/* Search and Filters */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <CardContent className="p-4">
           <div className="flex items-center space-x-2 mb-4">
-            <FunnelIcon className="h-5 w-5 text-gray-400" />
-            <h3 className="text-sm font-medium text-gray-900">
+            <FunnelIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white">
               Search & Filter Apartments
             </h3>
           </div>
@@ -126,13 +126,13 @@ export function ApartmentList({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
               <Input
                 type="text"
                 placeholder="Search by door number or tenant..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
@@ -159,8 +159,8 @@ export function ApartmentList({
           </div>
 
           {/* Results Summary */}
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
               Showing {filteredAndSortedApartments.length} of{" "}
               {apartments.length} apartments
               {searchQuery && <span className="ml-2">for "{searchQuery}"</span>}
@@ -171,13 +171,13 @@ export function ApartmentList({
 
       {/* Apartments Grid */}
       {filteredAndSortedApartments.length === 0 ? (
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardContent className="text-center py-12">
-            <HomeIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
+            <HomeIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
               No apartments found
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {searchQuery ||
               occupancyFilter !== "all" ||
               bedroomFilter !== "all"
@@ -220,22 +220,22 @@ function ApartmentCard({
   onViewTenant,
 }: ApartmentCardProps) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md dark:hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <CardContent className="p-4">
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
           <div className="cursor-pointer" onClick={onView}>
-            <h3 className="font-semibold text-gray-900 hover:text-blue-600">
+            <h3 className="font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
               D-No: {apartment.doorNumber}
             </h3>
-            <p className="text-sm text-gray-600">Floor {apartment.floor}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">Floor {apartment.floor}</p>
           </div>
           <div className="flex items-center space-x-1">
             <span
               className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                 apartment.isOccupied
-                  ? "bg-green-100 text-green-800"
-                  : "bg-gray-100 text-gray-800"
+                  ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
               }`}
             >
               {apartment.isOccupied ? "Occupied" : "Vacant"}
@@ -246,23 +246,23 @@ function ApartmentCard({
         {/* Apartment Details */}
         <div className="space-y-2 mb-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">Bedrooms:</span>
-            <span className="font-medium">
+            <span className="text-gray-600 dark:text-gray-300">Bedrooms:</span>
+            <span className="font-medium text-gray-900 dark:text-white">
               {apartment.bedroomCount} bedroom
               {apartment.bedroomCount !== 1 ? "s" : ""}
             </span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">Bathrooms:</span>
-            <span className="font-medium">{apartment.bathroomCount}</span>
+            <span className="text-gray-600 dark:text-gray-300">Bathrooms:</span>
+            <span className="font-medium text-gray-900 dark:text-white">{apartment.bathroomCount}</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">Area:</span>
-            <span className="font-medium">{apartment.area} sq ft</span>
+            <span className="text-gray-600 dark:text-gray-300">Area:</span>
+            <span className="font-medium text-gray-900 dark:text-white">{apartment.area} sq ft</span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">Rent:</span>
-            <span className="font-medium text-green-600">
+            <span className="text-gray-600 dark:text-gray-300">Rent:</span>
+            <span className="font-medium text-green-600 dark:text-green-400">
               ₹{apartment.rentAmount.toLocaleString()}/month
             </span>
           </div>
@@ -270,11 +270,11 @@ function ApartmentCard({
 
         {/* Tenant Information */}
         {apartment.currentTenant && (
-          <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <UsersIcon className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-900">
+                <UsersIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-medium text-blue-900 dark:text-blue-300">
                   {apartment.currentTenant.personalInfo?.fullName}
                 </span>
               </div>
@@ -282,13 +282,13 @@ function ApartmentCard({
                 size="sm"
                 variant="outline"
                 onClick={onViewTenant}
-                className="text-xs"
+                className="text-xs border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 View Details
               </Button>
             </div>
             {apartment.currentTenant.contactInfo?.phone && (
-              <p className="text-xs text-blue-700 mt-1">
+              <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">
                 {apartment.currentTenant.contactInfo.phone}
               </p>
             )}
@@ -299,22 +299,22 @@ function ApartmentCard({
         <div className="mb-4">
           <div className="flex flex-wrap gap-1">
             {apartment.specifications.furnished && (
-              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
+              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                 Furnished
               </span>
             )}
             {apartment.specifications.parking && (
-              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-green-100 text-green-800">
+              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                 Parking
               </span>
             )}
             {apartment.specifications.balcony && (
-              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-purple-100 text-purple-800">
+              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
                 Balcony
               </span>
             )}
             {apartment.specifications.airConditioning && (
-              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-cyan-100 text-cyan-800">
+              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-300">
                 AC
               </span>
             )}
@@ -322,12 +322,12 @@ function ApartmentCard({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+        <div className="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700">
           <Button
             size="sm"
             variant="outline"
             onClick={onView}
-            className="flex-1 mr-2"
+            className="flex-1 mr-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             View Details
           </Button>
@@ -336,7 +336,7 @@ function ApartmentCard({
               size="sm"
               variant="outline"
               onClick={onEdit}
-              className="p-2"
+              className="p-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               title="Edit Apartment"
             >
               <PencilIcon className="h-4 w-4" />
@@ -345,7 +345,7 @@ function ApartmentCard({
               size="sm"
               variant="outline"
               onClick={onDelete}
-              className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="p-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 border-gray-300 dark:border-gray-600"
               title="Delete Apartment"
             >
               <TrashIcon className="h-4 w-4" />

@@ -44,7 +44,7 @@ export const InsuranceManagement: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
       {viewMode === "overview" && (
         <InsuranceOverview
           onSelectType={handleSelectType}
@@ -68,6 +68,6 @@ export const InsuranceManagement: React.FC = () => {
         onSave={handleFormSave}
         defaultType={selectedType || undefined}
       />
-    </>
+    </div>
   );
 };

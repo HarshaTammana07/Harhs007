@@ -152,9 +152,9 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           {payment ? "Edit Rent Payment" : "Record Rent Payment"}
         </h2>
       </div>
@@ -163,12 +163,13 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Tenant Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Tenant *
             </label>
             <Select
               {...register("tenantId", { required: "Tenant is required" })}
               disabled={!!tenantId}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
             >
               <option value="">Select Tenant</option>
               {tenants.map((tenant) => (
@@ -178,7 +179,7 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
               ))}
             </Select>
             {errors.tenantId && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.tenantId.message}
               </p>
             )}
@@ -186,12 +187,13 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
 
           {/* Property Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Property *
             </label>
             <Select
               {...register("propertyId", { required: "Property is required" })}
               disabled={!!propertyId}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
             >
               <option value="">Select Property</option>
               {properties.map((property) => (
@@ -201,7 +203,7 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
               ))}
             </Select>
             {errors.propertyId && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.propertyId.message}
               </p>
             )}
@@ -209,7 +211,7 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
 
           {/* Rent Amount */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Rent Amount *
             </label>
             <Input
@@ -219,9 +221,10 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
                 required: "Amount is required",
                 min: { value: 0.01, message: "Amount must be positive" },
               })}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             {errors.amount && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.amount.message}
               </p>
             )}
@@ -229,15 +232,16 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
 
           {/* Due Date */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Due Date *
             </label>
             <Input
               type="date"
               {...register("dueDate", { required: "Due date is required" })}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             {errors.dueDate && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.dueDate.message}
               </p>
             )}
@@ -245,17 +249,17 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
 
           {/* Payment Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Status *
             </label>
-            <Select {...register("status", { required: "Status is required" })}>
+            <Select {...register("status", { required: "Status is required" })} className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white">
               <option value="pending">Pending</option>
               <option value="paid">Paid</option>
               <option value="overdue">Overdue</option>
               <option value="partial">Partial</option>
             </Select>
             {errors.status && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.status.message}
               </p>
             )}
@@ -263,13 +267,14 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
 
           {/* Payment Method */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Payment Method *
             </label>
             <Select
               {...register("paymentMethod", {
                 required: "Payment method is required",
               })}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
             >
               <option value="cash">Cash</option>
               <option value="bank_transfer">Bank Transfer</option>
@@ -278,7 +283,7 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
               <option value="card">Card</option>
             </Select>
             {errors.paymentMethod && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.paymentMethod.message}
               </p>
             )}
@@ -287,28 +292,33 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
           {/* Paid Date (only if status is paid) */}
           {watchStatus === "paid" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Paid Date
               </label>
-              <Input type="date" {...register("paidDate")} />
+              <Input 
+                type="date" 
+                {...register("paidDate")} 
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              />
             </div>
           )}
 
           {/* Transaction ID */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Transaction ID
             </label>
             <Input
               type="text"
               placeholder="Enter transaction ID"
               {...register("transactionId")}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
           {/* Late Fee */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Late Fee
             </label>
             <Input
@@ -318,9 +328,10 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
               {...register("lateFee", {
                 min: { value: 0, message: "Late fee cannot be negative" },
               })}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             {errors.lateFee && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.lateFee.message}
               </p>
             )}
@@ -328,7 +339,7 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
 
           {/* Discount */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Discount
             </label>
             <Input
@@ -338,9 +349,10 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
               {...register("discount", {
                 min: { value: 0, message: "Discount cannot be negative" },
               })}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             {errors.discount && (
-              <p className="mt-1 text-sm text-red-600">
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                 {errors.discount.message}
               </p>
             )}
@@ -348,7 +360,7 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
 
           {/* Actual Amount Paid (calculated) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Actual Amount Paid
             </label>
             <Input
@@ -356,27 +368,27 @@ export const RentPaymentForm: React.FC<RentPaymentFormProps> = ({
               step="0.01"
               {...register("actualAmountPaid")}
               readOnly
-              className="bg-gray-50"
+              className="bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
         </div>
 
         {/* Notes */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Notes
           </label>
           <textarea
             {...register("notes")}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             placeholder="Add any additional notes..."
           />
         </div>
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-4 pt-6 border-t">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <Button type="button" variant="outline" onClick={onCancel} className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
             Cancel
           </Button>
           <Button type="submit" disabled={loading}>

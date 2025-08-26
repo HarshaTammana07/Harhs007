@@ -102,58 +102,38 @@ export function DocumentFilters({
   }, []);
 
   const onSubmit = (data: DocumentFiltersFormData) => {
-    const newCriteria: DocumentSearchCriteria = {
-      query: criteria.query, // Preserve existing query
-    };
+    const newCriteria: DocumentSearchCriteria = {};
 
-    // Add filters only if they have values
-    if (data.category) {
-      newCriteria.category = data.category as DocumentCategory;
-    }
-
-    if (data.familyMemberId) {
-      newCriteria.familyMemberId = data.familyMemberId;
-    }
-
-    if (data.propertyId) {
-      newCriteria.propertyId = data.propertyId;
-    }
-
-    if (data.insurancePolicyId) {
-      newCriteria.insurancePolicyId = data.insurancePolicyId;
-    }
-
+    if (data.category) newCriteria.category = data.category as DocumentCategory;
+    if (data.familyMemberId) newCriteria.familyMemberId = data.familyMemberId;
+    if (data.propertyId) newCriteria.propertyId = data.propertyId;
+    if (data.insurancePolicyId) newCriteria.insurancePolicyId = data.insurancePolicyId;
     if (data.tags) {
-      const tags = data.tags
+      newCriteria.tags = data.tags
         .split(",")
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0);
-      if (tags.length > 0) {
-        newCriteria.tags = tags;
-      }
     }
-
-    if (data.isExpiring) {
+    if (data.isExpiring !== "") {
       newCriteria.isExpiring = data.isExpiring === "true";
     }
-
-    // Date ranges
     if (data.expiryDateStart || data.expiryDateEnd) {
-      newCriteria.expiryDateRange = {
-        start: data.expiryDateStart
-          ? new Date(data.expiryDateStart)
-          : undefined,
-        end: data.expiryDateEnd ? new Date(data.expiryDateEnd) : undefined,
-      };
+      newCriteria.expiryDateRange = {};
+      if (data.expiryDateStart) {
+        newCriteria.expiryDateRange.start = new Date(data.expiryDateStart);
+      }
+      if (data.expiryDateEnd) {
+        newCriteria.expiryDateRange.end = new Date(data.expiryDateEnd);
+      }
     }
-
     if (data.issuedDateStart || data.issuedDateEnd) {
-      newCriteria.issuedDateRange = {
-        start: data.issuedDateStart
-          ? new Date(data.issuedDateStart)
-          : undefined,
-        end: data.issuedDateEnd ? new Date(data.issuedDateEnd) : undefined,
-      };
+      newCriteria.issuedDateRange = {};
+      if (data.issuedDateStart) {
+        newCriteria.issuedDateRange.start = new Date(data.issuedDateStart);
+      }
+      if (data.issuedDateEnd) {
+        newCriteria.issuedDateRange.end = new Date(data.issuedDateEnd);
+      }
     }
 
     onApply(newCriteria);
@@ -174,20 +154,22 @@ export function DocumentFilters({
     });
   };
 
-  const categories = documentService.getAllCategories();
-
-  if (loadingData) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600">Loading filter options...</span>
-      </div>
-    );
-  }
+  const categories = [
+    { value: "aadhar", label: "Aadhar Card" },
+    { value: "pan", label: "PAN Card" },
+    { value: "driving_license", label: "Driving License" },
+    { value: "passport", label: "Passport" },
+    { value: "house_documents", label: "House Documents" },
+    { value: "business_documents", label: "Business Documents" },
+    { value: "insurance_documents", label: "Insurance Documents" },
+    { value: "bank_documents", label: "Bank Documents" },
+    { value: "educational_certificates", label: "Educational Certificates" },
+    { value: "medical_records", label: "Medical Records" },
+  ];
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* Category and Associations */}
+      {/* Basic Filters */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Select
@@ -195,6 +177,7 @@ export function DocumentFilters({
             {...register("category")}
             placeholder="All categories"
             options={categories}
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           />
         </div>
 
@@ -203,12 +186,13 @@ export function DocumentFilters({
             label="Family Member"
             {...register("familyMemberId")}
             placeholder="All family members"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           >
             {familyMembers.map((member) => (
               <option
                 key={member.id}
                 value={member.id}
-                className="text-gray-900 bg-white"
+                className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
               >
                 {member.fullName} ({member.nickname})
               </option>
@@ -223,12 +207,13 @@ export function DocumentFilters({
             label="Property"
             {...register("propertyId")}
             placeholder="All properties"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           >
             {(properties as { id: string; address: string }[]).map((property) => (
               <option
                 key={property.id}
                 value={property.id}
-                className="text-gray-900 bg-white"
+                className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
               >
                 {property.address}
               </option>
@@ -241,12 +226,13 @@ export function DocumentFilters({
             label="Insurance Policy"
             {...register("insurancePolicyId")}
             placeholder="All insurance policies"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           >
             {insurancePolicies.map((policy) => (
               <option
                 key={policy.id}
                 value={policy.id}
-                className="text-gray-900 bg-white"
+                className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
               >
                 {policy.policyNumber} - {policy.type.toUpperCase()} ({policy.provider})
               </option>
@@ -258,16 +244,17 @@ export function DocumentFilters({
       {/* Tags and Expiry Status */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Tags
           </label>
           <Input
             {...register("tags")}
             placeholder="Enter tags separated by commas"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
           {availableTags.length > 0 && (
             <div className="mt-2">
-              <p className="text-xs text-gray-500 mb-1">Available tags:</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Available tags:</p>
               <div className="flex flex-wrap gap-1">
                 {availableTags.slice(0, 10).map((tag, index) => (
                   <button
@@ -283,13 +270,13 @@ export function DocumentFilters({
                         reset({ ...watch(), tags: newTags });
                       }
                     }}
-                    className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                    className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
                   >
                     {tag}
                   </button>
                 ))}
                 {availableTags.length > 10 && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     +{availableTags.length - 10} more
                   </span>
                 )}
@@ -303,11 +290,12 @@ export function DocumentFilters({
             label="Expiry Status"
             {...register("isExpiring")}
             placeholder="All documents"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           >
-            <option value="true" className="text-gray-900 bg-white">
+            <option value="true" className="text-gray-900 dark:text-white bg-white dark:bg-gray-800">
               Expiring or expired documents
             </option>
-            <option value="false" className="text-gray-900 bg-white">
+            <option value="false" className="text-gray-900 dark:text-white bg-white dark:bg-gray-800">
               Valid documents
             </option>
           </Select>
@@ -317,46 +305,72 @@ export function DocumentFilters({
       {/* Date Ranges */}
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Expiry Date Range
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">From</label>
-              <Input type="date" {...register("expiryDateStart")} />
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">From</label>
+              <Input 
+                type="date" 
+                {...register("expiryDateStart")} 
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">To</label>
-              <Input type="date" {...register("expiryDateEnd")} />
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">To</label>
+              <Input 
+                type="date" 
+                {...register("expiryDateEnd")} 
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
             </div>
           </div>
         </div>
 
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Issued Date Range
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">From</label>
-              <Input type="date" {...register("issuedDateStart")} />
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">From</label>
+              <Input 
+                type="date" 
+                {...register("issuedDateStart")} 
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">To</label>
-              <Input type="date" {...register("issuedDateEnd")} />
+              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">To</label>
+              <Input 
+                type="date" 
+                {...register("issuedDateEnd")} 
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex justify-between pt-6 border-t">
-        <Button type="button" variant="outline" onClick={handleClear}>
+      <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={handleClear}
+          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+        >
           Clear All
         </Button>
 
         <div className="flex gap-3">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+          >
             Cancel
           </Button>
           <Button type="submit">Apply Filters</Button>

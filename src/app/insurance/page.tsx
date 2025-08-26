@@ -6,7 +6,9 @@ export default function InsurancePage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <InsuranceManagement />
+        <div className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <InsuranceManagement />
+        </div>
       </AppLayout>
     </ProtectedRoute>
   );

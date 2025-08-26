@@ -170,14 +170,14 @@ export const DocumentManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Document Management
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
             Manage family and business documents with secure storage
           </p>
         </div>
@@ -185,7 +185,7 @@ export const DocumentManagement: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => setShowStatsModal(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             <ChartBarIcon className="h-4 w-4" />
             Stats
@@ -193,12 +193,12 @@ export const DocumentManagement: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => setShowFiltersModal(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
           >
             <FunnelIcon className="h-4 w-4" />
             Filters
             {hasActiveFilters && (
-              <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5">
+              <span className="bg-blue-500 dark:bg-blue-600 text-white text-xs rounded-full px-2 py-0.5">
                 Active
               </span>
             )}
@@ -214,7 +214,7 @@ export const DocumentManagement: React.FC = () => {
       </div>
 
       {/* Search Bar */}
-      <Card className="p-4">
+      <Card className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <Input
@@ -222,14 +222,14 @@ export const DocumentManagement: React.FC = () => {
               placeholder="Search documents by title, filename, document number, or issuer..."
               value={searchCriteria.query || ""}
               onChange={(e) => handleSearch(e.target.value)}
-              className="w-full"
+              className="w-full bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
           {hasActiveFilters && (
             <Button
               variant="outline"
               onClick={clearFilters}
-              className="whitespace-nowrap"
+              className="whitespace-nowrap border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Clear Filters
             </Button>
