@@ -912,8 +912,12 @@ export function DashboardContent() {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Rent Collection Trend Chart */}
-          <Card>
-            <CardHeader>
+          <Card className="relative">
+            {/* Dev badge */}
+            <div className="absolute top-2 right-2 z-10 px-2 py-1 rounded-md text-[10px] font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700">
+              Development in progress
+            </div>
+            <CardHeader className="opacity-60">
               <div className="flex items-center space-x-2">
                 <div className="p-2 bg-green-100 rounded-lg">
                   <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -923,7 +927,7 @@ export function DashboardContent() {
                 <CardTitle>Monthly Rent Collection Trend</CardTitle>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="opacity-60">
               <div className="space-y-4">
                 {/* Chart Data Display */}
                 <div className="space-y-3">
@@ -969,8 +973,12 @@ export function DashboardContent() {
           </Card>
 
           {/* Occupancy Rate Trend Chart */}
-          <Card>
-            <CardHeader>
+          <Card className="relative">
+            {/* Dev badge */}
+            <div className="absolute top-2 right-2 z-10 px-2 py-1 rounded-md text-[10px] font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700">
+              Development in progress
+            </div>
+            <CardHeader className="opacity-60">
               <div className="flex items-center space-x-2">
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <svg className="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -980,7 +988,7 @@ export function DashboardContent() {
                 <CardTitle>Occupancy Rate Trends</CardTitle>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="opacity-60">
               <div className="space-y-4">
                 {/* Chart Data Display */}
                 <div className="space-y-3">

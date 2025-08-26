@@ -351,34 +351,34 @@ export default function ApartmentDetailPage() {
                       <p className="text-lg font-semibold">{apartment.floor}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Area
                       </label>
-                      <p className="text-lg font-semibold">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {apartment.area} sq ft
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Bedrooms
                       </label>
-                      <p className="text-lg font-semibold">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {apartment.bedroomCount}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Bathrooms
                       </label>
-                      <p className="text-lg font-semibold">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {apartment.bathroomCount}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Monthly Rent
                       </label>
-                      <p className="text-lg font-semibold text-green-600">
+                      <p className="text-lg font-semibold text-green-600 dark:text-green-400">
                         ₹{apartment.rentAmount?.toLocaleString() || "0"}
                       </p>
                     </div>
@@ -435,7 +435,7 @@ export default function ApartmentDetailPage() {
                           }`}
                         />
                         <span
-                          className={`text-sm ${spec.value ? "text-gray-900" : "text-gray-500"}`}
+                          className={`text-sm ${spec.value ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}`}
                         >
                           {spec.label}
                         </span>
@@ -443,18 +443,18 @@ export default function ApartmentDetailPage() {
                     ))}
                   </div>
 
-                  <div className="pt-4 border-t border-gray-200">
-                    <label className="text-sm font-medium text-gray-600">
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Water Supply
                     </label>
-                    <p className="text-sm text-gray-900 capitalize">
+                    <p className="text-sm text-gray-900 dark:text-white capitalize">
                       {apartment.specifications.waterSupply.replace("_", " ")}
                     </p>
                   </div>
 
                   {apartment.specifications.additionalFeatures.length > 0 && (
-                    <div className="pt-4 border-t border-gray-200">
-                      <label className="text-sm font-medium text-gray-600 mb-2 block">
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 block">
                         Additional Features
                       </label>
                       <div className="flex flex-wrap gap-2">
@@ -462,7 +462,7 @@ export default function ApartmentDetailPage() {
                           (feature) => (
                             <span
                               key={feature}
-                              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
                             >
                               {feature}
                             </span>
@@ -495,10 +495,10 @@ export default function ApartmentDetailPage() {
                   {apartment.currentTenant ? (
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-semibold text-gray-900">
+                        <h4 className="font-semibold text-gray-900 dark:text-white">
                           {apartment.currentTenant.personalInfo?.fullName}
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           {apartment.currentTenant.personalInfo?.occupation}
                         </p>
                       </div>
@@ -508,7 +508,7 @@ export default function ApartmentDetailPage() {
                           {apartment.currentTenant.contactInfo.phone && (
                             <div className="flex items-center space-x-2">
                               <PhoneIcon className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-900">
+                              <span className="text-sm text-gray-900 dark:text-white">
                                 {apartment.currentTenant.contactInfo.phone}
                               </span>
                             </div>
@@ -516,7 +516,7 @@ export default function ApartmentDetailPage() {
                           {apartment.currentTenant.contactInfo.email && (
                             <div className="flex items-center space-x-2">
                               <EnvelopeIcon className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-900">
+                              <span className="text-sm text-gray-900 dark:text-white">
                                 {apartment.currentTenant.contactInfo.email}
                               </span>
                             </div>
@@ -525,43 +525,43 @@ export default function ApartmentDetailPage() {
                       )}
 
                       {apartment.currentTenant.rentalAgreement && (
-                        <div className="pt-4 border-t border-gray-200">
+                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Monthly Rent
                               </span>
-                              <span className="text-sm font-medium text-green-600">
+                              <span className="text-sm font-medium text-green-600 dark:text-green-400">
                                 ₹
                                 {apartment.currentTenant.rentalAgreement.rentAmount?.toLocaleString() ||
                                   "0"}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Security Deposit
                               </span>
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
                                 ₹
                                 {apartment.currentTenant.rentalAgreement.securityDeposit?.toLocaleString() ||
                                   "0"}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Lease Start
                               </span>
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
                                 {new Date(
                                   apartment.currentTenant.rentalAgreement.startDate
                                 ).toLocaleDateString()}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Lease End
                               </span>
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
                                 {new Date(
                                   apartment.currentTenant.rentalAgreement.endDate
                                 ).toLocaleDateString()}
@@ -571,7 +571,7 @@ export default function ApartmentDetailPage() {
                         </div>
                       )}
 
-                      <div className="pt-4 border-t border-gray-200">
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                         <Button
                           size="sm"
                           variant="outline"
@@ -584,11 +584,11 @@ export default function ApartmentDetailPage() {
                     </div>
                   ) : (
                     <div className="text-center py-6">
-                      <UsersIcon className="mx-auto h-8 w-8 text-gray-400" />
-                      <p className="mt-2 text-sm text-gray-600">
+                      <UsersIcon className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" />
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                         No tenant assigned
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         This apartment is currently vacant
                       </p>
                     </div>
@@ -606,29 +606,29 @@ export default function ApartmentDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Monthly Rent</span>
-                    <span className="text-sm font-medium text-green-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">Monthly Rent</span>
+                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
                       ₹{apartment.rentAmount?.toLocaleString() || "0"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
                       Security Deposit
                     </span>
-                    <span className="text-sm font-medium">
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                       ₹{apartment.securityDeposit?.toLocaleString() || "0"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Annual Rent</span>
-                    <span className="text-sm font-medium">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">Annual Rent</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
                       ₹{((apartment.rentAmount || 0) * 12).toLocaleString()}
                     </span>
                   </div>
                   {apartment.rentHistory &&
                     apartment.rentHistory.length > 0 && (
-                      <div className="pt-3 border-t border-gray-200">
-                        <p className="text-xs text-gray-500">
+                      <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           {apartment.rentHistory.length} payment
                           {apartment.rentHistory.length !== 1 ? "s" : ""}{" "}
                           recorded

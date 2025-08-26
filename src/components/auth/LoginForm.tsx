@@ -8,9 +8,6 @@ import {
   Button,
   Input,
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui";
 
 export function LoginForm() {
@@ -47,7 +44,7 @@ export function LoginForm() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative"
+      className="min-h-screen flex items-center justify-center py-6 lg:py-12 px-4 sm:px-6 lg:px-8 relative"
       style={{
         backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')`,
         backgroundSize: "cover",
@@ -60,55 +57,54 @@ export function LoginForm() {
 
       <div className="max-w-4xl w-full relative z-10">
         <Card className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm shadow-2xl border-0 overflow-hidden">
-          <div className="flex">
+          <div className="flex flex-col lg:flex-row">
             {/* Left side - Logo and Branding */}
-            <div className="w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 p-8 flex flex-col justify-center items-center text-white">
-              <div className="text-center mb-8">
-                <div className="bg-white/20 rounded-2xl p-6 mb-6 backdrop-blur-sm">
-                  <div className="text-4xl font-black mb-2">SFS</div>
-                  <div className="text-lg font-medium opacity-90">STORES</div>
-                </div>
+            <div className="w-full lg:w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 p-6 lg:p-8 flex flex-col justify-center items-center text-white">
+                              <div className="text-center mb-6 lg:mb-8">
+                  <div className="bg-white/20 rounded-2xl p-4 lg:p-6 mb-4 lg:mb-6 backdrop-blur-sm">
+                    <div className="text-3xl lg:text-4xl font-black mb-2">SFS</div>
+                    <div className="text-base lg:text-lg font-medium opacity-90">STORES</div>
+                  </div>
 
-                <h1 className="text-2xl font-bold mb-3">
-                  Satyanarayana Fancy Stores
-                </h1>
-                <h2 className="text-lg font-semibold mb-4 opacity-90">
-                  Family Business Management
-                </h2>
-                <p className="text-sm opacity-80 leading-relaxed">
-                  Streamline your family business operations with our
-                  comprehensive management system. Track properties, manage
-                  tenants, handle insurance, and organize documents all in one
-                  place.
-                </p>
-              </div>
+                  <h1 className="text-xl lg:text-2xl font-bold mb-2 lg:mb-3">
+                    Satyanarayana Fancy Stores
+                  </h1>
+                  <h2 className="text-base lg:text-lg font-semibold mb-3 lg:mb-4 opacity-90">
+                    Enterprise Asset Management Platform
+                  </h2>
+                  <p className="text-xs lg:text-sm opacity-80 leading-relaxed">
+                    Comprehensive real estate portfolio management solution for
+                    property tracking, tenant administration, financial oversight,
+                    and regulatory compliance in one integrated platform.
+                  </p>
+                </div>
 
               <div className="text-center text-xs opacity-70">
                 <p>© 2024 Satyanarayana Fancy Stores</p>
-                <p>Family Business Management System</p>
+                <p>Enterprise Asset Management System</p>
               </div>
             </div>
 
             {/* Right side - Login Form */}
-            <div className="w-1/2 p-8">
+            <div className="w-full lg:w-1/2 p-6 lg:p-8">
               <div className="max-w-sm mx-auto">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+                <div className="text-center mb-6 lg:mb-8">
+                  <h3 className="text-xl lg:text-2xl font-bold text-gray-800 dark:text-white mb-2">
                     Welcome Back
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-300">
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-300">
                     Sign in to access your dashboard
                   </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6">
                   {error && (
                     <div className="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-md text-sm">
                       {error}
                     </div>
                   )}
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 lg:space-y-4">
                     <Input
                       id="email"
                       label="Email Address"
@@ -186,15 +182,25 @@ export function LoginForm() {
                   </Button>
 
                   <div className="text-center">
-                    <div className="text-sm text-gray-600 dark:text-gray-300">
-                      <p className="mb-2 font-medium">Demo Credentials:</p>
-                      <div className="text-xs space-y-1 bg-gray-50 dark:bg-gray-700 p-3 rounded-md">
-                        <p>
-                          <strong>Admin:</strong> harsha@family.com / harsha123
-                        </p>
-                        <p>
-                          <strong>Member:</strong> manu@family.com / manu123
-                        </p>
+                    <div className="text-xs lg:text-sm text-gray-600 dark:text-gray-300">
+                      <p className="mb-2 font-medium">System Features:</p>
+                      <div className="text-xs space-y-1 bg-gray-50 dark:bg-gray-700 p-2 lg:p-3 rounded-md">
+                                               <p className="flex items-center justify-center space-x-1">
+                         <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                         <span>Portfolio Management</span>
+                       </p>
+                       <p className="flex items-center justify-center space-x-1">
+                         <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                         <span>Financial Operations</span>
+                       </p>
+                       <p className="flex items-center justify-center space-x-1">
+                         <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
+                         <span>Compliance & Documentation</span>
+                       </p>
+                       <p className="flex items-center justify-center space-x-1">
+                         <span className="w-1.5 h-1.5 bg-orange-500 rounded-full"></span>
+                         <span>Business Intelligence</span>
+                       </p>
                       </div>
                     </div>
                   </div>
