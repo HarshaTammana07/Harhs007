@@ -66,13 +66,13 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
   const getStatusColor = (status: InsurancePolicy["status"]): string => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300";
       case "expired":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300";
       case "lapsed":
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300";
     }
   };
 
@@ -92,12 +92,12 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
     if (days < 0) {
       return {
         text: `Expired ${Math.abs(days)} days ago`,
-        color: "text-red-600",
+        color: "text-red-600 dark:text-red-400",
       };
     } else if (days <= 30) {
-      return { text: `Expires in ${days} days`, color: "text-yellow-600" };
+      return { text: `Expires in ${days} days`, color: "text-yellow-600 dark:text-yellow-400" };
     } else {
-      return { text: `${days} days to renewal`, color: "text-green-600" };
+      return { text: `${days} days to renewal`, color: "text-green-600 dark:text-green-400" };
     }
   };
 
@@ -157,18 +157,18 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={onBack}>
+          <Button variant="outline" onClick={onBack} className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
             ← Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {getTypeTitle(type)}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
               Manage your {getTypeTitle(type).toLowerCase()} policies
             </p>
           </div>
@@ -186,16 +186,16 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
             placeholder="Search policies by number, provider, or family member..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
         </div>
       </div>
 
       {/* Policies List */}
       {filteredPolicies.length === 0 ? (
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <CardContent className="text-center py-12">
-            <div className="text-gray-500">
+            <div className="text-gray-500 dark:text-gray-400">
               {searchTerm
                 ? "No policies found matching your search."
                 : `No ${getTypeTitle(type).toLowerCase()} policies found.`}
@@ -217,15 +217,15 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
             return (
               <Card
                 key={policy.id}
-                className="hover:shadow-lg transition-shadow"
+                className="hover:shadow-lg dark:hover:shadow-xl transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg">
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">
                         {policy.policyNumber}
                       </CardTitle>
-                      <p className="text-gray-600 text-sm mt-1">
+                      <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
                         {policy.provider}
                       </p>
                     </div>
@@ -241,25 +241,25 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-gray-500">Family Member:</span>
-                      <div className="font-medium">
+                      <span className="text-gray-500 dark:text-gray-400">Family Member:</span>
+                      <div className="font-medium text-gray-900 dark:text-white">
                         {getFamilyMemberName(policy.familyMemberId)}
                       </div>
                     </div>
                     <div>
-                      <span className="text-gray-500">Premium:</span>
-                      <div className="font-medium">
+                      <span className="text-gray-500 dark:text-gray-400">Premium:</span>
+                      <div className="font-medium text-gray-900 dark:text-white">
                         ₹{policy.premiumAmount.toLocaleString()}
                       </div>
                     </div>
                     <div>
-                      <span className="text-gray-500">Coverage:</span>
-                      <div className="font-medium">
+                      <span className="text-gray-500 dark:text-gray-400">Coverage:</span>
+                      <div className="font-medium text-gray-900 dark:text-white">
                         ₹{policy.coverageAmount.toLocaleString()}
                       </div>
                     </div>
                     <div>
-                      <span className="text-gray-500">Renewal:</span>
+                      <span className="text-gray-500 dark:text-gray-400">Renewal:</span>
                       <div className={`font-medium ${renewalStatus.color}`}>
                         {renewalStatus.text}
                       </div>
@@ -271,12 +271,12 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
                     policyNumber={policy.policyNumber}
                   />
 
-                  <div className="flex space-x-2 pt-2 border-t">
+                  <div className="flex space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleEditPolicy(policy)}
-                      className="flex-1"
+                      className="flex-1 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Edit
                     </Button>
@@ -284,7 +284,7 @@ export const InsurancePolicyList: React.FC<InsurancePolicyListProps> = ({
                       variant="outline"
                       size="sm"
                       onClick={() => handleDeletePolicy(policy)}
-                      className="flex-1 text-red-600 hover:text-red-700"
+                      className="flex-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border-gray-300 dark:border-gray-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                     >
                       Delete
                     </Button>

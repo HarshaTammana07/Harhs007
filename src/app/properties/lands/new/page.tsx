@@ -13,19 +13,21 @@ export default function NewLandPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
-          <Breadcrumb items={breadcrumbItems} />
+        <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <div className="p-6">
+            <Breadcrumb items={breadcrumbItems} />
 
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Add New Land Property
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Register a new land property with details and lease information.
-            </p>
+            <div className="mt-6">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Add New Land Property
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-1">
+                Register a new land property with details and lease information.
+              </p>
+            </div>
+
+            <LandForm />
           </div>
-
-          <LandForm />
         </div>
       </AppLayout>
     </ProtectedRoute>

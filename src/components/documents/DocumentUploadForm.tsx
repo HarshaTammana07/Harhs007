@@ -98,8 +98,8 @@ export function DocumentUploadForm({
     // Auto-generate title from filename if not set
     const currentTitle = watch("title");
     if (!currentTitle && file && file.name) {
-      const titleFromFile = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
-      setValue("title", titleFromFile);
+      const fileName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+      setValue("title", fileName);
     }
   };
 
@@ -110,41 +110,45 @@ export function DocumentUploadForm({
     }
 
     setIsUploading(true);
-
     try {
-      // Parse tags
-      const tags = data.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0);
+      // Convert file to base64
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          // Remove the data URL prefix to get just the base64 data
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(selectedFile);
+      });
 
-      // Create document metadata
-      const metadata = {
+      const documentData = {
         title: data.title,
         category: data.category,
-        familyMemberId: data.familyMemberId || undefined,
-        propertyId: data.propertyId || undefined,
-        propertyType: data.propertyId ? 'building' : undefined, // TODO: Make this dynamic when properties are migrated
-        insurancePolicyId: data.insurancePolicyId || undefined,
-        expiryDate: data.expiryDate ? new Date(data.expiryDate) : undefined,
-        issuedDate: data.issuedDate ? new Date(data.issuedDate) : undefined,
-        issuer: data.issuer || undefined,
-        documentNumber: data.documentNumber || undefined,
-        tags,
+        fileName: selectedFile.name,
+        fileSize: selectedFile.size,
+        mimeType: selectedFile.type,
+        fileData: base64Data,
+        familyMemberId: data.familyMemberId || null,
+        propertyId: data.propertyId || null,
+        insurancePolicyId: data.insurancePolicyId || null,
+        expiryDate: data.expiryDate ? new Date(data.expiryDate) : null,
+        issuedDate: data.issuedDate ? new Date(data.issuedDate) : null,
+        issuer: data.issuer || null,
+        documentNumber: data.documentNumber || null,
+        tags: data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
       };
 
-      // Create document from file using API
-      await ApiService.createDocumentFromFile(selectedFile, metadata);
-
-      toast.success("Document uploaded successfully!");
+      await ApiService.createDocument(documentData);
+      toast.success("Document uploaded successfully");
       reset();
       setSelectedFile(null);
       onSuccess();
     } catch (error) {
       console.error("Error uploading document:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to upload document"
-      );
+      toast.error("Failed to upload document");
     } finally {
       setIsUploading(false);
     }
@@ -163,10 +167,6 @@ export function DocumentUploadForm({
     { value: "medical_records", label: "Medical Records" },
   ];
 
-  if (isUploading) {
-    return <LoadingState message="Uploading document..." />;
-  }
-
   if (loadingData) {
     return <LoadingState message="Loading form data..." />;
   }
@@ -175,28 +175,38 @@ export function DocumentUploadForm({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* File Upload */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Document File *
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Select File *
         </label>
         <SimpleFileUpload
           onFileSelect={handleFileSelect}
           selectedFile={selectedFile}
-          accept="image/*,.pdf,.doc,.docx"
-          maxSizeMB={5}
+          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+          maxSize={5 * 1024 * 1024} // 5MB
         />
+        {errors.file && (
+          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+            {errors.file.message}
+          </p>
+        )}
       </div>
 
       {/* Basic Information */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Document Title *
           </label>
           <Input
             {...register("title", { required: "Title is required" })}
             placeholder="Enter document title"
-            error={errors.title?.message}
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
+          {errors.title && (
+            <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+              {errors.title.message}
+            </p>
+          )}
         </div>
 
         <div>
@@ -205,6 +215,7 @@ export function DocumentUploadForm({
             {...register("category", { required: "Category is required" })}
             error={errors.category?.message}
             options={categories}
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           />
         </div>
       </div>
@@ -216,12 +227,13 @@ export function DocumentUploadForm({
             label="Family Member"
             {...register("familyMemberId")}
             placeholder="Select family member"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           >
             {familyMembers.map((member) => (
               <option
                 key={member.id}
                 value={member.id}
-                className="text-gray-900 bg-white"
+                className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
               >
                 {member.fullName} ({member.nickname})
               </option>
@@ -234,12 +246,13 @@ export function DocumentUploadForm({
             label="Property"
             {...register("propertyId")}
             placeholder="Select property"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           >
             {properties.map((property) => (
               <option
                 key={property.id}
                 value={property.id}
-                className="text-gray-900 bg-white"
+                className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
               >
                 {property.address}
               </option>
@@ -252,12 +265,13 @@ export function DocumentUploadForm({
             label="Insurance Policy"
             {...register("insurancePolicyId")}
             placeholder="Select insurance policy"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           >
             {insurancePolicies.map((policy) => (
               <option
                 key={policy.id}
                 value={policy.id}
-                className="text-gray-900 bg-white"
+                className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
               >
                 {policy.policyNumber} - {policy.type.toUpperCase()} ({policy.provider})
               </option>
@@ -269,22 +283,24 @@ export function DocumentUploadForm({
       {/* Document Details */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Document Number
           </label>
           <Input
             {...register("documentNumber")}
             placeholder="Enter document number"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Issuer
           </label>
           <Input
             {...register("issuer")}
             placeholder="Enter issuing authority"
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
         </div>
       </div>
@@ -292,41 +308,51 @@ export function DocumentUploadForm({
       {/* Dates */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Issued Date
           </label>
-          <Input type="date" {...register("issuedDate")} />
+          <Input 
+            type="date" 
+            {...register("issuedDate")} 
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Expiry Date
           </label>
-          <Input type="date" {...register("expiryDate")} />
+          <Input 
+            type="date" 
+            {...register("expiryDate")} 
+            className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+          />
         </div>
       </div>
 
       {/* Tags */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Tags
         </label>
         <Input
           {...register("tags")}
           placeholder="Enter tags separated by commas (e.g., government, identity, important)"
+          className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
         />
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Separate multiple tags with commas
         </p>
       </div>
 
       {/* Actions */}
-      <div className="flex justify-end gap-3 pt-4 border-t">
+      <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
         <Button
           type="button"
           variant="outline"
           onClick={onCancel}
           disabled={isUploading}
+          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           Cancel
         </Button>

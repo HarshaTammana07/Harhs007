@@ -234,12 +234,12 @@ export default function ApartmentDetailPage() {
     return (
       <ProtectedRoute>
         <AppLayout>
-          <div className="text-center py-12">
-            <HomeIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+            <HomeIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
               Apartment not found
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               The apartment you're looking for doesn&apos;t exist.
             </p>
             <div className="mt-6">
@@ -270,30 +270,31 @@ export default function ApartmentDetailPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
-          <Breadcrumb items={breadcrumbItems} />
+        <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <div className="p-6">
+            <Breadcrumb items={breadcrumbItems} />
 
-          {/* Header */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            {/* Header */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mt-6">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                   Apartment D-No: {apartment.doorNumber}
                 </h1>
-                <p className="text-gray-600 mt-1">
+                <p className="text-gray-600 dark:text-gray-300 mt-1">
                   {building.name} • Floor {apartment.floor}
                 </p>
                 <div className="flex items-center space-x-4 mt-2">
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                       apartment.isOccupied
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
                     }`}
                   >
                     {apartment.isOccupied ? "Occupied" : "Vacant"}
                   </span>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 dark:text-gray-300">
                     {apartment.bedroomCount} bedroom
                     {apartment.bedroomCount !== 1 ? "s" : ""} •{" "}
                     {apartment.bathroomCount} bathroom
@@ -326,9 +327,9 @@ export default function ApartmentDetailPage() {
             {/* Apartment Details */}
             <div className="lg:col-span-2 space-y-6">
               {/* Basic Information */}
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-gray-900 dark:text-white">
                     <HomeIcon className="h-5 w-5 mr-2" />
                     Apartment Details
                   </CardTitle>
@@ -336,15 +337,15 @@ export default function ApartmentDetailPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Door Number
                       </label>
-                      <p className="text-lg font-semibold">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {apartment.doorNumber}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Floor
                       </label>
                       <p className="text-lg font-semibold">{apartment.floor}</p>
@@ -679,6 +680,7 @@ export default function ApartmentDetailPage() {
               title="Add Tenant to Apartment"
             />
           )}
+          </div>
         </div>
       </AppLayout>
     </ProtectedRoute>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Document, DocumentCategory } from "@/types";
-// Removed documentService import as we're using API now
+import { fileService } from "@/services/FileService";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import {
@@ -92,9 +92,9 @@ export function DocumentList({
 
   const getFileIcon = (mimeType: string) => {
     if (mimeType.startsWith("image/")) {
-      return <PhotoIcon className="h-5 w-5 text-blue-500" />;
+      return <PhotoIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />;
     }
-    return <DocumentIcon className="h-5 w-5 text-gray-500" />;
+    return <DocumentIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />;
   };
 
   const getExpiryStatus = (document: Document) => {
@@ -110,37 +110,31 @@ export function DocumentList({
       return {
         status: "expired",
         message: `Expired ${Math.abs(daysUntilExpiry)} days ago`,
-        icon: <ExclamationTriangleIcon className="h-4 w-4 text-red-500" />,
-        className: "text-red-600 bg-red-50",
+        icon: <ExclamationTriangleIcon className="h-4 w-4 text-red-500 dark:text-red-400" />,
+        className: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20",
       };
     } else if (daysUntilExpiry <= 30) {
       return {
         status: "expiring",
         message: `Expires in ${daysUntilExpiry} days`,
-        icon: <ClockIcon className="h-4 w-4 text-yellow-500" />,
-        className: "text-yellow-600 bg-yellow-50",
+        icon: <ClockIcon className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />,
+        className: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20",
       };
     }
 
     return null;
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
+
 
   if (documents.length === 0) {
     return (
-      <Card className="p-8 text-center">
-        <DocumentIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+      <Card className="p-8 text-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <DocumentIcon className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
           No documents found
         </h3>
-        <p className="text-gray-500">
+        <p className="text-gray-500 dark:text-gray-400">
           Upload your first document or adjust your search filters.
         </p>
       </Card>
@@ -150,15 +144,15 @@ export function DocumentList({
   return (
     <div className="space-y-4">
       {/* Sort Controls */}
-      <Card className="p-4">
+      <Card className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div className="flex flex-wrap gap-2">
-          <span className="text-sm font-medium text-gray-700">Sort by:</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</span>
           <button
             onClick={() => handleSort("title")}
             className={`text-sm px-2 py-1 rounded ${
               sortBy === "title"
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-600 hover:bg-gray-100"
+                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
             Title {sortBy === "title" && (sortOrder === "asc" ? "↑" : "↓")}
@@ -167,8 +161,8 @@ export function DocumentList({
             onClick={() => handleSort("category")}
             className={`text-sm px-2 py-1 rounded ${
               sortBy === "category"
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-600 hover:bg-gray-100"
+                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
             Category{" "}
@@ -178,8 +172,8 @@ export function DocumentList({
             onClick={() => handleSort("createdAt")}
             className={`text-sm px-2 py-1 rounded ${
               sortBy === "createdAt"
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-600 hover:bg-gray-100"
+                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
             Created{" "}
@@ -189,8 +183,8 @@ export function DocumentList({
             onClick={() => handleSort("expiryDate")}
             className={`text-sm px-2 py-1 rounded ${
               sortBy === "expiryDate"
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-600 hover:bg-gray-100"
+                ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
             Expiry{" "}
@@ -207,7 +201,7 @@ export function DocumentList({
           return (
             <Card
               key={document.id}
-              className="p-4 hover:shadow-md transition-shadow"
+              className="p-4 hover:shadow-md dark:hover:shadow-xl transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
             >
               {/* Header */}
               <div className="flex items-start justify-between mb-3">
@@ -215,12 +209,12 @@ export function DocumentList({
                   {getFileIcon(document.mimeType)}
                   <div className="min-w-0 flex-1">
                     <h3
-                      className="font-medium text-gray-900 truncate"
+                      className="font-medium text-gray-900 dark:text-white truncate"
                       title={document.title}
                     >
                       {document.title}
                     </h3>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {getCategoryDisplayName(document.category)}
                     </p>
                   </div>
@@ -233,6 +227,7 @@ export function DocumentList({
                     variant="ghost"
                     onClick={() => onView(document)}
                     title="View document"
+                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <EyeIcon className="h-4 w-4" />
                   </Button>
@@ -241,6 +236,7 @@ export function DocumentList({
                     variant="ghost"
                     onClick={() => onDownload(document)}
                     title="Download document"
+                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <ArrowDownTrayIcon className="h-4 w-4" />
                   </Button>
@@ -249,7 +245,7 @@ export function DocumentList({
                     variant="ghost"
                     onClick={() => onDelete(document.id)}
                     title="Delete document"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
                   >
                     <TrashIcon className="h-4 w-4" />
                   </Button>
@@ -259,9 +255,9 @@ export function DocumentList({
               {/* Document Info */}
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">File:</span>
+                  <span className="text-gray-500 dark:text-gray-400">File:</span>
                   <span
-                    className="text-gray-900 truncate ml-2"
+                    className="text-gray-900 dark:text-white truncate ml-2"
                     title={document.fileName}
                   >
                     {document.fileName}
@@ -269,17 +265,17 @@ export function DocumentList({
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Size:</span>
-                  <span className="text-gray-900">
-                    {formatFileSize(document.fileSize)}
+                  <span className="text-gray-500 dark:text-gray-400">Size:</span>
+                  <span className="text-gray-900 dark:text-white">
+                    {fileService.formatFileSize(document.fileSize)}
                   </span>
                 </div>
 
                 {document.documentNumber && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Number:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Number:</span>
                     <span
-                      className="text-gray-900 truncate ml-2"
+                      className="text-gray-900 dark:text-white truncate ml-2"
                       title={document.documentNumber}
                     >
                       {document.documentNumber}
@@ -289,9 +285,9 @@ export function DocumentList({
 
                 {document.issuer && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Issuer:</span>
+                    <span className="text-gray-500 dark:text-gray-400">Issuer:</span>
                     <span
-                      className="text-gray-900 truncate ml-2"
+                      className="text-gray-900 dark:text-white truncate ml-2"
                       title={document.issuer}
                     >
                       {document.issuer}
@@ -300,8 +296,8 @@ export function DocumentList({
                 )}
 
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Created:</span>
-                  <span className="text-gray-900">
+                  <span className="text-gray-500 dark:text-gray-400">Created:</span>
+                  <span className="text-gray-900 dark:text-white">
                     {formatDistanceToNow(new Date(document.createdAt), {
                       addSuffix: true,
                     })}
@@ -310,8 +306,8 @@ export function DocumentList({
 
                 {document.expiryDate && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Expires:</span>
-                    <span className="text-gray-900">
+                    <span className="text-gray-500 dark:text-gray-400">Expires:</span>
+                    <span className="text-gray-900 dark:text-white">
                       {format(new Date(document.expiryDate), "MMM dd, yyyy")}
                     </span>
                   </div>
@@ -336,13 +332,13 @@ export function DocumentList({
                   {document.tags.slice(0, 3).map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded"
+                      className="inline-block px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
                     >
                       {tag}
                     </span>
                   ))}
                   {document.tags.length > 3 && (
-                    <span className="inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded">
+                    <span className="inline-block px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded">
                       +{document.tags.length - 3} more
                     </span>
                   )}
@@ -354,7 +350,7 @@ export function DocumentList({
       </div>
 
       {/* Results Summary */}
-      <div className="text-center text-sm text-gray-500 pt-4">
+      <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-4">
         Showing {documents.length} document{documents.length !== 1 ? "s" : ""}
       </div>
     </div>

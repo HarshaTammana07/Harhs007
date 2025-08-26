@@ -202,27 +202,32 @@ export function EnhancedRentPaymentForm({
           )
           .map(async (tenant) => {
             const tenantWithInfo: TenantWithPropertyInfo = { ...tenant };
-
             try {
               // Get apartment details
-              const apartments =
-                await propertyService.getApartmentsByBuildingId(buildingId);
+              const apartments = await propertyService.getApartmentsByBuildingId(
+                buildingId
+              );
               const apartment = apartments.find(
                 (apt) => apt.id === tenant.propertyId
               );
-              const building = buildings.find((b) => b.id === buildingId);
-
-              if (apartment && building) {
+              if (apartment) {
                 tenantWithInfo.displayInfo = {
                   apartmentDoorNumber: apartment.doorNumber,
                   apartmentFloor: apartment.floor,
+                };
+              }
+
+              // Get building details
+              const building = buildings.find((b) => b.id === buildingId);
+              if (building) {
+                tenantWithInfo.displayInfo = {
+                  ...tenantWithInfo.displayInfo,
                   buildingName: building.name,
                 };
               }
             } catch (error) {
-              console.error("Error loading tenant property info:", error);
+              console.error("Error loading tenant metadata:", error);
             }
-
             return tenantWithInfo;
           })
       );
@@ -250,11 +255,9 @@ export function EnhancedRentPaymentForm({
           )
           .map(async (tenant) => {
             const tenantWithInfo: TenantWithPropertyInfo = { ...tenant };
-
             try {
               // Get flat details
               const flat = flats.find((f) => f.id === flatId);
-
               if (flat) {
                 tenantWithInfo.displayInfo = {
                   flatDoorNumber: flat.doorNumber,
@@ -262,9 +265,8 @@ export function EnhancedRentPaymentForm({
                 };
               }
             } catch (error) {
-              console.error("Error loading tenant property info:", error);
+              console.error("Error loading tenant metadata:", error);
             }
-
             return tenantWithInfo;
           })
       );
@@ -282,44 +284,30 @@ export function EnhancedRentPaymentForm({
     try {
       setIsSubmitting(true);
 
-      // Validate required fields
-      if (!data.tenantId) {
-        toast.error("Please select a tenant");
-        return;
-      }
-
-      // Determine property details
+      // Determine property details based on selection
       let propertyId = "";
-      let propertyType = "";
-      let unitId: string | undefined = undefined;
+      let unitId = "";
 
-      if (
-        data.propertyType === "building" &&
-        data.buildingId &&
-        data.apartmentId
-      ) {
+      if (data.propertyType === "building") {
         propertyId = data.buildingId;
-        propertyType = "building";
         unitId = data.apartmentId;
-      } else if (data.propertyType === "flat" && data.flatId) {
+      } else if (data.propertyType === "flat") {
         propertyId = data.flatId;
-        propertyType = "flat";
-        unitId = undefined; // Flats don't have unit_id
-      } else {
-        toast.error("Please select a valid property");
-        return;
       }
 
-      // Calculate actual amount
-      const actualAmount =
-        data.amount + (data.lateFee || 0) - (data.discount || 0);
+      // Get tenant details
+      const selectedTenant = tenants.find((t) => t.id === data.tenantId);
+      if (!selectedTenant) {
+        throw new Error("Selected tenant not found");
+      }
 
       // Create payment data
-      const paymentData: Omit<RentPayment, "id" | "createdAt" | "updatedAt"> = {
+      const paymentData: RentPayment = {
+        id: `payment_${Date.now()}`,
         tenantId: data.tenantId,
-        propertyType: propertyType as "building" | "flat" | "land",
-        propertyId: propertyId,
-        unitId: unitId,
+        propertyId,
+        propertyType: data.propertyType as "building" | "flat",
+        unitId: unitId || undefined,
         amount: data.amount,
         dueDate: new Date(data.paymentDate),
         paidDate: new Date(data.paymentDate),
@@ -329,247 +317,238 @@ export function EnhancedRentPaymentForm({
         notes: data.notes || undefined,
         lateFee: data.lateFee || 0,
         discount: data.discount || 0,
-        actualAmountPaid: actualAmount,
+        actualAmountPaid: data.amount + (data.lateFee || 0) - (data.discount || 0),
         receiptNumber: `RCP-${Date.now()}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
-      // Create the payment using ApiService
-      const createdPayment = await ApiService.createRentPayment(paymentData);
+      // Save payment
+      await ApiService.createRentPayment(paymentData);
 
-      onSubmit(createdPayment);
-      reset();
       toast.success("Rent payment recorded successfully!");
+      onSubmit(paymentData);
+      reset();
     } catch (error) {
       console.error("Error recording payment:", error);
-      toast.error("Failed to record payment");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to record payment"
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getTenantDisplayText = (tenant: TenantWithPropertyInfo) => {
-    const name = tenant.personalInfo.fullName;
-    const phone = tenant.contactInfo.phone;
-
-    if (tenant.displayInfo?.apartmentDoorNumber) {
-      return `${name} - Door: ${tenant.displayInfo.apartmentDoorNumber}, Floor: ${tenant.displayInfo.apartmentFloor} (${phone})`;
-    } else if (tenant.displayInfo?.flatDoorNumber) {
-      return `${name} - Door: ${tenant.displayInfo.flatDoorNumber} (${phone})`;
-    }
-
-    return `${name} (${phone})`;
+  const handleCancel = () => {
+    reset();
+    onCancel();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onCancel} size="xl">
-      <div className="p-6">
+    <Modal isOpen={isOpen} onClose={handleCancel} size="xl">
+      <div className="p-6 bg-white dark:bg-gray-800">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
+          <div className="flex items-center">
+            <CurrencyRupeeIcon className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-2" />
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {title}
+            </h2>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
           {/* Property Selection */}
-          <Card>
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="flex items-center text-lg">
+              <CardTitle className="flex items-center text-gray-900 dark:text-white">
                 <BuildingOfficeIcon className="h-5 w-5 mr-2" />
                 Property Selection
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {loadingProperties ? (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-sm text-gray-600 mt-2">
-                    Loading properties...
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Property Type *
+                </label>
+                <select
+                  {...register("propertyType", {
+                    required: "Please select a property type",
+                  })}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                >
+                  <option value="">Select property type</option>
+                  <option value="building">Building</option>
+                  <option value="flat">Flat</option>
+                </select>
+                {errors.propertyType && (
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+                    {errors.propertyType.message}
                   </p>
-                </div>
-              ) : (
+                )}
+              </div>
+
+              {watchPropertyType === "building" && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Property Type *
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Building *
                     </label>
                     <select
-                      {...register("propertyType", {
-                        required: "Property type is required",
+                      {...register("buildingId", {
+                        required:
+                          watchPropertyType === "building"
+                            ? "Please select a building"
+                            : false,
                       })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                     >
-                      <option value="">Select property type</option>
-                      <option value="building">Building</option>
-                      <option value="flat">Flat</option>
+                      <option value="">Select building</option>
+                      {buildings.map((building) => (
+                        <option key={building.id} value={building.id}>
+                          {building.name} ({building.buildingCode}) -{" "}
+                          {building.address}
+                        </option>
+                      ))}
                     </select>
-                    {errors.propertyType && (
-                      <p className="text-red-600 text-sm mt-1">
-                        {errors.propertyType.message}
+                    {errors.buildingId && (
+                      <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+                        {errors.buildingId.message}
                       </p>
                     )}
                   </div>
 
-                  {watchPropertyType === "building" && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Building *
-                        </label>
-                        <select
-                          {...register("buildingId", {
-                            required:
-                              watchPropertyType === "building"
-                                ? "Please select a building"
-                                : false,
-                          })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="">Select building</option>
-                          {buildings.map((building) => (
-                            <option key={building.id} value={building.id}>
-                              {building.name} ({building.buildingCode}) -{" "}
-                              {building.address}
-                            </option>
-                          ))}
-                        </select>
-                        {errors.buildingId && (
-                          <p className="text-red-600 text-sm mt-1">
-                            {errors.buildingId.message}
-                          </p>
-                        )}
-                      </div>
-
-                      {watchBuildingId && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Apartment *
-                          </label>
-                          <select
-                            {...register("apartmentId", {
-                              required:
-                                watchPropertyType === "building"
-                                  ? "Please select an apartment"
-                                  : false,
-                            })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            <option value="">Select apartment</option>
-                            {apartments.map((apartment) => (
-                              <option key={apartment.id} value={apartment.id}>
-                                Door: {apartment.doorNumber}, Floor:{" "}
-                                {apartment.floor}
-                                {apartment.type && ` - ${apartment.type}`}
-                              </option>
-                            ))}
-                          </select>
-                          {errors.apartmentId && (
-                            <p className="text-red-600 text-sm mt-1">
-                              {errors.apartmentId.message}
-                            </p>
-                          )}
-                          {apartments.length === 0 && (
-                            <p className="text-sm text-gray-500 mt-1">
-                              No apartments found for the selected building
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {watchPropertyType === "flat" && (
+                  {watchBuildingId && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Flat *
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Apartment *
                       </label>
                       <select
-                        {...register("flatId", {
+                        {...register("apartmentId", {
                           required:
-                            watchPropertyType === "flat"
-                              ? "Please select a flat"
+                            watchPropertyType === "building"
+                              ? "Please select an apartment"
                               : false,
                         })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       >
-                        <option value="">Select flat</option>
-                        {flats.map((flat) => (
-                          <option key={flat.id} value={flat.id}>
-                            {flat.name} - {flat.doorNumber} ({flat.address})
+                        <option value="">Select apartment</option>
+                        {apartments.map((apartment) => (
+                          <option key={apartment.id} value={apartment.id}>
+                            Door: {apartment.doorNumber}, Floor:{" "}
+                            {apartment.floor}
+                            {apartment.type && ` - ${apartment.type}`}
                           </option>
                         ))}
                       </select>
-                      {errors.flatId && (
-                        <p className="text-red-600 text-sm mt-1">
-                          {errors.flatId.message}
+                      {errors.apartmentId && (
+                        <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+                          {errors.apartmentId.message}
+                        </p>
+                      )}
+                      {apartments.length === 0 && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          No apartments found for the selected building
                         </p>
                       )}
                     </div>
                   )}
                 </>
               )}
+
+              {watchPropertyType === "flat" && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Flat *
+                  </label>
+                  <select
+                    {...register("flatId", {
+                      required:
+                        watchPropertyType === "flat"
+                          ? "Please select a flat"
+                          : false,
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Select flat</option>
+                    {flats.map((flat) => (
+                      <option key={flat.id} value={flat.id}>
+                        {flat.name} - {flat.doorNumber} ({flat.address})
+                      </option>
+                    ))}
+                  </select>
+                  {errors.flatId && (
+                    <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+                      {errors.flatId.message}
+                    </p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 
           {/* Tenant Selection */}
-          {((watchPropertyType === "building" &&
-            watchBuildingId &&
-            watchApartmentId) ||
+          {((watchPropertyType === "building" && watchApartmentId) ||
             (watchPropertyType === "flat" && watchFlatId)) && (
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <CardHeader>
-                <CardTitle className="flex items-center text-lg">
+                <CardTitle className="flex items-center text-gray-900 dark:text-white">
                   <UserIcon className="h-5 w-5 mr-2" />
                   Tenant Selection
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {loadingTenants ? (
-                  <div className="text-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="text-sm text-gray-600 mt-2">
-                      Loading tenants...
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tenant *
-                    </label>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Tenant *
+                  </label>
+                  {loadingTenants ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-400 mx-auto"></div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        Loading tenants...
+                      </p>
+                    </div>
+                  ) : (
                     <select
                       {...register("tenantId", {
                         required: "Please select a tenant",
                       })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                     >
                       <option value="">Select tenant</option>
                       {tenants.map((tenant) => (
                         <option key={tenant.id} value={tenant.id}>
-                          {getTenantDisplayText(tenant)}
+                          {tenant.personalInfo.fullName}
+                          {tenant.displayInfo?.apartmentDoorNumber &&
+                            ` - Apt ${tenant.displayInfo.apartmentDoorNumber}`}
+                          {tenant.displayInfo?.flatDoorNumber &&
+                            ` - Flat ${tenant.displayInfo.flatDoorNumber}`}
+                          {tenant.rentalAgreement.rentAmount &&
+                            ` (₹${tenant.rentalAgreement.rentAmount}/month)`}
                         </option>
                       ))}
                     </select>
-                    {errors.tenantId && (
-                      <p className="text-red-600 text-sm mt-1">
-                        {errors.tenantId.message}
-                      </p>
-                    )}
-                    {tenants.length === 0 && !loadingTenants && (
-                      <p className="text-sm text-gray-500 mt-1">
-                        No tenants found for the selected property
-                      </p>
-                    )}
-                  </div>
-                )}
+                  )}
+                  {errors.tenantId && (
+                    <p className="text-red-600 dark:text-red-400 text-sm mt-1">
+                      {errors.tenantId.message}
+                    </p>
+                  )}
+                  {tenants.length === 0 && !loadingTenants && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      No tenants found for the selected property
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
 
           {/* Payment Details */}
           {watchTenantId && (
-            <Card>
+            <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               <CardHeader>
-                <CardTitle className="flex items-center text-lg">
+                <CardTitle className="flex items-center text-gray-900 dark:text-white">
                   <CurrencyRupeeIcon className="h-5 w-5 mr-2" />
                   Payment Details
                 </CardTitle>
@@ -588,6 +567,7 @@ export function EnhancedRentPaymentForm({
                       },
                     })}
                     error={errors.amount?.message}
+                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                   <Input
                     label="Payment Date *"
@@ -596,19 +576,20 @@ export function EnhancedRentPaymentForm({
                       required: "Payment date is required",
                     })}
                     error={errors.paymentDate?.message}
+                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Payment Method *
                     </label>
                     <select
                       {...register("paymentMethod", {
                         required: "Payment method is required",
                       })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                     >
                       <option value="cash">Cash</option>
                       <option value="card">Card</option>
@@ -617,7 +598,7 @@ export function EnhancedRentPaymentForm({
                       <option value="cheque">Cheque</option>
                     </select>
                     {errors.paymentMethod && (
-                      <p className="text-red-600 text-sm mt-1">
+                      <p className="text-red-600 dark:text-red-400 text-sm mt-1">
                         {errors.paymentMethod.message}
                       </p>
                     )}
@@ -626,6 +607,7 @@ export function EnhancedRentPaymentForm({
                     label="Transaction ID"
                     {...register("transactionId")}
                     placeholder="Enter transaction ID (optional)"
+                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
 
@@ -635,23 +617,25 @@ export function EnhancedRentPaymentForm({
                     type="number"
                     {...register("lateFee", { valueAsNumber: true })}
                     placeholder="0"
+                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                   <Input
                     label="Discount (₹)"
                     type="number"
                     {...register("discount", { valueAsNumber: true })}
                     placeholder="0"
+                    className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Notes
                   </label>
                   <textarea
                     {...register("notes")}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                     placeholder="Add any additional notes..."
                   />
                 </div>
@@ -660,8 +644,8 @@ export function EnhancedRentPaymentForm({
           )}
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-            <Button type="button" variant="outline" onClick={onCancel}>
+          <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <Button type="button" variant="outline" onClick={onCancel} className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting || !watchTenantId}>
