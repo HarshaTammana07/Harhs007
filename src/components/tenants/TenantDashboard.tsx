@@ -184,8 +184,8 @@ export function TenantDashboard({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Tenant Dashboard</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tenant Dashboard</h2>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
             Overview of all tenant information and rental management
           </p>
         </div>
@@ -210,8 +210,8 @@ export function TenantDashboard({
                 <UsersIcon className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Tenants</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm text-gray-600 dark:text-gray-300">Total Tenants</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {stats.totalTenants}
                 </p>
               </div>
@@ -227,7 +227,7 @@ export function TenantDashboard({
                 <UsersIcon className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Active Tenants</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Active Tenants</p>
                 <p className="text-2xl font-bold text-green-600">
                   {stats.activeTenants}
                 </p>
@@ -244,7 +244,7 @@ export function TenantDashboard({
                 <CurrencyRupeeIcon className="h-6 w-6 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Monthly Rent</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Monthly Rent</p>
                 <p className="text-2xl font-bold text-purple-600">
                   {formatCurrency(stats.totalMonthlyRent)}
                 </p>
@@ -261,7 +261,7 @@ export function TenantDashboard({
                 <ChartBarIcon className="h-6 w-6 text-indigo-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Average Rent</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Average Rent</p>
                 <p className="text-2xl font-bold text-indigo-600">
                   {formatCurrency(stats.averageRent)}
                 </p>
@@ -278,7 +278,7 @@ export function TenantDashboard({
                 <CurrencyRupeeIcon className="h-6 w-6 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Security Deposits</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Security Deposits</p>
                 <p className="text-2xl font-bold text-yellow-600">
                   {formatCurrency(stats.totalSecurityDeposits)}
                 </p>
@@ -295,7 +295,7 @@ export function TenantDashboard({
                 <CalendarIcon className="h-6 w-6 text-orange-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Expiring Soon</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Expiring Soon</p>
                 <p className="text-2xl font-bold text-orange-600">
                   {stats.expiringAgreements}
                 </p>
@@ -312,7 +312,7 @@ export function TenantDashboard({
                 <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Overdue Rents</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Overdue Rents</p>
                 <p className="text-2xl font-bold text-red-600">
                   {stats.overdueRents}
                 </p>
@@ -329,7 +329,7 @@ export function TenantDashboard({
                 <UsersIcon className="h-6 w-6 text-gray-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Inactive Tenants</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Inactive Tenants</p>
                 <p className="text-2xl font-bold text-gray-600">
                   {stats.inactiveTenants}
                 </p>
@@ -351,7 +351,7 @@ export function TenantDashboard({
           </CardHeader>
           <CardContent>
             {expiringTenants.length === 0 ? (
-              <p className="text-gray-600 text-center py-4">
+              <p className="text-gray-600 dark:text-gray-300 text-center py-4">
                 No agreements expiring in the next 30 days
               </p>
             ) : (
@@ -363,10 +363,10 @@ export function TenantDashboard({
                     onClick={() => onViewTenant?.(tenant)}
                   >
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium text-gray-900 dark:text-white">
                         {tenant.personalInfo.fullName}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
                         Agreement: {tenant.rentalAgreement.agreementNumber}
                       </p>
                     </div>
@@ -374,12 +374,12 @@ export function TenantDashboard({
                       <p className="text-sm font-medium text-orange-600">
                         {formatDate(tenant.rentalAgreement.endDate)}
                       </p>
-                      <p className="text-xs text-gray-600">Expires</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300">Expires</p>
                     </div>
                   </div>
                 ))}
                 {expiringTenants.length > 5 && (
-                  <p className="text-sm text-gray-600 text-center pt-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 text-center pt-2">
                     +{expiringTenants.length - 5} more expiring agreements
                   </p>
                 )}
@@ -398,7 +398,7 @@ export function TenantDashboard({
           </CardHeader>
           <CardContent>
             {overdueTenants.length === 0 ? (
-              <p className="text-gray-600 text-center py-4">
+              <p className="text-gray-600 dark:text-gray-300 text-center py-4">
                 No overdue rent payments
               </p>
             ) : (
@@ -412,10 +412,10 @@ export function TenantDashboard({
                       onClick={() => onViewTenant?.(tenant)}
                     >
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-gray-900 dark:text-white">
                           {tenant.personalInfo.fullName}
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           {daysPastDue} days overdue
                         </p>
                       </div>
@@ -423,12 +423,12 @@ export function TenantDashboard({
                         <p className="text-sm font-medium text-red-600">
                           {formatCurrency(overdueAmount)}
                         </p>
-                        <p className="text-xs text-gray-600">Amount Due</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300">Amount Due</p>
                       </div>
                     </div>
                   ))}
                 {overdueTenants.length > 5 && (
-                  <p className="text-sm text-gray-600 text-center pt-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 text-center pt-2">
                     +{overdueTenants.length - 5} more overdue payments
                   </p>
                 )}

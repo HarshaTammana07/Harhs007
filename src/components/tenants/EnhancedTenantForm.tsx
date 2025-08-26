@@ -265,7 +265,7 @@ export function EnhancedTenantForm({
     <Modal isOpen={isOpen} onClose={onCancel} size="2xl">
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
@@ -334,19 +334,19 @@ export function EnhancedTenantForm({
               {loadingProperties ? (
                 <div className="text-center py-4">
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-sm text-gray-600 mt-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
                     Loading properties...
                   </p>
                 </div>
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Property Type
                     </label>
                     <select
                       {...register("propertyType")}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                     >
                       <option value="">Select property type</option>
                       <option value="building">Building (Apartment)</option>
@@ -357,7 +357,7 @@ export function EnhancedTenantForm({
                   {watchPropertyType === "building" && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                           Building *
                         </label>
                         <select
@@ -367,7 +367,7 @@ export function EnhancedTenantForm({
                                 ? "Please select a building"
                                 : false,
                           })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                         >
                           <option value="">Select building</option>
                           {buildings.map((building) => (
@@ -386,7 +386,7 @@ export function EnhancedTenantForm({
 
                       {watchBuildingId && apartments.length > 0 && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Apartment *
                           </label>
                           <select
@@ -395,7 +395,7 @@ export function EnhancedTenantForm({
                                 ? "Please select an apartment"
                                 : false,
                             })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                           >
                             <option value="">Select apartment</option>
                             {apartments.map((apartment) => (
@@ -420,7 +420,7 @@ export function EnhancedTenantForm({
 
                   {watchPropertyType === "flat" && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Flat *
                       </label>
                       <select
@@ -430,7 +430,7 @@ export function EnhancedTenantForm({
                               ? "Please select a flat"
                               : false,
                         })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                       >
                         <option value="">Select flat</option>
                         {flats.map((flat) => (

@@ -16,3 +16,4 @@ export { Toaster } from "./Toaster";
 export { Grid, GridItem } from "./Grid";
 export { Container } from "./Container";
 export { Breadcrumb } from "./Breadcrumb";
+export { ThemeToggle, ThemeSelector, CompactThemeToggle } from "./ThemeToggle";

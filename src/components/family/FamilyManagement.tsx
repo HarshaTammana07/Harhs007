@@ -95,10 +95,10 @@ export const FamilyManagement: React.FC = () => {
   if (error) {
     return (
       <div className="text-center">
-        <div className="text-red-600 text-lg font-medium">{error}</div>
+        <div className="text-red-600 dark:text-red-400 text-lg font-medium">{error}</div>
         <button
           onClick={refresh}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600"
         >
           Try Again
         </button>
@@ -111,10 +111,10 @@ export const FamilyManagement: React.FC = () => {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Family Management
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
             Manage family member profiles and personal information
           </p>
         </div>

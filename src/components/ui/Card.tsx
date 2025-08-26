@@ -23,6 +23,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       ref={ref}
       className={cn(
         "card-gradient card-hover rounded-xl animate-slide-up",
+        "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700",
+        "shadow-soft dark:shadow-lg dark:shadow-gray-900/10",
+        "transition-all duration-200",
         className
       )}
       {...props}
@@ -36,7 +39,11 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, children, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn("flex flex-col space-y-1.5 p-6", className)}
+      className={cn(
+        "flex flex-col space-y-1.5 p-6",
+        "border-b border-gray-100 dark:border-gray-700/50",
+        className
+      )}
       {...props}
     >
       {children}
@@ -51,7 +58,9 @@ const CardTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight text-slate-900 dark:text-white",
+      "text-lg font-semibold leading-none tracking-tight",
+      "text-slate-900 dark:text-white",
+      "transition-colors duration-200",
       className
     )}
     {...props}
@@ -66,7 +75,11 @@ const CardDescription = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-slate-600 dark:text-zinc-300", className)}
+    className={cn(
+      "text-sm text-slate-600 dark:text-zinc-300",
+      "transition-colors duration-200",
+      className
+    )}
     {...props}
   >
     {children}
