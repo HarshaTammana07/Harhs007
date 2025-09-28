@@ -65,9 +65,9 @@ export class RentPaymentService {
     });
   }
 
-  public recordRentPayment(
+  public async recordRentPayment(
     payment: Omit<RentPayment, "id" | "createdAt" | "updatedAt">
-  ): RentPayment {
+  ): Promise<RentPayment> {
     this.validateRentPayment(payment);
 
     const newPayment: RentPayment = {
@@ -84,16 +84,16 @@ export class RentPaymentService {
 
     // Generate receipt if payment is completed
     if (newPayment.status === "paid") {
-      this.generateRentReceipt(newPayment.id);
+      await this.generateRentReceipt(newPayment.id);
     }
 
     return newPayment;
   }
 
-  public updateRentPayment(
+  public async updateRentPayment(
     id: string,
     updates: Partial<RentPayment>
-  ): RentPayment {
+  ): Promise<RentPayment> {
     const payments = this.getRentPayments();
     const index = payments.findIndex((payment) => payment.id === id);
 
@@ -120,7 +120,7 @@ export class RentPaymentService {
       payments[index].status !== "paid" &&
       updatedPayment.paidDate
     ) {
-      this.generateRentReceipt(updatedPayment.id);
+      await this.generateRentReceipt(updatedPayment.id);
     }
 
     return updatedPayment;
@@ -164,7 +164,7 @@ export class RentPaymentService {
     return receipts.find((receipt) => receipt.paymentId === paymentId) || null;
   }
 
-  public generateRentReceipt(paymentId: string): RentReceipt {
+  public async generateRentReceipt(paymentId: string): Promise<RentReceipt> {
     const payment = this.getRentPaymentById(paymentId);
     if (!payment) {
       throw new LocalStorageError(
@@ -188,7 +188,7 @@ export class RentPaymentService {
       );
     }
 
-    const propertyInfo = this.getPropertyInfo(
+    const propertyInfo = await this.getPropertyInfo(
       payment.propertyId,
       payment.propertyType,
       payment.unitId
@@ -330,11 +330,11 @@ export class RentPaymentService {
   }
 
   // Rent Collection Reports
-  public generateRentCollectionReport(
+  public async generateRentCollectionReport(
     startDate: Date,
     endDate: Date,
     reportType: "monthly" | "quarterly" | "yearly" | "custom" = "custom"
-  ): RentCollectionReport {
+  ): Promise<RentCollectionReport> {
     const payments = this.getRentPayments().filter((payment) => {
       const dueDate = new Date(payment.dueDate);
       return dueDate >= startDate && dueDate <= endDate;
@@ -356,8 +356,8 @@ export class RentPaymentService {
         ? (totalCollectedRent / totalExpectedRent) * 100
         : 0;
 
-    const propertyBreakdown = this.generatePropertyBreakdown(payments);
-    const tenantBreakdown = this.generateTenantBreakdown(payments);
+    const propertyBreakdown = await this.generatePropertyBreakdown(payments);
+    const tenantBreakdown = await this.generateTenantBreakdown(payments);
     const paymentMethodBreakdown =
       this.generatePaymentMethodBreakdown(payments);
 
@@ -501,11 +501,11 @@ export class RentPaymentService {
     return { startDate, endDate };
   }
 
-  private getPropertyInfo(
+  private async getPropertyInfo(
     propertyId: string,
     propertyType: "building" | "flat" | "land",
     unitId?: string
-  ): { address: string; name: string } {
+  ): Promise<{ address: string; name: string }> {
     if (propertyType === "building") {
       const building = propertyService.getBuildingById(propertyId);
       if (building && unitId) {
@@ -520,7 +520,7 @@ export class RentPaymentService {
       const flat = propertyService.getFlatById(propertyId);
       return { address: flat?.address || "", name: flat?.name || "" };
     } else if (propertyType === "land") {
-      const land = propertyService.getLandById(propertyId);
+      const land = await propertyService.getLandById(propertyId);
       return { address: land?.address || "", name: land?.name || "" };
     }
     return { address: "", name: "" };
@@ -572,14 +572,14 @@ export class RentPaymentService {
     return null;
   }
 
-  private generatePropertyBreakdown(
+  private async generatePropertyBreakdown(
     payments: RentPayment[]
-  ): PropertyRentBreakdown[] {
+  ): Promise<PropertyRentBreakdown[]> {
     const propertyMap = new Map<string, PropertyRentBreakdown>();
 
-    payments.forEach((payment) => {
+    for (const payment of payments) {
       const key = `${payment.propertyId}-${payment.unitId || ""}`;
-      const propertyInfo = this.getPropertyInfo(
+      const propertyInfo = await this.getPropertyInfo(
         payment.propertyId,
         payment.propertyType,
         payment.unitId
@@ -603,7 +603,7 @@ export class RentPaymentService {
       if (payment.status === "paid") {
         breakdown.collectedRent += payment.actualAmountPaid || payment.amount;
       }
-    });
+    }
 
     // Calculate derived values
     propertyMap.forEach((breakdown) => {
@@ -620,15 +620,15 @@ export class RentPaymentService {
     return Array.from(propertyMap.values());
   }
 
-  private generateTenantBreakdown(
+  private async generateTenantBreakdown(
     payments: RentPayment[]
-  ): TenantRentBreakdown[] {
+  ): Promise<TenantRentBreakdown[]> {
     const tenantMap = new Map<string, TenantRentBreakdown>();
 
-    payments.forEach((payment) => {
+    for (const payment of payments) {
       if (!tenantMap.has(payment.tenantId)) {
         const tenant = propertyService.getTenantById(payment.tenantId);
-        const propertyInfo = this.getPropertyInfo(
+        const propertyInfo = await this.getPropertyInfo(
           payment.propertyId,
           payment.propertyType,
           payment.unitId
@@ -663,7 +663,7 @@ export class RentPaymentService {
         );
         breakdown.daysPastDue = Math.max(breakdown.daysPastDue, daysPastDue);
       }
-    });
+    }
 
     // Calculate outstanding rent
     tenantMap.forEach((breakdown) => {

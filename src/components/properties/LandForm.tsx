@@ -116,10 +116,10 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
       };
 
       if (land) {
-        propertyService.updateLand(land.id, landData);
+        await propertyService.updateLand(land.id, landData);
         toast.success("Land property updated successfully");
       } else {
-        propertyService.saveLand(landData);
+        await propertyService.saveLand(landData);
         toast.success("Land property added successfully");
       }
 

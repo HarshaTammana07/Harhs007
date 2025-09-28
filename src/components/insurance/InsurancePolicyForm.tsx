@@ -12,9 +12,8 @@ import {
   Modal,
 } from "@/components/ui";
 
-import { InsurancePolicy, FamilyMember, Document } from "@/types";
+import { InsurancePolicy, FamilyMember } from "@/types";
 import { ApiService } from "@/services/ApiService";
-import { fileService } from "@/services/FileService";
 import toast from "react-hot-toast";
 
 interface InsurancePolicyFormData {
@@ -46,7 +45,6 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
   defaultType,
 }) => {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
-  const [documents, setDocuments] = useState<Document[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -89,7 +87,6 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
           new Date(policy.renewalDate).toISOString().split("T")[0]
         );
         setValue("status", policy.status);
-        setDocuments(policy.documents || []);
       } else if (defaultType) {
         setValue("type", defaultType);
         setValue("status", "active");
@@ -107,36 +104,9 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
     }
   };
 
-  const handleFileUpload = async (files: File[]) => {
-    try {
-      const uploadedDocs: Document[] = [];
-      for (const file of files) {
-        const fileData = await fileService.readFileAsDataURL(file);
-        const doc: Document = {
-          id: `doc_${Date.now()}_${Math.random()}`,
-          fileName: file.name,
-          fileSize: file.size,
-          mimeType: file.type,
-          fileData,
-          createdAt: new Date(),
-        };
-        uploadedDocs.push(doc);
-      }
-      setDocuments((prev) => [...prev, ...uploadedDocs]);
-      toast.success(`${files.length} document(s) uploaded successfully`);
-    } catch (error) {
-      console.error("Error uploading files:", error);
-      toast.error("Failed to upload documents");
-    }
-  };
-
-  const handleRemoveDocument = (documentId: string) => {
-    setDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
-  };
 
   const handleClose = () => {
     reset();
-    setDocuments([]);
     onClose();
   };
 
@@ -155,7 +125,8 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
         endDate: new Date(data.endDate),
         renewalDate: new Date(data.renewalDate),
         status: data.status,
-        documents,
+        documents: [],
+        premiumHistory: [],
       };
 
       if (policy) {
@@ -389,76 +360,6 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
               </select>
             </div>
 
-            {/* Document Upload */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Policy Documents
-              </label>
-              <div>
-                <input
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                  multiple
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    if (files.length > 0) {
-                      handleFileUpload(files);
-                    }
-                  }}
-                  className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50"
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Select multiple files (PDF, JPG, PNG, DOC, DOCX) up to 5MB
-                  each
-                </p>
-              </div>
-
-              {documents.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Uploaded Documents:
-                  </h4>
-                  {documents.map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded border border-gray-200 dark:border-gray-600"
-                    >
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {doc.fileName}
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {fileService.formatFileSize(doc.fileSize)} •{" "}
-                          {doc.mimeType}
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            fileService.downloadFile(doc.fileData, doc.fileName)
-                          }
-                          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                        >
-                          Download
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleRemoveDocument(doc.id)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border-gray-300 dark:border-gray-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
 
             {/* Form Actions */}
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">

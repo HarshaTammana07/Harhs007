@@ -307,7 +307,7 @@ function FilePreviewModal({ document, onClose }: FilePreviewModalProps) {
     <Modal isOpen onClose={onClose} size="lg">
       <div className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
             {document.title}
           </h3>
           <Button
@@ -329,12 +329,12 @@ function FilePreviewModal({ document, onClose }: FilePreviewModalProps) {
               className="max-w-full max-h-96 mx-auto rounded-lg"
             />
           ) : isPDF ? (
-            <div className="bg-gray-100 rounded-lg p-8 text-center">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 text-center">
               <FileIcon
                 mimeType={document.mimeType}
-                className="w-16 h-16 mx-auto mb-4 text-gray-400"
+                className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500"
               />
-              <p className="text-gray-600 mb-4">PDF Preview</p>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">PDF Preview</p>
               <Button
                 onClick={() => window.open(document.fileData, "_blank")}
                 className="mb-2"
@@ -343,19 +343,19 @@ function FilePreviewModal({ document, onClose }: FilePreviewModalProps) {
               </Button>
             </div>
           ) : (
-            <div className="bg-gray-100 rounded-lg p-8 text-center">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-8 text-center">
               <FileIcon
                 mimeType={document.mimeType}
-                className="w-16 h-16 mx-auto mb-4 text-gray-400"
+                className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500"
               />
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-300">
                 Preview not available for this file type
               </p>
             </div>
           )}
         </div>
 
-        <div className="text-sm text-gray-500 space-y-1">
+        <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
           <p>
             <strong>File:</strong> {document.fileName}
           </p>

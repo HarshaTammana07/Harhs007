@@ -1,10 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  documentService,
-  DocumentStats as DocumentStatsType,
-} from "@/services/DocumentService";
+import { ApiService } from "@/services/ApiService";
+import { DocumentStats as DocumentStatsType } from "@/services/DocumentService";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import {
@@ -13,6 +11,7 @@ import {
   ClockIcon,
   FolderIcon,
   ChartBarIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 
 interface DocumentStatsProps {
@@ -27,10 +26,10 @@ export function DocumentStats({ onClose }: DocumentStatsProps) {
     loadStats();
   }, []);
 
-  const loadStats = () => {
+  const loadStats = async () => {
     setIsLoading(true);
     try {
-      const documentStats = documentService.getDocumentStats();
+      const documentStats = await ApiService.getDocumentStats();
       setStats(documentStats);
     } catch (error) {
       console.error("Error loading document statistics:", error);
@@ -61,6 +60,11 @@ export function DocumentStats({ onClose }: DocumentStatsProps) {
   const categoryEntries = Object.entries(stats.documentsByCategory)
     .filter(([_, count]) => count > 0)
     .sort(([, a], [, b]) => b - a);
+
+  // Calculate additional insights
+  const validDocuments = stats.totalDocuments - stats.expiredDocuments - stats.expiringDocuments - stats.documentsWithoutExpiry;
+  const documentsNeedingAttention = stats.expiredDocuments + stats.expiringDocuments;
+  const hasExpiryIssues = documentsNeedingAttention > 0;
 
   const getPercentage = (count: number) => {
     return stats.totalDocuments > 0
@@ -233,32 +237,66 @@ export function DocumentStats({ onClose }: DocumentStatsProps) {
       </Card>
 
       {/* Summary */}
-      <Card className="p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-        <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-2">Summary</h3>
-        <div className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-          <p>
-            You have <strong>{stats.totalDocuments}</strong> documents across{" "}
-            <strong>{categoryEntries.length}</strong> categories.
-          </p>
-          {(stats.expiredDocuments > 0 || stats.expiringDocuments > 0) && (
-            <p>
-              <strong>
-                {stats.expiredDocuments + stats.expiringDocuments}
-              </strong>{" "}
-              documents require attention due to expiry.
-            </p>
-          )}
-          {stats.documentsWithoutExpiry > 0 && (
-            <p>
-              <strong>{stats.documentsWithoutExpiry}</strong> documents don't
-              have expiry dates set.
-            </p>
+      <Card className={`p-6 border ${
+        hasExpiryIssues 
+          ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800" 
+          : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+      }`}>
+        <h3 className={`text-lg font-semibold mb-2 ${
+          hasExpiryIssues 
+            ? "text-red-900 dark:text-red-200" 
+            : "text-green-900 dark:text-green-200"
+        }`}>
+          {hasExpiryIssues ? "⚠️ Action Required" : "✅ All Good"}
+        </h3>
+        <div className={`text-sm space-y-2 ${
+          hasExpiryIssues 
+            ? "text-red-800 dark:text-red-300" 
+            : "text-green-800 dark:text-green-300"
+        }`}>
+          {stats.totalDocuments === 0 ? (
+            <p>No documents found. Start by uploading your first document!</p>
+          ) : (
+            <>
+              <p>
+                You have <strong>{stats.totalDocuments}</strong> documents across{" "}
+                <strong>{categoryEntries.length}</strong> categories.
+              </p>
+              {hasExpiryIssues ? (
+                <p>
+                  <strong>{documentsNeedingAttention}</strong> documents require immediate attention due to expiry.
+                </p>
+              ) : (
+                <p>
+                  All your documents are up to date! 🎉
+                </p>
+              )}
+              {stats.documentsWithoutExpiry > 0 && (
+                <p>
+                  <strong>{stats.documentsWithoutExpiry}</strong> documents don't have expiry dates set.
+                </p>
+              )}
+              {validDocuments > 0 && (
+                <p>
+                  <strong>{validDocuments}</strong> documents are valid and up to date.
+                </p>
+              )}
+            </>
           )}
         </div>
       </Card>
 
       {/* Actions */}
-      <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+        <Button 
+          variant="outline" 
+          onClick={loadStats}
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <ArrowPathIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          Refresh Stats
+        </Button>
         <Button onClick={onClose}>Close</Button>
       </div>
     </div>

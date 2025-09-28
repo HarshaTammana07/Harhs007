@@ -578,6 +578,53 @@ export class PropertyService {
     }
   }
 
+  /**
+   * Get all properties for dropdown selection
+   */
+  public async getAllPropertiesForDropdown(): Promise<Array<{id: string, name: string, type: string}>> {
+    try {
+      const [buildings, flats, lands] = await Promise.all([
+        this.getBuildings(),
+        this.getFlats(),
+        this.getLands(),
+      ]);
+
+      const properties: Array<{id: string, name: string, type: string}> = [];
+
+      // Add buildings
+      buildings.forEach(building => {
+        properties.push({
+          id: building.id,
+          name: `${building.name} (Building)`,
+          type: 'building'
+        });
+      });
+
+      // Add flats
+      flats.forEach(flat => {
+        properties.push({
+          id: flat.id,
+          name: `${flat.name} (Flat)`,
+          type: 'flat'
+        });
+      });
+
+      // Add lands
+      lands.forEach(land => {
+        properties.push({
+          id: land.id,
+          name: `${land.name} (Land)`,
+          type: 'land'
+        });
+      });
+
+      return properties;
+    } catch (error) {
+      console.error("PropertyService.getAllPropertiesForDropdown error:", error);
+      throw new Error(`Failed to fetch properties: ${error.message}`);
+    }
+  }
+
   // Note: Import functionality would need to be implemented with individual API calls
   // since we're now using Supabase instead of localStorage
 }

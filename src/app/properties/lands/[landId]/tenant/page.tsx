@@ -42,7 +42,7 @@ export default function LandTenantPage() {
   const loadLand = async () => {
     try {
       setLoading(true);
-      const landData = propertyService.getLandById(landId);
+      const landData = await propertyService.getLandById(landId);
       if (landData) {
         setLand(landData);
       } else {

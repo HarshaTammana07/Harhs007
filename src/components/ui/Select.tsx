@@ -36,7 +36,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="mb-2 block text-sm font-medium text-gray-700"
+            className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
           >
             {label}
           </label>
@@ -52,7 +52,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           {...props}
         >
           {placeholder && (
-            <option value="" className="text-gray-500">
+            <option value="" className="text-gray-500 dark:text-gray-400">
               {placeholder}
             </option>
           )}
@@ -60,16 +60,16 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             <option
               key={option.value}
               value={option.value}
-              className="text-gray-900 bg-white"
+              className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
             >
               {option.label}
             </option>
           ))}
           {children}
         </select>
-        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
         {helperText && !error && (
-          <p className="mt-1 text-sm text-gray-500">{helperText}</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{helperText}</p>
         )}
       </div>
     );
