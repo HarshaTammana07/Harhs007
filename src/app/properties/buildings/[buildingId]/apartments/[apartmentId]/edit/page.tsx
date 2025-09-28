@@ -29,17 +29,14 @@ export default function EditApartmentPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const buildingData = propertyService.getBuildingById(buildingId);
+      const buildingData = await propertyService.getBuildingById(buildingId);
       if (!buildingData) {
         toast.error("Building not found");
         router.push("/properties/buildings");
         return;
       }
 
-      const apartmentData = propertyService.getApartmentById(
-        buildingId,
-        apartmentId
-      );
+      const apartmentData = await propertyService.getApartmentById(apartmentId);
       if (!apartmentData) {
         toast.error("Apartment not found");
         router.push(`/properties/buildings/${buildingId}/apartments`);
@@ -62,7 +59,7 @@ export default function EditApartmentPage() {
     try {
       setIsSubmitting(true);
 
-      propertyService.updateApartment(buildingId, apartmentId, {
+      await propertyService.updateApartment(apartmentId, {
         ...apartmentData,
         updatedAt: new Date(),
       });

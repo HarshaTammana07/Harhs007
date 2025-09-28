@@ -214,19 +214,19 @@ export function TenantList({
               (apt) => apt.currentTenant?.id === tenant.id
             );
             if (apartment) {
-              propertyService.updateApartment(propertyId, apartment.id, {
+              await propertyService.updateApartment(apartment.id, {
                 currentTenant: undefined,
                 isOccupied: false,
               });
             }
           }
         } else if (propertyType === "flat") {
-          propertyService.updateFlat(propertyId, {
+          await propertyService.updateFlat(propertyId, {
             currentTenant: undefined,
             isOccupied: false,
           });
         } else if (propertyType === "land") {
-          propertyService.updateLand(propertyId, {
+          await propertyService.updateLand(propertyId, {
             currentTenant: undefined,
             isLeased: false,
           });
@@ -235,7 +235,7 @@ export function TenantList({
 
       // Remove from standalone tenants if exists
       try {
-        propertyService.deleteTenant(tenant.id);
+        await propertyService.deleteTenant(tenant.id);
       } catch (error) {
         // Tenant might not exist in standalone list, which is fine
       }
@@ -254,7 +254,7 @@ export function TenantList({
     try {
       if (editingTenant) {
         // Update existing tenant
-        propertyService.updateTenant(editingTenant.id, {
+        await propertyService.updateTenant(editingTenant.id, {
           ...tenantData,
           updatedAt: new Date(),
         });
@@ -266,7 +266,7 @@ export function TenantList({
           createdAt: new Date(),
           updatedAt: new Date(),
         };
-        propertyService.saveTenant(newTenant);
+        await propertyService.saveTenant(newTenant);
       }
 
       setShowTenantForm(false);
@@ -307,8 +307,8 @@ export function TenantList({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Tenants</h2>
-          <p className="text-gray-600 mt-1">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Tenants</h2>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
             Manage all tenant information and rental agreements
           </p>
         </div>
@@ -332,8 +332,8 @@ export function TenantList({
                 <UsersIcon className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Tenants</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm text-gray-600 dark:text-gray-300">Total Tenants</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {stats.total}
                 </p>
               </div>
@@ -348,7 +348,7 @@ export function TenantList({
                 <UserIcon className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Active</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Active</p>
                 <p className="text-2xl font-bold text-green-600">
                   {stats.active}
                 </p>
@@ -364,7 +364,7 @@ export function TenantList({
                 <UserIcon className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Inactive</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Inactive</p>
                 <p className="text-2xl font-bold text-red-600">
                   {stats.inactive}
                 </p>
@@ -380,7 +380,7 @@ export function TenantList({
                 <UserIcon className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">With Properties</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">With Properties</p>
                 <p className="text-2xl font-bold text-purple-600">
                   {stats.withProperties}
                 </p>
@@ -413,7 +413,7 @@ export function TenantList({
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value as any)}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                   >
                     <option value="all">All Status</option>
                     <option value="active">Active</option>
@@ -424,7 +424,7 @@ export function TenantList({
                 <select
                   value={propertyTypeFilter}
                   onChange={(e) => setPropertyTypeFilter(e.target.value as any)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 >
                   <option value="all">All Properties</option>
                   <option value="building">Buildings</option>
@@ -445,14 +445,14 @@ export function TenantList({
               <div className="text-gray-400 mb-4">
                 <UsersIcon className="h-16 w-16 mx-auto" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 {searchQuery ||
                 statusFilter !== "all" ||
                 propertyTypeFilter !== "all"
                   ? "No tenants found"
                   : "No tenants yet"}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
                 {searchQuery ||
                 statusFilter !== "all" ||
                 propertyTypeFilter !== "all"

@@ -6,13 +6,15 @@ export default function FlatsPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Flats</h1>
-              <p className="text-gray-600 mt-1">
-                Manage standalone rental units and individual apartments.
-              </p>
+        <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <div className="p-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Flats</h1>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">
+                  Manage standalone rental units and individual apartments.
+                </p>
+              </div>
             </div>
           </div>
 

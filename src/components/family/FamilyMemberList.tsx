@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { Grid } from "@/components/ui/Grid";
 import { LoadingState } from "@/components/ui/LoadingState";
+import { useFamilyMemberCounts } from "@/hooks/useFamilyMemberCounts";
 import {
   sortByRelationshipPriority,
   sortByAge,
@@ -44,6 +45,10 @@ export function FamilyMemberList({
     useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("relationship");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+
+  // Get dynamic counts for all family members
+  const familyMemberIds = useMemo(() => members.map(member => member.id), [members]);
+  const { getCountsForMember, loading: countsLoading } = useFamilyMemberCounts(familyMemberIds);
 
   // Filter and sort members
   const filteredAndSortedMembers = useMemo(() => {
@@ -108,8 +113,7 @@ export function FamilyMemberList({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Family Members</h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             {members.length} member{members.length !== 1 ? "s" : ""}
             {filteredAndSortedMembers.length !== members.length &&
               ` (${filteredAndSortedMembers.length} shown)`}
@@ -123,7 +127,7 @@ export function FamilyMemberList({
       </div>
 
       {/* Filters and Controls */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-4">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 space-y-4">
         {/* Search */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
@@ -141,22 +145,22 @@ export function FamilyMemberList({
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           {/* Relationship Filter */}
           <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
               Relationship:
             </label>
             <select
               value={selectedRelationship}
               onChange={(e) => setSelectedRelationship(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-1 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all" className="text-gray-900 bg-white">
+              <option value="all" className="text-gray-900 dark:text-white bg-white dark:bg-gray-800">
                 All
               </option>
               {RELATIONSHIP_OPTIONS.map((relationship) => (
                 <option
                   key={relationship}
                   value={relationship}
-                  className="text-gray-900 bg-white"
+                  className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
                 >
                   {relationship}
                 </option>
@@ -166,24 +170,24 @@ export function FamilyMemberList({
 
           {/* Sort Options */}
           <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
               Sort by:
             </label>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="border border-gray-300 rounded-md px-3 py-1 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="relationship" className="text-gray-900 bg-white">
+              <option value="relationship" className="text-gray-900 dark:text-white bg-white dark:bg-gray-800">
                 Relationship
               </option>
-              <option value="name" className="text-gray-900 bg-white">
+              <option value="name" className="text-gray-900 dark:text-white bg-white dark:bg-gray-800">
                 Name
               </option>
-              <option value="age" className="text-gray-900 bg-white">
+              <option value="age" className="text-gray-900 dark:text-white bg-white dark:bg-gray-800">
                 Age
               </option>
-              <option value="recent" className="text-gray-900 bg-white">
+              <option value="recent" className="text-gray-900 dark:text-white bg-white dark:bg-gray-800">
                 Recently Updated
               </option>
             </select>
@@ -191,16 +195,16 @@ export function FamilyMemberList({
 
           {/* View Mode Toggle */}
           <div className="flex items-center space-x-2 ml-auto">
-            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
               View:
             </label>
-            <div className="flex border border-gray-300 rounded-md overflow-hidden">
+            <div className="flex border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
               <button
                 onClick={() => setViewMode("grid")}
                 className={`px-3 py-1 text-sm ${
                   viewMode === "grid"
                     ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`}
               >
                 Grid
@@ -210,7 +214,7 @@ export function FamilyMemberList({
                 className={`px-3 py-1 text-sm ${
                   viewMode === "list"
                     ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`}
               >
                 List
@@ -224,12 +228,12 @@ export function FamilyMemberList({
       {filteredAndSortedMembers.length === 0 ? (
         <div className="text-center py-12">
           <div className="text-gray-400 text-6xl mb-4">👥</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             {searchQuery || selectedRelationship !== "all"
               ? "No matching family members found"
               : "No family members yet"}
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
             {searchQuery || selectedRelationship !== "all"
               ? "Try adjusting your search or filters"
               : "Add your first family member to get started"}
@@ -241,17 +245,22 @@ export function FamilyMemberList({
           {/* Grid View */}
           {viewMode === "grid" && (
             <Grid cols={compact ? 4 : 3} gap="md">
-              {filteredAndSortedMembers.map((member) => (
-                <FamilyMemberCard
-                  key={member.id}
-                  member={member}
-                  onEdit={onEdit}
-                  onView={onView}
-                  onDelete={onDelete}
-                  showActions={showActions}
-                  compact={compact}
-                />
-              ))}
+              {filteredAndSortedMembers.map((member) => {
+                const counts = getCountsForMember(member.id);
+                return (
+                  <FamilyMemberCard
+                    key={member.id}
+                    member={member}
+                    onEdit={onEdit}
+                    onView={onView}
+                    onDelete={onDelete}
+                    showActions={showActions}
+                    compact={compact}
+                    documentCount={counts.documents}
+                    insuranceCount={counts.insurance}
+                  />
+                );
+              })}
             </Grid>
           )}
 
@@ -263,21 +272,26 @@ export function FamilyMemberList({
                 Object.entries(groupedMembers).map(
                   ([relationship, relationshipMembers]) => (
                     <div key={relationship} className="space-y-3">
-                      <h3 className="text-lg font-semibold text-gray-900 capitalize border-b border-gray-200 pb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white capitalize border-b border-gray-200 dark:border-gray-700 pb-2">
                         {relationship} ({relationshipMembers.length})
                       </h3>
                       <div className="space-y-2">
-                        {relationshipMembers.map((member) => (
-                          <FamilyMemberCard
-                            key={member.id}
-                            member={member}
-                            onEdit={onEdit}
-                            onView={onView}
-                            onDelete={onDelete}
-                            showActions={showActions}
-                            compact={true}
-                          />
-                        ))}
+                        {relationshipMembers.map((member) => {
+                          const counts = getCountsForMember(member.id);
+                          return (
+                            <FamilyMemberCard
+                              key={member.id}
+                              member={member}
+                              onEdit={onEdit}
+                              onView={onView}
+                              onDelete={onDelete}
+                              showActions={showActions}
+                              compact={true}
+                              documentCount={counts.documents}
+                              insuranceCount={counts.insurance}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
                   )

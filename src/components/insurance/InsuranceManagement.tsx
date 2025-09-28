@@ -14,6 +14,7 @@ export const InsuranceManagement: React.FC = () => {
     InsurancePolicy["type"] | null
   >(null);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleSelectType = (type: InsurancePolicy["type"]) => {
     setSelectedType(type);
@@ -28,6 +29,8 @@ export const InsuranceManagement: React.FC = () => {
   const handleBackToOverview = () => {
     setViewMode("overview");
     setSelectedType(null);
+    // Trigger refresh when going back to overview
+    setRefreshTrigger(prev => prev + 1);
   };
 
   const handleFormClose = () => {
@@ -35,18 +38,18 @@ export const InsuranceManagement: React.FC = () => {
   };
 
   const handleFormSave = () => {
-    // Refresh the current view
-    if (viewMode === "list") {
-      // The list component will handle its own refresh
-    }
+    // Trigger refresh for both overview and list views
+    setRefreshTrigger(prev => prev + 1);
+    setIsAddFormOpen(false);
   };
 
   return (
-    <>
+    <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
       {viewMode === "overview" && (
         <InsuranceOverview
           onSelectType={handleSelectType}
           onAddNew={handleAddNew}
+          refreshTrigger={refreshTrigger}
         />
       )}
 
@@ -54,6 +57,7 @@ export const InsuranceManagement: React.FC = () => {
         <InsurancePolicyList
           type={selectedType}
           onBack={handleBackToOverview}
+          refreshTrigger={refreshTrigger}
         />
       )}
 
@@ -64,6 +68,6 @@ export const InsuranceManagement: React.FC = () => {
         onSave={handleFormSave}
         defaultType={selectedType || undefined}
       />
-    </>
+    </div>
   );
 };

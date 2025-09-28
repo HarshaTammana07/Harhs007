@@ -37,7 +37,7 @@ export function BuildingsList() {
   const loadBuildings = async () => {
     try {
       setLoading(true);
-      const buildingsData = propertyService.getBuildings();
+      const buildingsData = await propertyService.getBuildings();
       setBuildings(buildingsData);
     } catch (error) {
       console.error("Error loading buildings:", error);
@@ -75,7 +75,7 @@ export function BuildingsList() {
 
   const handleDeleteBuilding = async (buildingId: string) => {
     try {
-      propertyService.deleteBuilding(buildingId);
+      await propertyService.deleteBuilding(buildingId);
       await loadBuildings();
       toast.success("Building deleted successfully");
     } catch (error) {
@@ -89,24 +89,18 @@ export function BuildingsList() {
   };
 
   const handleFormSubmit = async (
-    buildingData: Omit<Building, "id" | "createdAt" | "updatedAt">
+    buildingData: Omit<Building, "id" | "createdAt" | "updatedAt" | "apartments" | "documents">
   ) => {
     try {
       setFormLoading(true);
 
       if (editingBuilding) {
         // Update existing building
-        propertyService.updateBuilding(editingBuilding.id, buildingData);
+        await propertyService.updateBuilding(editingBuilding.id, buildingData);
         toast.success("Building updated successfully");
       } else {
-        // Create new building
-        const newBuilding: Building = {
-          ...buildingData,
-          id: `building_${Date.now()}`,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        propertyService.saveBuilding(newBuilding);
+        // Create new building - PropertyService now handles ID generation
+        await propertyService.saveBuilding(buildingData);
         toast.success("Building created successfully");
       }
 
@@ -137,7 +131,7 @@ export function BuildingsList() {
 
   if (showForm) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 p-6">
         <Breadcrumb items={breadcrumbItems} />
         <BuildingForm
           building={editingBuilding || undefined}
@@ -150,14 +144,14 @@ export function BuildingsList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <Breadcrumb items={breadcrumbItems} />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Buildings</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Buildings</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
             Manage apartment buildings and their units
           </p>
         </div>
@@ -173,16 +167,16 @@ export function BuildingsList() {
       {/* Search and Stats */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1 relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
           <Input
             type="text"
             placeholder="Search buildings by name, code, or address..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
         </div>
-        <div className="flex items-center space-x-4 text-sm text-gray-600">
+        <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
           <span className="flex items-center">
             <BuildingOfficeIcon className="h-4 w-4 mr-1" />
             {filteredBuildings.length} Buildings
@@ -193,11 +187,11 @@ export function BuildingsList() {
       {/* Buildings Grid */}
       {filteredBuildings.length === 0 ? (
         <div className="text-center py-12">
-          <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
             {searchQuery ? "No buildings found" : "No buildings yet"}
           </h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             {searchQuery
               ? "Try adjusting your search terms"
               : "Get started by creating your first building"}
@@ -228,7 +222,7 @@ export function BuildingsList() {
       {/* Summary Stats */}
       {filteredBuildings.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Buildings Overview
           </h3>
           <BuildingStats buildings={filteredBuildings} />

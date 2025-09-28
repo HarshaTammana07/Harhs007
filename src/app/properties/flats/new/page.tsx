@@ -51,22 +51,24 @@ export default function NewFlatPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
-          <div>
-            <Breadcrumb items={breadcrumbItems} />
-            <div className="mt-4">
-              <h1 className="text-3xl font-bold text-gray-900">Add New Flat</h1>
-              <p className="text-gray-600 mt-1">
-                Create a new standalone rental unit or individual apartment.
-              </p>
+        <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <div className="p-6">
+            <div>
+              <Breadcrumb items={breadcrumbItems} />
+              <div className="mt-4">
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Add New Flat</h1>
+                <p className="text-gray-600 dark:text-gray-300 mt-1">
+                  Create a new standalone rental unit or individual apartment.
+                </p>
+              </div>
             </div>
-          </div>
 
-          <FlatForm
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            loading={loading}
-          />
+            <FlatForm
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              loading={loading}
+            />
+          </div>
         </div>
       </AppLayout>
     </ProtectedRoute>

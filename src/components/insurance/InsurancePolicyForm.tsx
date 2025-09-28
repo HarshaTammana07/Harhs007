@@ -13,8 +13,7 @@ import {
 } from "@/components/ui";
 
 import { InsurancePolicy, FamilyMember, Document } from "@/types";
-import { insuranceService } from "@/services/InsuranceService";
-import { familyMemberService } from "@/services/FamilyMemberService";
+import { ApiService } from "@/services/ApiService";
 import { fileService } from "@/services/FileService";
 import toast from "react-hot-toast";
 
@@ -59,9 +58,16 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
     watch,
   } = useForm<InsurancePolicyFormData>();
 
+  // Load family members when modal opens
   useEffect(() => {
     if (isOpen) {
       loadFamilyMembers();
+    }
+  }, [isOpen]);
+
+  // Set form values after family members are loaded
+  useEffect(() => {
+    if (isOpen && familyMembers.length > 0) {
       if (policy) {
         // Populate form with existing policy data
         setValue("policyNumber", policy.policyNumber);
@@ -89,36 +95,35 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
         setValue("status", "active");
       }
     }
-  }, [isOpen, policy, defaultType, setValue]);
+  }, [isOpen, policy, defaultType, setValue, familyMembers]);
 
-  const loadFamilyMembers = () => {
-    const members = familyMemberService.getAllFamilyMembers();
-    setFamilyMembers(members);
+  const loadFamilyMembers = async () => {
+    try {
+      const members = await ApiService.getFamilyMembers();
+      setFamilyMembers(members);
+    } catch (error) {
+      console.error("Failed to load family members:", error);
+      toast.error("Failed to load family members");
+    }
   };
 
   const handleFileUpload = async (files: File[]) => {
     try {
-      const newDocuments: Document[] = [];
-
+      const uploadedDocs: Document[] = [];
       for (const file of files) {
-        const base64Data = await fileService.convertToBase64(file);
-        const document: Document = {
-          id: Date.now().toString() + Math.random().toString(36).substr(2),
-          title: file.name,
-          category: "insurance_documents",
-          fileData: base64Data,
+        const fileData = await fileService.readFileAsDataURL(file);
+        const doc: Document = {
+          id: `doc_${Date.now()}_${Math.random()}`,
           fileName: file.name,
           fileSize: file.size,
           mimeType: file.type,
-          tags: ["insurance"],
+          fileData,
           createdAt: new Date(),
-          updatedAt: new Date(),
         };
-        newDocuments.push(document);
+        uploadedDocs.push(doc);
       }
-
-      setDocuments((prev) => [...prev, ...newDocuments]);
-      toast.success(`${newDocuments.length} document(s) uploaded successfully`);
+      setDocuments((prev) => [...prev, ...uploadedDocs]);
+      toast.success(`${files.length} document(s) uploaded successfully`);
     } catch (error) {
       console.error("Error uploading files:", error);
       toast.error("Failed to upload documents");
@@ -129,26 +134,35 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
     setDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
   };
 
+  const handleClose = () => {
+    reset();
+    setDocuments([]);
+    onClose();
+  };
+
   const onSubmit = async (data: InsurancePolicyFormData) => {
-    setIsSubmitting(true);
     try {
-      const policyData = {
-        ...data,
-        premiumAmount: Number(data.premiumAmount),
-        coverageAmount: Number(data.coverageAmount),
+      setIsSubmitting(true);
+
+      const policyData: Omit<InsurancePolicy, "id" | "createdAt" | "updatedAt"> = {
+        policyNumber: data.policyNumber,
+        type: data.type,
+        provider: data.provider,
+        familyMemberId: data.familyMemberId,
+        premiumAmount: data.premiumAmount,
+        coverageAmount: data.coverageAmount,
         startDate: new Date(data.startDate),
         endDate: new Date(data.endDate),
         renewalDate: new Date(data.renewalDate),
+        status: data.status,
         documents,
       };
 
       if (policy) {
-        // Update existing policy
-        insuranceService.updatePolicy(policy.id, policyData);
+        await ApiService.updateInsurancePolicy(policy.id, policyData);
         toast.success("Policy updated successfully");
       } else {
-        // Create new policy
-        insuranceService.createPolicy(policyData);
+        await ApiService.createInsurancePolicy(policyData);
         toast.success("Policy created successfully");
       }
 
@@ -162,19 +176,11 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
     }
   };
 
-  const handleClose = () => {
-    reset();
-    setDocuments([]);
-    onClose();
-  };
-
-  const selectedType = watch("type");
-
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} size="lg">
-      <Card>
+    <Modal isOpen={isOpen} onClose={handleClose} size="xl">
+      <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="text-gray-900 dark:text-white">
             {policy ? "Edit Insurance Policy" : "Add New Insurance Policy"}
           </CardTitle>
         </CardHeader>
@@ -183,7 +189,7 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
             {/* Basic Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Policy Number *
                 </label>
                 <Input
@@ -191,23 +197,24 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                     required: "Policy number is required",
                   })}
                   placeholder="Enter policy number"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {errors.policyNumber && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                     {errors.policyNumber.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Insurance Type *
                 </label>
                 <select
                   {...register("type", {
                     required: "Insurance type is required",
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                   <option value="">Select type</option>
                   <option value="car">Car Insurance</option>
@@ -216,14 +223,14 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                   <option value="health">Health Insurance</option>
                 </select>
                 {errors.type && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                     {errors.type.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Insurance Provider *
                 </label>
                 <Input
@@ -231,23 +238,24 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                     required: "Provider is required",
                   })}
                   placeholder="Enter insurance provider"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {errors.provider && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                     {errors.provider.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Family Member *
                 </label>
                 <select
                   {...register("familyMemberId", {
                     required: "Family member is required",
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                   <option value="">Select family member</option>
                   {familyMembers.map((member) => (
@@ -257,7 +265,7 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                   ))}
                 </select>
                 {errors.familyMemberId && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                     {errors.familyMemberId.message}
                   </p>
                 )}
@@ -267,7 +275,7 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
             {/* Financial Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Premium Amount (₹) *
                 </label>
                 <Input
@@ -277,16 +285,17 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                     min: { value: 0, message: "Amount must be positive" },
                   })}
                   placeholder="Enter premium amount"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {errors.premiumAmount && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                     {errors.premiumAmount.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Coverage Amount (₹) *
                 </label>
                 <Input
@@ -296,19 +305,20 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                     min: { value: 0, message: "Amount must be positive" },
                   })}
                   placeholder="Enter coverage amount"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {errors.coverageAmount && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                     {errors.coverageAmount.message}
                   </p>
                 )}
               </div>
             </div>
 
-            {/* Dates */}
+            {/* Date Information */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Start Date *
                 </label>
                 <Input
@@ -316,31 +326,35 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                   {...register("startDate", {
                     required: "Start date is required",
                   })}
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {errors.startDate && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                     {errors.startDate.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   End Date *
                 </label>
                 <Input
                   type="date"
-                  {...register("endDate", { required: "End date is required" })}
+                  {...register("endDate", {
+                    required: "End date is required",
+                  })}
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {errors.endDate && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                     {errors.endDate.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Renewal Date *
                 </label>
                 <Input
@@ -348,9 +362,10 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                   {...register("renewalDate", {
                     required: "Renewal date is required",
                   })}
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {errors.renewalDate && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-1">
                     {errors.renewalDate.message}
                   </p>
                 )}
@@ -359,12 +374,14 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Status
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Status *
               </label>
               <select
-                {...register("status")}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {...register("status", {
+                  required: "Status is required",
+                })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
                 <option value="active">Active</option>
                 <option value="expired">Expired</option>
@@ -374,7 +391,7 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
 
             {/* Document Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Policy Documents
               </label>
               <div>
@@ -388,9 +405,9 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                       handleFileUpload(files);
                     }
                   }}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-400 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   Select multiple files (PDF, JPG, PNG, DOC, DOCX) up to 5MB
                   each
                 </p>
@@ -398,19 +415,19 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
 
               {documents.length > 0 && (
                 <div className="mt-4 space-y-2">
-                  <h4 className="text-sm font-medium text-gray-700">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Uploaded Documents:
                   </h4>
                   {documents.map((doc) => (
                     <div
                       key={doc.id}
-                      className="flex items-center justify-between bg-gray-50 p-3 rounded"
+                      className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-3 rounded border border-gray-200 dark:border-gray-600"
                     >
                       <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
                           {doc.fileName}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           {fileService.formatFileSize(doc.fileSize)} •{" "}
                           {doc.mimeType}
                         </div>
@@ -423,6 +440,7 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                           onClick={() =>
                             fileService.downloadFile(doc.fileData, doc.fileName)
                           }
+                          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                         >
                           Download
                         </Button>
@@ -431,7 +449,7 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
                           variant="outline"
                           size="sm"
                           onClick={() => handleRemoveDocument(doc.id)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 border-gray-300 dark:border-gray-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                         >
                           Remove
                         </Button>
@@ -443,12 +461,13 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
             </div>
 
             {/* Form Actions */}
-            <div className="flex justify-end space-x-3 pt-4 border-t">
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleClose}
                 disabled={isSubmitting}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Cancel
               </Button>

@@ -1,19 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FamilyMember } from "@/types";
 import { FamilyMemberList } from "./FamilyMemberList";
 import { FamilyMemberForm } from "./FamilyMemberForm";
 import { FamilyMemberDetail } from "./FamilyMemberDetail";
-import { familyMemberService } from "@/services/FamilyMemberService";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { useClientSideEffect } from "@/hooks/useClientSide";
+import { useFamilyMembers } from "@/hooks/useFamilyMembers";
+import toast from "react-hot-toast";
 
 export const FamilyManagement: React.FC = () => {
-  const [members, setMembers] = useState<FamilyMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use reliable family members hook for immediate state updates
+  const {
+    members,
+    loading,
+    error,
+    createMember,
+    updateMember,
+    deleteMember,
+    refresh,
+  } = useFamilyMembers();
 
   // Modal states
   const [showForm, setShowForm] = useState(false);
@@ -22,30 +29,6 @@ export const FamilyManagement: React.FC = () => {
     null
   );
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
-
-  // Load family members on component mount (client-side only)
-  useClientSideEffect(() => {
-    loadFamilyMembers();
-  }, []);
-
-  const loadFamilyMembers = () => {
-    // Don't try to load family members during SSR
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-      const familyMembers = familyMemberService.getAllFamilyMembers();
-      setMembers(familyMembers);
-    } catch (err) {
-      console.error("Error loading family members:", err);
-      setError("Failed to load family members. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAddMember = () => {
     setEditingMember(null);
@@ -62,37 +45,36 @@ export const FamilyManagement: React.FC = () => {
     setShowDetail(true);
   };
 
-  const handleDeleteMember = async (memberId: string) => {
+  const handleDeleteMember = async (member: FamilyMember) => {
     if (
       window.confirm(
-        "Are you sure you want to delete this family member? This action cannot be undone."
+        `Are you sure you want to delete ${member.fullName}? This action cannot be undone.`
       )
     ) {
       try {
-        familyMemberService.deleteFamilyMember(memberId);
-        loadFamilyMembers(); // Refresh the list
+        await deleteMember(member.id);
       } catch (err) {
         console.error("Error deleting family member:", err);
-        setError("Failed to delete family member. Please try again.");
+        // Error handling is done in the hook
       }
     }
   };
 
-  const handleFormSubmit = (memberData: any) => {
+  const handleFormSubmit = async (memberData: unknown) => {
     try {
       if (editingMember) {
         // Update existing member
-        familyMemberService.updateFamilyMember(editingMember.id, memberData);
+        await updateMember(editingMember.id, memberData);
       } else {
         // Create new member
-        familyMemberService.createFamilyMember(memberData);
+        await createMember(memberData);
       }
-      loadFamilyMembers(); // Refresh the list
+
       setShowForm(false);
       setEditingMember(null);
     } catch (err) {
       console.error("Error saving family member:", err);
-      setError("Failed to save family member. Please try again.");
+      // Error handling is done in the hook
     }
   };
 
@@ -113,10 +95,10 @@ export const FamilyManagement: React.FC = () => {
   if (error) {
     return (
       <div className="text-center">
-        <div className="text-red-600 text-lg font-medium">{error}</div>
+        <div className="text-red-600 dark:text-red-400 text-lg font-medium">{error}</div>
         <button
-          onClick={loadFamilyMembers}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          onClick={refresh}
+          className="mt-4 px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600"
         >
           Try Again
         </button>
@@ -129,10 +111,10 @@ export const FamilyManagement: React.FC = () => {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Family Management
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-600 dark:text-gray-300 mt-1">
             Manage family member profiles and personal information
           </p>
         </div>
@@ -151,8 +133,8 @@ export const FamilyManagement: React.FC = () => {
         <FamilyMemberForm
           member={editingMember}
           isOpen={showForm}
-          onSubmit={handleFormSubmit}
-          onCancel={handleFormCancel}
+          onSave={handleFormSubmit}
+          onClose={handleFormCancel}
         />
 
         {/* Family Member Detail Modal */}
@@ -167,7 +149,7 @@ export const FamilyManagement: React.FC = () => {
             }}
             onDelete={() => {
               handleDetailClose();
-              handleDeleteMember(selectedMember.id);
+              handleDeleteMember(selectedMember);
             }}
           />
         )}

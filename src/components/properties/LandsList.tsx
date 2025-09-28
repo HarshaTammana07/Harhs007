@@ -33,7 +33,7 @@ export function LandsList() {
   const loadLands = async () => {
     try {
       setLoading(true);
-      const landsData = propertyService.getLands();
+      const landsData = await propertyService.getLands();
       setLands(landsData);
     } catch (error) {
       console.error("Error loading lands:", error);
@@ -90,9 +90,9 @@ export function LandsList() {
     }
 
     try {
-      propertyService.deleteLand(landId);
+      await propertyService.deleteLand(landId);
       toast.success("Land property deleted successfully");
-      loadLands();
+      await loadLands();
     } catch (error) {
       console.error("Error deleting land:", error);
       toast.error("Failed to delete land property");
@@ -104,11 +104,11 @@ export function LandsList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header with Add Button */}
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-semibold text-gray-900">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             All Land Properties ({filteredLands.length})
           </h2>
         </div>
@@ -119,18 +119,18 @@ export function LandsList() {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white p-4 rounded-lg border border-gray-200">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="flex-1">
             <div className="relative">
-              <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
               <Input
                 type="text"
                 placeholder="Search lands by name, address, or survey number..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
           </div>
@@ -142,7 +142,7 @@ export function LandsList() {
               onChange={(e) =>
                 setLeaseFilter(e.target.value as "all" | "leased" | "vacant")
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
               <option value="all">All Properties</option>
               <option value="leased">Leased</option>
@@ -164,7 +164,7 @@ export function LandsList() {
                     | "industrial"
                 )
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
               <option value="all">All Zoning</option>
               <option value="residential">Residential</option>
@@ -179,7 +179,7 @@ export function LandsList() {
       {/* Lands Grid */}
       {filteredLands.length === 0 ? (
         <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
+          <div className="text-gray-400 dark:text-gray-500 mb-4">
             <svg
               className="mx-auto h-12 w-12"
               fill="none"
@@ -194,12 +194,12 @@ export function LandsList() {
               />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             {searchQuery || leaseFilter !== "all" || zoningFilter !== "all"
               ? "No land properties found"
               : "No land properties yet"}
           </h3>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 dark:text-gray-300 mb-4">
             {searchQuery || leaseFilter !== "all" || zoningFilter !== "all"
               ? "Try adjusting your search or filters."
               : "Get started by adding your first land property."}
@@ -230,33 +230,33 @@ export function LandsList() {
 
       {/* Summary Stats */}
       {lands.length > 0 && (
-        <div className="bg-gray-50 rounded-lg p-4">
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
                 {lands.length}
               </div>
-              <div className="text-sm text-gray-600">Total Properties</div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">Total Properties</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
                 {lands.filter((l) => l.isLeased).length}
               </div>
-              <div className="text-sm text-gray-600">Leased</div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">Leased</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-orange-600">
+              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                 {lands.filter((l) => !l.isLeased).length}
               </div>
-              <div className="text-sm text-gray-600">Vacant</div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">Vacant</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {lands
                   .reduce((total, land) => total + land.area, 0)
                   .toLocaleString()}
               </div>
-              <div className="text-sm text-gray-600">Total Area (sq ft)</div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">Total Area (sq ft)</div>
             </div>
           </div>
         </div>

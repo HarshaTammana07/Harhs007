@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { FamilyMember, Document } from "@/types";
+import { FamilyMember, Document, InsurancePolicy } from "@/types";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { FilePreview } from "@/components/ui/FilePreview";
+import { FamilyApiService } from "@/services/FamilyApiService";
+import toast from "react-hot-toast";
 import {
   getInitials,
-  formatContactInfo,
   getRelationshipColor,
   hasAlerts,
   getAlertCount,
@@ -37,6 +38,82 @@ export function FamilyMemberDetail({
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(
     null
   );
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [insurancePolicies, setInsurancePolicies] = useState<InsurancePolicy[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadMemberData = React.useCallback(async () => {
+    if (!member?.id) return;
+    
+    try {
+      setLoading(true);
+      const [documentsData, policiesData] = await Promise.all([
+        FamilyApiService.getDocumentsByFamilyMember(member.id),
+        FamilyApiService.getInsurancePoliciesByFamilyMember(member.id),
+      ]);
+      
+      setDocuments(documentsData);
+      setInsurancePolicies(policiesData);
+    } catch (error) {
+      console.error("Error loading member data:", error);
+      toast.error("Failed to load member documents and policies");
+    } finally {
+      setLoading(false);
+    }
+  }, [member?.id]);
+
+  // Load documents and insurance policies when member changes
+  useEffect(() => {
+    if (member?.id && isOpen) {
+      loadMemberData();
+    }
+  }, [member?.id, isOpen, loadMemberData]);
+
+  const downloadDocument = React.useCallback((document: Document) => {
+    try {
+      if (!document.fileData) {
+        toast.error("No file data available for download");
+        return;
+      }
+
+      // Check if fileData is base64 encoded or already has data URL prefix
+      let base64Data = document.fileData;
+      if (base64Data.startsWith('data:')) {
+        // Extract base64 part from data URL
+        base64Data = base64Data.split(',')[1];
+      }
+
+      // Create a blob from the base64 data
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: document.mimeType || 'application/octet-stream' });
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = window.document.createElement('a');
+      link.href = url;
+      link.download = document.fileName || `${document.title}.pdf`;
+      
+      // Append to body, click, and remove
+      window.document.body.appendChild(link);
+      link.click();
+      window.document.body.removeChild(link);
+      
+      // Clean up the URL
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 100);
+
+      toast.success(`Downloaded ${document.title}`);
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error(`Failed to download document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }, []);
 
   const alertCount = getAlertCount(member);
   const hasAlert = hasAlerts(member);
@@ -89,7 +166,7 @@ export function FamilyMemberDetail({
     }
 
     // Expiring documents
-    member.documents.forEach((doc) => {
+    documents.forEach((doc) => {
       if (doc.expiryDate) {
         const expiryDate = new Date(doc.expiryDate);
         if (expiryDate <= thirtyDaysFromNow && expiryDate >= today) {
@@ -104,7 +181,7 @@ export function FamilyMemberDetail({
     });
 
     // Insurance renewals
-    member.insurancePolicies.forEach((policy) => {
+    insurancePolicies.forEach((policy) => {
       const renewalDate = new Date(policy.renewalDate);
       if (renewalDate <= thirtyDaysFromNow && renewalDate >= today) {
         events.push({
@@ -154,10 +231,10 @@ export function FamilyMemberDetail({
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {member.fullName}
                   </h2>
-                  <p className="text-lg text-gray-600">{member.nickname}</p>
+                  <p className="text-lg text-gray-600 dark:text-gray-300">{member.nickname}</p>
                   <div className="mt-2 flex items-center space-x-3">
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${relationshipColor}`}
@@ -165,7 +242,7 @@ export function FamilyMemberDetail({
                       {member.relationship}
                     </span>
                     {member.dateOfBirth && (
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         Age {calculateAge(member.dateOfBirth)}
                       </span>
                     )}
@@ -198,11 +275,11 @@ export function FamilyMemberDetail({
 
               {/* Alerts */}
               {hasAlert && (
-                <div className="mt-4 bg-orange-50 border border-orange-200 rounded-md p-3">
+                <div className="mt-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-md p-3">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
                       <svg
-                        className="h-5 w-5 text-orange-400"
+                        className="h-5 w-5 text-orange-400 dark:text-orange-300"
                         viewBox="0 0 20 20"
                         fill="currentColor"
                       >
@@ -214,7 +291,7 @@ export function FamilyMemberDetail({
                       </svg>
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm font-medium text-orange-800">
+                      <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
                         {alertCount} alert{alertCount !== 1 ? "s" : ""} require
                         attention
                       </p>
@@ -226,26 +303,26 @@ export function FamilyMemberDetail({
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-gray-200">
+          <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="-mb-px flex space-x-8">
               {[
                 { id: "overview", label: "Overview" },
                 {
                   id: "documents",
-                  label: `Documents (${member.documents.length})`,
+                  label: `Documents (${documents.length})`,
                 },
                 {
                   id: "insurance",
-                  label: `Insurance (${member.insurancePolicies.length})`,
+                  label: `Insurance (${insurancePolicies.length})`,
                 },
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as "overview" | "documents" | "insurance")}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.id
                       ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
                   {tab.label}
@@ -260,31 +337,31 @@ export function FamilyMemberDetail({
               <div className="space-y-6">
                 {/* Contact Information */}
                 <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Contact Information
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Phone
                       </label>
-                      <p className="mt-1 text-sm text-gray-900">
+                      <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                         {member.contactInfo.phone || "Not provided"}
                       </p>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Email
                       </label>
-                      <p className="mt-1 text-sm text-gray-900">
+                      <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                         {member.contactInfo.email || "Not provided"}
                       </p>
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Address
                       </label>
-                      <p className="mt-1 text-sm text-gray-900">
+                      <p className="mt-1 text-sm text-gray-900 dark:text-gray-100">
                         {member.contactInfo.address || "Not provided"}
                       </p>
                     </div>
@@ -293,25 +370,25 @@ export function FamilyMemberDetail({
 
                 {/* Profile Completion */}
                 <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Profile Completion
                   </h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">
                         Overall completion
                       </span>
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {completionPercentage}%
                       </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${completionPercentage}%` }}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4 mt-4 text-xs text-gray-500">
+                    <div className="grid grid-cols-2 gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
                       <div className="flex items-center">
                         <span
                           className={`w-2 h-2 rounded-full mr-2 ${member.fullName ? "bg-green-500" : "bg-gray-300"}`}
@@ -367,7 +444,7 @@ export function FamilyMemberDetail({
                 {/* Upcoming Events */}
                 {upcomingEvents.length > 0 && (
                   <Card className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                       Upcoming Events
                     </h3>
                     <div className="space-y-3">
@@ -377,18 +454,18 @@ export function FamilyMemberDetail({
                           className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-md"
                         >
                           <div>
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
                               {event.title}
                             </p>
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                               {event.description}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
                               {event.date.toLocaleDateString()}
                             </p>
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
                               {Math.ceil(
                                 (event.date.getTime() - new Date().getTime()) /
                                   (1000 * 60 * 60 * 24)
@@ -404,19 +481,19 @@ export function FamilyMemberDetail({
 
                 {/* Statistics */}
                 <Card className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     Statistics
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600">
-                        {member.documents.length}
+                        {documents.length}
                       </div>
                       <div className="text-sm text-gray-600">Documents</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600">
-                        {member.insurancePolicies.length}
+                        {insurancePolicies.length}
                       </div>
                       <div className="text-sm text-gray-600">
                         Insurance Policies
@@ -443,27 +520,28 @@ export function FamilyMemberDetail({
 
             {activeTab === "documents" && (
               <div className="space-y-4">
-                {member.documents.length === 0 ? (
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-gray-600 mt-2">Loading documents...</p>
+                  </div>
+                ) : documents.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-gray-400 text-6xl mb-4">📄</div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
                       No documents yet
                     </h3>
                     <p className="text-gray-600">
-                      Documents will appear here when added
+                      Documents will appear here when added for {member.fullName}
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {member.documents.map((document) => (
-                      <Card
-                        key={document.id}
-                        className="p-4 cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => setSelectedDocument(document)}
-                      >
-                        <div className="flex items-start space-x-3">
+                  <div className="space-y-4">
+                    {documents.map((document) => (
+                      <Card key={document.id} className="p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start space-x-4">
                           <div className="flex-shrink-0">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                               <svg
                                 className="w-6 h-6 text-blue-600"
                                 fill="none"
@@ -479,21 +557,51 @@ export function FamilyMemberDetail({
                               </svg>
                             </div>
                           </div>
+                          
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
+                            <h4 className="text-base font-medium text-gray-900 truncate">
                               {document.title}
-                            </p>
-                            <p className="text-xs text-gray-500 capitalize">
+                            </h4>
+                            <p className="text-sm text-gray-500 capitalize mt-1">
                               {document.category.replace("_", " ")}
                             </p>
-                            {document.expiryDate && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                Expires:{" "}
-                                {new Date(
-                                  document.expiryDate
-                                ).toLocaleDateString()}
-                              </p>
-                            )}
+                            
+                            <div className="flex flex-wrap gap-4 mt-2 text-xs text-gray-500">
+                              {document.expiryDate && (
+                                <span>
+                                  Expires: {new Date(document.expiryDate).toLocaleDateString()}
+                                </span>
+                              )}
+                              {document.fileSize && (
+                                <span>
+                                  Size: {(document.fileSize / 1024 / 1024).toFixed(2)} MB
+                                </span>
+                              )}
+                              {document.issuer && (
+                                <span>
+                                  Issuer: {document.issuer}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="flex-shrink-0 flex space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedDocument(document)}
+                              className="whitespace-nowrap"
+                            >
+                              👁️ View
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => downloadDocument(document)}
+                              className="whitespace-nowrap"
+                            >
+                              📥 Download
+                            </Button>
                           </div>
                         </div>
                       </Card>
@@ -505,19 +613,24 @@ export function FamilyMemberDetail({
 
             {activeTab === "insurance" && (
               <div className="space-y-4">
-                {member.insurancePolicies.length === 0 ? (
+                {loading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                    <p className="text-gray-600 mt-2">Loading insurance policies...</p>
+                  </div>
+                ) : insurancePolicies.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-gray-400 text-6xl mb-4">🛡️</div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
                       No insurance policies yet
                     </h3>
                     <p className="text-gray-600">
-                      Insurance policies will appear here when added
+                      Insurance policies will appear here when added for {member.fullName}
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {member.insurancePolicies.map((policy) => (
+                    {insurancePolicies.map((policy) => (
                       <Card key={policy.id} className="p-6">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -593,13 +706,9 @@ export function FamilyMemberDetail({
           size="lg"
         >
           <FilePreview
-            file={{
-              name: selectedDocument.fileName,
-              size: selectedDocument.fileSize,
-              type: selectedDocument.mimeType,
-              data: selectedDocument.fileData,
-            }}
-            onClose={() => setSelectedDocument(null)}
+            document={selectedDocument}
+            onDownload={downloadDocument}
+            showActions={true}
           />
         </Modal>
       )}

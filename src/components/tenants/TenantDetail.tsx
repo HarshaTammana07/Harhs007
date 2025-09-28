@@ -128,10 +128,10 @@ export function TenantDetail({
             <UserIcon className="h-8 w-8 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {tenant.personalInfo.fullName}
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
               {tenant.personalInfo.occupation}
               {tenant.personalInfo.employer &&
                 ` at ${tenant.personalInfo.employer}`}
@@ -203,10 +203,10 @@ export function TenantDetail({
                 <HomeIcon className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">
                   {propertyInfo.propertyName}
                 </p>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-300">
                   {propertyInfo.propertyType.charAt(0).toUpperCase() +
                     propertyInfo.propertyType.slice(1)}
                   {propertyInfo.unitInfo && ` • ${propertyInfo.unitInfo}`}
@@ -232,40 +232,40 @@ export function TenantDetail({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Full Name
                     </label>
-                    <p className="text-gray-900 font-medium">
+                    <p className="text-gray-900 dark:text-white font-medium">
                       {tenant.personalInfo.fullName}
                     </p>
                   </div>
 
                   {tenant.personalInfo.dateOfBirth && (
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Date of Birth
                       </label>
-                      <p className="text-gray-900">
+                      <p className="text-gray-900 dark:text-white">
                         {formatDate(tenant.personalInfo.dateOfBirth)}
                       </p>
                     </div>
                   )}
 
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Occupation
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-gray-900 dark:text-white">
                       {tenant.personalInfo.occupation}
                     </p>
                   </div>
 
                   {tenant.personalInfo.employer && (
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Employer
                       </label>
-                      <p className="text-gray-900">
+                      <p className="text-gray-900 dark:text-white">
                         {tenant.personalInfo.employer}
                       </p>
                     </div>
@@ -275,39 +275,39 @@ export function TenantDetail({
                 <div className="space-y-4">
                   {tenant.personalInfo.monthlyIncome && (
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Monthly Income
                       </label>
-                      <p className="text-gray-900 font-semibold">
+                      <p className="text-gray-900 dark:text-white font-semibold">
                         {formatCurrency(tenant.personalInfo.monthlyIncome)}
                       </p>
                     </div>
                   )}
 
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Marital Status
                     </label>
-                    <p className="text-gray-900 capitalize">
+                    <p className="text-gray-900 dark:text-white capitalize">
                       {tenant.personalInfo.maritalStatus}
                     </p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Family Size
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-gray-900 dark:text-white">
                       {tenant.personalInfo.familySize} member
                       {tenant.personalInfo.familySize !== 1 ? "s" : ""}
                     </p>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Nationality
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-gray-900 dark:text-white">
                       {tenant.personalInfo.nationality}
                     </p>
                   </div>
@@ -330,10 +330,10 @@ export function TenantDetail({
                   <div className="flex items-center space-x-3">
                     <PhoneIcon className="h-5 w-5 text-gray-400" />
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Phone
                       </label>
-                      <p className="text-gray-900 font-medium">
+                      <p className="text-gray-900 dark:text-white font-medium">
                         {tenant.contactInfo.phone}
                       </p>
                     </div>
@@ -343,10 +343,10 @@ export function TenantDetail({
                     <div className="flex items-center space-x-3">
                       <EnvelopeIcon className="h-5 w-5 text-gray-400" />
                       <div>
-                        <label className="text-sm font-medium text-gray-600">
+                        <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                           Email
                         </label>
-                        <p className="text-gray-900">
+                        <p className="text-gray-900 dark:text-white">
                           {tenant.contactInfo.email}
                         </p>
                       </div>
@@ -359,10 +359,10 @@ export function TenantDetail({
                     <div className="flex items-start space-x-3">
                       <MapPinIcon className="h-5 w-5 text-gray-400 mt-1" />
                       <div>
-                        <label className="text-sm font-medium text-gray-600">
+                        <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                           Address
                         </label>
-                        <p className="text-gray-900">
+                        <p className="text-gray-900 dark:text-white">
                           {tenant.contactInfo.address}
                         </p>
                       </div>
@@ -385,37 +385,37 @@ export function TenantDetail({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Name
                     </label>
-                    <p className="text-gray-900 font-medium">
+                    <p className="text-gray-900 dark:text-white font-medium">
                       {tenant.emergencyContact.name}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Relationship
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-gray-900 dark:text-white">
                       {tenant.emergencyContact.relationship}
                     </p>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Phone
                     </label>
-                    <p className="text-gray-900 font-medium">
+                    <p className="text-gray-900 dark:text-white font-medium">
                       {tenant.emergencyContact.phone}
                     </p>
                   </div>
                   {tenant.emergencyContact.email && (
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Email
                       </label>
-                      <p className="text-gray-900">
+                      <p className="text-gray-900 dark:text-white">
                         {tenant.emergencyContact.email}
                       </p>
                     </div>
@@ -424,10 +424,10 @@ export function TenantDetail({
               </div>
               {tenant.emergencyContact.address && (
                 <div className="mt-4">
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Address
                   </label>
-                  <p className="text-gray-900">
+                  <p className="text-gray-900 dark:text-white">
                     {tenant.emergencyContact.address}
                   </p>
                 </div>
@@ -447,61 +447,61 @@ export function TenantDetail({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Agreement Number
                     </label>
-                    <p className="text-gray-900 font-medium">
+                    <p className="text-gray-900 dark:text-white font-medium">
                       {tenant.rentalAgreement.agreementNumber}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Start Date
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-gray-900 dark:text-white">
                       {formatDate(tenant.rentalAgreement.startDate)}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       End Date
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-gray-900 dark:text-white">
                       {formatDate(tenant.rentalAgreement.endDate)}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Payment Method
                     </label>
-                    <p className="text-gray-900 capitalize">
+                    <p className="text-gray-900 dark:text-white capitalize">
                       {tenant.rentalAgreement.paymentMethod.replace("_", " ")}
                     </p>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Monthly Rent
                     </label>
-                    <p className="text-gray-900 font-semibold text-lg">
+                    <p className="text-gray-900 dark:text-white font-semibold text-lg">
                       {formatCurrency(tenant.rentalAgreement.rentAmount)}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Security Deposit
                     </label>
-                    <p className="text-gray-900 font-semibold">
+                    <p className="text-gray-900 dark:text-white font-semibold">
                       {formatCurrency(tenant.rentalAgreement.securityDeposit)}
                     </p>
                   </div>
                   {tenant.rentalAgreement.maintenanceCharges && (
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Maintenance Charges
                       </label>
-                      <p className="text-gray-900">
+                      <p className="text-gray-900 dark:text-white">
                         {formatCurrency(
                           tenant.rentalAgreement.maintenanceCharges
                         )}
@@ -509,10 +509,10 @@ export function TenantDetail({
                     </div>
                   )}
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Rent Due Date
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-gray-900 dark:text-white">
                       {tenant.rentalAgreement.rentDueDate} of every month
                     </p>
                   </div>
@@ -521,19 +521,19 @@ export function TenantDetail({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Notice Period
                   </label>
-                  <p className="text-gray-900">
+                  <p className="text-gray-900 dark:text-white">
                     {tenant.rentalAgreement.noticePeriod} days
                   </p>
                 </div>
                 {tenant.rentalAgreement.lateFeeAmount && (
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Late Fee
                     </label>
-                    <p className="text-gray-900">
+                    <p className="text-gray-900 dark:text-white">
                       {formatCurrency(tenant.rentalAgreement.lateFeeAmount)}
                     </p>
                   </div>
@@ -542,10 +542,10 @@ export function TenantDetail({
 
               {tenant.rentalAgreement.renewalTerms && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Renewal Terms
                   </label>
-                  <p className="text-gray-900">
+                  <p className="text-gray-900 dark:text-white">
                     {tenant.rentalAgreement.renewalTerms}
                   </p>
                 </div>
@@ -554,10 +554,10 @@ export function TenantDetail({
               {tenant.rentalAgreement.specialConditions &&
                 tenant.rentalAgreement.specialConditions.length > 0 && (
                   <div>
-                    <label className="text-sm font-medium text-gray-600">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Special Conditions
                     </label>
-                    <ul className="text-gray-900 list-disc list-inside space-y-1">
+                    <ul className="text-gray-900 dark:text-white list-disc list-inside space-y-1">
                       {tenant.rentalAgreement.specialConditions.map(
                         (condition, index) => (
                           <li key={index}>{condition}</li>
@@ -586,7 +586,7 @@ export function TenantDetail({
                       className="border border-gray-200 rounded-lg p-4"
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-900">
+                        <h4 className="font-medium text-gray-900 dark:text-white">
                           {reference.name}
                         </h4>
                         {reference.verified && (
@@ -597,29 +597,29 @@ export function TenantDetail({
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
-                          <span className="text-gray-600">Relationship:</span>
-                          <span className="ml-2 text-gray-900">
+                          <span className="text-gray-600 dark:text-gray-300">Relationship:</span>
+                          <span className="ml-2 text-gray-900 dark:text-white">
                             {reference.relationship}
                           </span>
                         </div>
                         <div>
-                          <span className="text-gray-600">Phone:</span>
-                          <span className="ml-2 text-gray-900">
+                          <span className="text-gray-600 dark:text-gray-300">Phone:</span>
+                          <span className="ml-2 text-gray-900 dark:text-white">
                             {reference.phone}
                           </span>
                         </div>
                         {reference.email && (
                           <div>
-                            <span className="text-gray-600">Email:</span>
-                            <span className="ml-2 text-gray-900">
+                            <span className="text-gray-600 dark:text-gray-300">Email:</span>
+                            <span className="ml-2 text-gray-900 dark:text-white">
                               {reference.email}
                             </span>
                           </div>
                         )}
                         {reference.address && (
                           <div className="md:col-span-2">
-                            <span className="text-gray-600">Address:</span>
-                            <span className="ml-2 text-gray-900">
+                            <span className="text-gray-600 dark:text-gray-300">Address:</span>
+                            <span className="ml-2 text-gray-900 dark:text-white">
                               {reference.address}
                             </span>
                           </div>
@@ -645,33 +645,33 @@ export function TenantDetail({
             </CardHeader>
             <CardContent className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                   Move-in Date
                 </label>
-                <p className="text-gray-900 font-medium">
+                <p className="text-gray-900 dark:text-white font-medium">
                   {formatDate(tenant.moveInDate)}
                 </p>
               </div>
               {tenant.moveOutDate && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Move-out Date
                   </label>
-                  <p className="text-gray-900 font-medium">
+                  <p className="text-gray-900 dark:text-white font-medium">
                     {formatDate(tenant.moveOutDate)}
                   </p>
                 </div>
               )}
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                   Duration
                 </label>
-                <p className="text-gray-900 font-medium">
+                <p className="text-gray-900 dark:text-white font-medium">
                   {getTenancyDuration()}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                   Status
                 </label>
                 <p
@@ -694,50 +694,50 @@ export function TenantDetail({
             <CardContent className="space-y-3">
               {tenant.identification.aadharNumber && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Aadhar Number
                   </label>
-                  <p className="text-gray-900 font-mono">
+                  <p className="text-gray-900 dark:text-white font-mono">
                     {tenant.identification.aadharNumber}
                   </p>
                 </div>
               )}
               {tenant.identification.panNumber && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     PAN Number
                   </label>
-                  <p className="text-gray-900 font-mono">
+                  <p className="text-gray-900 dark:text-white font-mono">
                     {tenant.identification.panNumber}
                   </p>
                 </div>
               )}
               {tenant.identification.drivingLicense && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Driving License
                   </label>
-                  <p className="text-gray-900 font-mono">
+                  <p className="text-gray-900 dark:text-white font-mono">
                     {tenant.identification.drivingLicense}
                   </p>
                 </div>
               )}
               {tenant.identification.passport && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Passport
                   </label>
-                  <p className="text-gray-900 font-mono">
+                  <p className="text-gray-900 dark:text-white font-mono">
                     {tenant.identification.passport}
                   </p>
                 </div>
               )}
               {tenant.identification.voterIdNumber && (
                 <div>
-                  <label className="text-sm font-medium text-gray-600">
+                  <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                     Voter ID
                   </label>
-                  <p className="text-gray-900 font-mono">
+                  <p className="text-gray-900 dark:text-white font-mono">
                     {tenant.identification.voterIdNumber}
                   </p>
                 </div>
@@ -759,16 +759,16 @@ export function TenantDetail({
                   {tenant.documents.map((document) => (
                     <div
                       key={document.id}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded hover:bg-gray-100 cursor-pointer"
+                      className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
                       onClick={() => setSelectedDocument(document)}
                     >
                       <div className="flex items-center space-x-2">
                         <DocumentTextIcon className="h-4 w-4 text-gray-400" />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
                             {document.title}
                           </p>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-xs text-gray-600 dark:text-gray-300">
                             {document.category}
                           </p>
                         </div>
@@ -792,7 +792,7 @@ export function TenantDetail({
         >
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {selectedDocument.title}
               </h3>
               <Button

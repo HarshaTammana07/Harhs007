@@ -4,3 +4,6 @@ export { TenantList } from "./TenantList";
 export { TenantDetail } from "./TenantDetail";
 export { TenantDashboard } from "./TenantDashboard";
 export { SimpleTenantForm } from "./SimpleTenantForm";
+export { TenantManagement } from "./TenantManagement";
+export { MinimalTenantForm } from "./MinimalTenantForm";
+export { EnhancedTenantForm } from "./EnhancedTenantForm";

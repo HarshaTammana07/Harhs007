@@ -32,7 +32,7 @@ export function PropertyTypeOverview() {
   const loadPropertyStats = async () => {
     try {
       setLoading(true);
-      const propertyStats = propertyService.getPropertyStatistics();
+      const propertyStats = await propertyService.getPropertyStatistics();
       setStats(propertyStats);
     } catch (error) {
       console.error("Error loading property statistics:", error);
@@ -72,36 +72,36 @@ export function PropertyTypeOverview() {
   if (!stats) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">Unable to load property statistics.</p>
+        <p className="text-gray-600 dark:text-gray-300">Unable to load property statistics.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Overview Summary */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
           Property Portfolio Overview
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {stats.totalUnits}
             </div>
-            <div className="text-sm text-gray-600">Total Units</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">Total Units</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {stats.totalOccupied}
             </div>
-            <div className="text-sm text-gray-600">Occupied</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">Occupied</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-indigo-600">
+            <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
               {stats.occupancyRate.toFixed(1)}%
             </div>
-            <div className="text-sm text-gray-600">Occupancy Rate</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">Occupancy Rate</div>
           </div>
         </div>
       </div>
@@ -112,7 +112,7 @@ export function PropertyTypeOverview() {
         <PropertyTypeCard
           title="Buildings"
           description="Multi-unit apartment buildings with individual apartments"
-          icon={<BuildingOfficeIcon className="h-6 w-6 text-blue-600" />}
+          icon={<BuildingOfficeIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />}
           stats={{
             total: stats.buildings.total,
             occupied: stats.buildings.occupied,
@@ -126,7 +126,7 @@ export function PropertyTypeOverview() {
         <PropertyTypeCard
           title="Flats"
           description="Standalone rental units and individual apartments"
-          icon={<HomeIcon className="h-6 w-6 text-blue-600" />}
+          icon={<HomeIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />}
           stats={{
             total: stats.flats.total,
             occupied: stats.flats.occupied,
@@ -140,7 +140,7 @@ export function PropertyTypeOverview() {
         <PropertyTypeCard
           title="Real Estate"
           description="Land properties, plots, and agricultural land"
-          icon={<MapIcon className="h-6 w-6 text-blue-600" />}
+          icon={<MapIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />}
           stats={{
             total: stats.lands.total,
             occupied: stats.lands.leased,
@@ -152,20 +152,20 @@ export function PropertyTypeOverview() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Quick Actions
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             onClick={handleAddBuilding}
-            className="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+            className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-400 hover:shadow-md dark:hover:shadow-lg transition-all text-left"
           >
             <div className="flex items-center space-x-3">
-              <BuildingOfficeIcon className="h-5 w-5 text-blue-600" />
+              <BuildingOfficeIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <div>
-                <div className="font-medium text-gray-900">Add Building</div>
-                <div className="text-sm text-gray-600">
+                <div className="font-medium text-gray-900 dark:text-white">Add Building</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
                   Create a new apartment building
                 </div>
               </div>
@@ -174,13 +174,13 @@ export function PropertyTypeOverview() {
 
           <button
             onClick={handleAddFlat}
-            className="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+            className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-400 hover:shadow-md dark:hover:shadow-lg transition-all text-left"
           >
             <div className="flex items-center space-x-3">
-              <HomeIcon className="h-5 w-5 text-blue-600" />
+              <HomeIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <div>
-                <div className="font-medium text-gray-900">Add Flat</div>
-                <div className="text-sm text-gray-600">
+                <div className="font-medium text-gray-900 dark:text-white">Add Flat</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
                   Add a standalone rental unit
                 </div>
               </div>
@@ -189,13 +189,13 @@ export function PropertyTypeOverview() {
 
           <button
             onClick={handleAddLand}
-            className="p-4 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all text-left"
+            className="p-4 bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-400 hover:shadow-md dark:hover:shadow-lg transition-all text-left"
           >
             <div className="flex items-center space-x-3">
-              <MapIcon className="h-5 w-5 text-blue-600" />
+              <MapIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               <div>
-                <div className="font-medium text-gray-900">Add Land</div>
-                <div className="text-sm text-gray-600">
+                <div className="font-medium text-gray-900 dark:text-white">Add Land</div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
                   Register a land property
                 </div>
               </div>

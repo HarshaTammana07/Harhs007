@@ -66,6 +66,7 @@ export interface Apartment {
   id: string;
   buildingId: string;
   doorNumber: string; // D-No: 500, 501, etc.
+  serviceNumber?: string; // Service number for utilities
   floor: number;
   bedroomCount: number; // 1, 2, 3 bedroom
   bathroomCount: number;
@@ -97,6 +98,7 @@ export interface ApartmentSpecifications {
 export interface Flat extends BaseProperty {
   type: "flat";
   doorNumber: string;
+  serviceNumber?: string; // Service number for utilities
   bedroomCount: number;
   bathroomCount: number;
   area: number; // in sq ft
@@ -165,6 +167,9 @@ export interface Tenant {
   moveInDate: Date;
   moveOutDate?: Date;
   isActive: boolean;
+  propertyId?: string;
+  propertyType?: string;
+  buildingId?: string;
   createdAt: Date;
   updatedAt: Date;
 }

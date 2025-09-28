@@ -9,635 +9,577 @@ import {
   RentPayment,
   MaintenanceRecord,
 } from "@/types";
-import {
-  LocalStorageService,
-  LocalStorageError,
-  LocalStorageErrorCodes,
-} from "./LocalStorageService";
+import { ApiService } from "./ApiService";
 
 /**
  * PropertyService - Handles all property management operations for the hierarchical property system
- * Manages Buildings, Apartments, Flats, Lands, and Tenants with localStorage persistence
+ * Manages Buildings, Apartments, Flats, Lands, and Tenants with Supabase database persistence
  */
 export class PropertyService {
-  private static readonly KEYS = {
-    BUILDINGS: "buildings",
-    FLATS: "flats",
-    LANDS: "lands",
-    TENANTS: "tenants",
-  } as const;
-
-  private localStorageService: LocalStorageService;
-
   constructor() {
-    this.localStorageService = new LocalStorageService();
+    // No longer using localStorage - using ApiService (Supabase) instead
   }
 
-  // Generic property operations
-  private getFromStorage<T>(key: string): T[] {
+  // Now using ApiService (Supabase) for all data operations
+
+  // Building CRUD Operations - Now using ApiService (Supabase)
+  public async getBuildings(): Promise<Building[]> {
     try {
-      const item = localStorage.getItem(key);
-      if (!item) return [];
-      return JSON.parse(item, this.dateReviver);
+      return await ApiService.getBuildings();
     } catch (error) {
-      console.error(`Error reading from localStorage key "${key}":`, error);
-      return [];
+      console.error("PropertyService.getBuildings error:", error);
+      throw new Error(`Failed to fetch buildings: ${error.message}`);
     }
   }
 
-  private saveToStorage<T>(key: string, data: T[]): void {
+  public async getBuildingById(id: string): Promise<Building | null> {
     try {
-      localStorage.setItem(key, JSON.stringify(data, this.dateReplacer));
+      return await ApiService.getBuildingById(id);
     } catch (error) {
-      if (error instanceof DOMException && error.code === 22) {
-        throw new LocalStorageError(
-          "Storage quota exceeded",
-          LocalStorageErrorCodes.QUOTA_EXCEEDED
+      console.error("PropertyService.getBuildingById error:", error);
+      throw new Error(`Failed to fetch building: ${error.message}`);
+    }
+  }
+
+  public async saveBuilding(
+    building: Omit<
+      Building,
+      "id" | "createdAt" | "updatedAt" | "apartments" | "documents"
+    >
+  ): Promise<Building> {
+    try {
+      this.validateBuildingData(building);
+      return await ApiService.createBuilding(building);
+    } catch (error) {
+      console.error("PropertyService.saveBuilding error:", error);
+      throw new Error(`Failed to create building: ${error.message}`);
+    }
+  }
+
+  public async updateBuilding(
+    id: string,
+    updates: Partial<Building>
+  ): Promise<Building> {
+    try {
+      if (updates.name || updates.buildingCode || updates.address) {
+        this.validateBuildingData(updates as unknown);
+      }
+      return await ApiService.updateBuilding(id, updates);
+    } catch (error) {
+      console.error("PropertyService.updateBuilding error:", error);
+      throw new Error(`Failed to update building: ${error.message}`);
+    }
+  }
+
+  public async deleteBuilding(id: string): Promise<void> {
+    try {
+      await ApiService.deleteBuilding(id);
+    } catch (error) {
+      console.error("PropertyService.deleteBuilding error:", error);
+      throw new Error(`Failed to delete building: ${error.message}`);
+    }
+  }
+
+  private validateBuildingData(building: Partial<Building>): void {
+    if (building.name && !building.name.trim()) {
+      throw new Error("Building name is required");
+    }
+    if (building.buildingCode && !building.buildingCode.trim()) {
+      throw new Error("Building code is required");
+    }
+    if (building.address && !building.address.trim()) {
+      throw new Error("Building address is required");
+    }
+    if (building.totalFloors !== undefined && building.totalFloors < 1) {
+      throw new Error("Total floors must be at least 1");
+    }
+    if (
+      building.totalApartments !== undefined &&
+      building.totalApartments < 1
+    ) {
+      throw new Error("Total apartments must be at least 1");
+    }
+  }
+
+  // Apartment Operations (within buildings) - Now using ApiService
+  public async getApartmentsByBuildingId(
+    buildingId: string
+  ): Promise<Apartment[]> {
+    try {
+      return await ApiService.getApartmentsByBuildingId(buildingId);
+    } catch (error) {
+      console.error("PropertyService.getApartmentsByBuildingId error:", error);
+      throw new Error(`Failed to fetch apartments: ${error.message}`);
+    }
+  }
+
+  public async getApartmentById(
+    apartmentId: string
+  ): Promise<Apartment | null> {
+    try {
+      return await ApiService.getApartmentById(apartmentId);
+    } catch (error) {
+      console.error("PropertyService.getApartmentById error:", error);
+      throw new Error(`Failed to fetch apartment: ${error.message}`);
+    }
+  }
+
+  public async addApartmentToBuilding(
+    buildingId: string,
+    apartmentData: Omit<
+      Apartment,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "currentTenant"
+      | "rentHistory"
+      | "maintenanceRecords"
+      | "documents"
+    >
+  ): Promise<Apartment> {
+    try {
+      this.validateApartmentData(apartmentData);
+      const apartment = { ...apartmentData, buildingId };
+      return await ApiService.createApartment(apartment);
+    } catch (error) {
+      console.error("PropertyService.addApartmentToBuilding error:", error);
+      throw new Error(`Failed to create apartment: ${error.message}`);
+    }
+  }
+
+  public async updateApartment(
+    apartmentId: string,
+    updates: Partial<Apartment>
+  ): Promise<Apartment> {
+    try {
+      return await ApiService.updateApartment(apartmentId, updates);
+    } catch (error) {
+      console.error("PropertyService.updateApartment error:", error);
+      throw new Error(`Failed to update apartment: ${error.message}`);
+    }
+  }
+
+  public async deleteApartment(apartmentId: string): Promise<void> {
+    try {
+      await ApiService.deleteApartment(apartmentId);
+    } catch (error) {
+      console.error("PropertyService.deleteApartment error:", error);
+      throw new Error(`Failed to delete apartment: ${error.message}`);
+    }
+  }
+
+  private validateApartmentData(apartment: Partial<Apartment>): void {
+    if (apartment.doorNumber && !apartment.doorNumber.trim()) {
+      throw new Error("Door number is required");
+    }
+    if (apartment.bedroomCount !== undefined && apartment.bedroomCount < 0) {
+      throw new Error("Bedroom count cannot be negative");
+    }
+    if (apartment.bathroomCount !== undefined && apartment.bathroomCount < 0) {
+      throw new Error("Bathroom count cannot be negative");
+    }
+    if (apartment.area !== undefined && apartment.area <= 0) {
+      throw new Error("Area must be greater than 0");
+    }
+  }
+
+  // Flat CRUD Operations - Now using ApiService
+  public async getFlats(): Promise<Flat[]> {
+    try {
+      return await ApiService.getFlats();
+    } catch (error) {
+      console.error("PropertyService.getFlats error:", error);
+      throw new Error(`Failed to fetch flats: ${error.message}`);
+    }
+  }
+
+  public async getFlatById(id: string): Promise<Flat | null> {
+    try {
+      return await ApiService.getFlatById(id);
+    } catch (error) {
+      console.error("PropertyService.getFlatById error:", error);
+      throw new Error(`Failed to fetch flat: ${error.message}`);
+    }
+  }
+
+  public async saveFlat(
+    flatData: Omit<
+      Flat,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "currentTenant"
+      | "rentHistory"
+      | "maintenanceRecords"
+      | "documents"
+    >
+  ): Promise<Flat> {
+    try {
+      this.validateFlatData(flatData);
+      return await ApiService.createFlat(flatData);
+    } catch (error) {
+      console.error("PropertyService.saveFlat error:", error);
+      throw new Error(`Failed to create flat: ${error.message}`);
+    }
+  }
+
+  public async updateFlat(id: string, updates: Partial<Flat>): Promise<Flat> {
+    try {
+      return await ApiService.updateFlat(id, updates);
+    } catch (error) {
+      console.error("PropertyService.updateFlat error:", error);
+      throw new Error(`Failed to update flat: ${error.message}`);
+    }
+  }
+
+  public async deleteFlat(id: string): Promise<void> {
+    try {
+      await ApiService.deleteFlat(id);
+    } catch (error) {
+      console.error("PropertyService.deleteFlat error:", error);
+      throw new Error(`Failed to delete flat: ${error.message}`);
+    }
+  }
+
+  private validateFlatData(flat: Partial<Flat>): void {
+    if (flat.name && !flat.name.trim()) {
+      throw new Error("Flat name is required");
+    }
+    if (flat.address && !flat.address.trim()) {
+      throw new Error("Flat address is required");
+    }
+    if (flat.doorNumber && !flat.doorNumber.trim()) {
+      throw new Error("Door number is required");
+    }
+  }
+
+  // Land CRUD Operations - Now using ApiService
+  public async getLands(): Promise<Land[]> {
+    try {
+      return await ApiService.getLands();
+    } catch (error) {
+      console.error("PropertyService.getLands error:", error);
+      throw new Error(`Failed to fetch lands: ${error.message}`);
+    }
+  }
+
+  public async getLandById(id: string): Promise<Land | null> {
+    try {
+      return await ApiService.getLandById(id);
+    } catch (error) {
+      console.error("PropertyService.getLandById error:", error);
+      throw new Error(`Failed to fetch land: ${error.message}`);
+    }
+  }
+
+  public async saveLand(
+    landData: Omit<
+      Land,
+      | "id"
+      | "createdAt"
+      | "updatedAt"
+      | "currentTenant"
+      | "rentHistory"
+      | "maintenanceRecords"
+      | "documents"
+    >
+  ): Promise<Land> {
+    try {
+      this.validateLandData(landData);
+      return await ApiService.createLand(landData);
+    } catch (error) {
+      console.error("PropertyService.saveLand error:", error);
+      throw new Error(`Failed to create land: ${error.message}`);
+    }
+  }
+
+  public async updateLand(id: string, updates: Partial<Land>): Promise<Land> {
+    try {
+      return await ApiService.updateLand(id, updates);
+    } catch (error) {
+      console.error("PropertyService.updateLand error:", error);
+      throw new Error(`Failed to update land: ${error.message}`);
+    }
+  }
+
+  public async deleteLand(id: string): Promise<void> {
+    try {
+      await ApiService.deleteLand(id);
+    } catch (error) {
+      console.error("PropertyService.deleteLand error:", error);
+      throw new Error(`Failed to delete land: ${error.message}`);
+    }
+  }
+
+  private validateLandData(land: Partial<Land>): void {
+    if (land.name && !land.name.trim()) {
+      throw new Error("Land name is required");
+    }
+    if (land.address && !land.address.trim()) {
+      throw new Error("Land address is required");
+    }
+    if (land.area !== undefined && land.area <= 0) {
+      throw new Error("Land area must be greater than 0");
+    }
+  }
+
+  // Tenant CRUD Operations - Now using ApiService
+  public async getTenants(): Promise<Tenant[]> {
+    try {
+      return await ApiService.getTenants();
+    } catch (error) {
+      console.error("PropertyService.getTenants error:", error);
+      throw new Error(`Failed to fetch tenants: ${error.message}`);
+    }
+  }
+
+  public async getTenantByProperty(
+    propertyId: string,
+    propertyType: string
+  ): Promise<Tenant | null> {
+    try {
+      return await ApiService.getTenantByProperty(propertyId, propertyType);
+    } catch (error) {
+      console.error("PropertyService.getTenantByProperty error:", error);
+      throw new Error(`Failed to fetch tenant: ${error.message}`);
+    }
+  }
+
+  public async updateTenantPropertyLink(
+    tenantId: string,
+    propertyId: string,
+    propertyType: string,
+    buildingId?: string
+  ): Promise<void> {
+    try {
+      const updateData: any = {
+        property_id: propertyId,
+        property_type: propertyType,
+      };
+
+      if (buildingId) {
+        updateData.building_id = buildingId;
+      }
+
+      const { error } = await ApiService.supabase
+        .from("tenants")
+        .update(updateData)
+        .eq("id", tenantId);
+
+      if (error) {
+        throw new Error(
+          `Failed to update tenant property link: ${error.message}`
         );
       }
+    } catch (error) {
+      console.error("PropertyService.updateTenantPropertyLink error:", error);
       throw error;
     }
   }
 
-  // Date serialization helpers
-  private dateReplacer(key: string, value: any): any {
-    if (value instanceof Date) {
-      return { __type: "Date", value: value.toISOString() };
-    }
-    return value;
-  }
-
-  private dateReviver(key: string, value: any): any {
-    if (
-      typeof value === "object" &&
-      value !== null &&
-      value.__type === "Date"
-    ) {
-      return new Date(value.value);
-    }
-    return value;
-  }
-
-  // Building CRUD Operations
-  public getBuildings(): Building[] {
-    return this.getFromStorage<Building>(PropertyService.KEYS.BUILDINGS);
-  }
-
-  public getBuildingById(id: string): Building | null {
-    const buildings = this.getBuildings();
-    return buildings.find((building) => building.id === id) || null;
-  }
-
-  public saveBuilding(building: Building): void {
-    this.validateBuilding(building);
-    const buildings = this.getBuildings();
-    buildings.push(building);
-    this.saveToStorage(PropertyService.KEYS.BUILDINGS, buildings);
-  }
-
-  public updateBuilding(id: string, updates: Partial<Building>): void {
-    const buildings = this.getBuildings();
-    const index = buildings.findIndex((building) => building.id === id);
-
-    if (index === -1) {
-      throw new LocalStorageError(
-        `Building with id "${id}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    const updatedBuilding = {
-      ...buildings[index],
-      ...updates,
-      updatedAt: new Date(),
-    };
-    this.validateBuilding(updatedBuilding);
-
-    buildings[index] = updatedBuilding;
-    this.saveToStorage(PropertyService.KEYS.BUILDINGS, buildings);
-  }
-
-  public deleteBuilding(id: string): void {
-    const buildings = this.getBuildings();
-    const filteredBuildings = buildings.filter(
-      (building) => building.id !== id
-    );
-
-    if (buildings.length === filteredBuildings.length) {
-      throw new LocalStorageError(
-        `Building with id "${id}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    // Also remove all apartments in this building
-    const allBuildings = this.getBuildings();
-    const building = allBuildings.find((b) => b.id === id);
-    if (building && building.apartments) {
-      building.apartments.forEach((apartment) => {
-        if (apartment.currentTenant) {
-          this.deleteTenant(apartment.currentTenant.id);
-        }
-      });
-    }
-
-    this.saveToStorage(PropertyService.KEYS.BUILDINGS, filteredBuildings);
-  }
-
-  private validateBuilding(building: Building): void {
-    if (
-      !building.id ||
-      !building.name ||
-      !building.address ||
-      !building.buildingCode
-    ) {
-      throw new LocalStorageError(
-        "Building must have id, name, address, and buildingCode",
-        LocalStorageErrorCodes.VALIDATION_ERROR
-      );
+  public async getTenantById(id: string): Promise<Tenant | null> {
+    try {
+      // Note: ApiService doesn't have getTenantById yet, so we'll get all and filter
+      const tenants = await this.getTenants();
+      return tenants.find((tenant) => tenant.id === id) || null;
+    } catch (error) {
+      console.error("PropertyService.getTenantById error:", error);
+      throw new Error(`Failed to fetch tenant: ${error.message}`);
     }
   }
 
-  // Apartment Operations (within buildings)
-  public getApartmentsByBuildingId(buildingId: string): Apartment[] {
-    const building = this.getBuildingById(buildingId);
-    return building?.apartments || [];
-  }
-
-  public getApartmentById(
-    buildingId: string,
-    apartmentId: string
-  ): Apartment | null {
-    const apartments = this.getApartmentsByBuildingId(buildingId);
-    return apartments.find((apartment) => apartment.id === apartmentId) || null;
-  }
-
-  public addApartmentToBuilding(
-    buildingId: string,
-    apartment: Apartment
-  ): void {
-    this.validateApartment(apartment);
-    const buildings = this.getBuildings();
-    const buildingIndex = buildings.findIndex(
-      (building) => building.id === buildingId
-    );
-
-    if (buildingIndex === -1) {
-      throw new LocalStorageError(
-        `Building with id "${buildingId}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    apartment.buildingId = buildingId;
-    if (!buildings[buildingIndex].apartments) {
-      buildings[buildingIndex].apartments = [];
-    }
-    buildings[buildingIndex].apartments.push(apartment);
-    buildings[buildingIndex].updatedAt = new Date();
-
-    this.saveToStorage(PropertyService.KEYS.BUILDINGS, buildings);
-  }
-
-  public updateApartment(
-    buildingId: string,
-    apartmentId: string,
-    updates: Partial<Apartment>
-  ): void {
-    const buildings = this.getBuildings();
-    const buildingIndex = buildings.findIndex(
-      (building) => building.id === buildingId
-    );
-
-    if (buildingIndex === -1) {
-      throw new LocalStorageError(
-        `Building with id "${buildingId}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    const apartmentIndex =
-      buildings[buildingIndex].apartments?.findIndex(
-        (apartment) => apartment.id === apartmentId
-      ) ?? -1;
-
-    if (apartmentIndex === -1) {
-      throw new LocalStorageError(
-        `Apartment with id "${apartmentId}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    const updatedApartment = {
-      ...buildings[buildingIndex].apartments[apartmentIndex],
-      ...updates,
-      updatedAt: new Date(),
-    };
-    this.validateApartment(updatedApartment);
-
-    buildings[buildingIndex].apartments[apartmentIndex] = updatedApartment;
-    buildings[buildingIndex].updatedAt = new Date();
-
-    this.saveToStorage(PropertyService.KEYS.BUILDINGS, buildings);
-  }
-
-  public deleteApartment(buildingId: string, apartmentId: string): void {
-    const buildings = this.getBuildings();
-    const buildingIndex = buildings.findIndex(
-      (building) => building.id === buildingId
-    );
-
-    if (buildingIndex === -1) {
-      throw new LocalStorageError(
-        `Building with id "${buildingId}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    const apartment = buildings[buildingIndex].apartments?.find(
-      (apt) => apt.id === apartmentId
-    );
-    if (apartment?.currentTenant) {
-      this.deleteTenant(apartment.currentTenant.id);
-    }
-
-    buildings[buildingIndex].apartments =
-      buildings[buildingIndex].apartments?.filter(
-        (apartment) => apartment.id !== apartmentId
-      ) || [];
-    buildings[buildingIndex].updatedAt = new Date();
-
-    this.saveToStorage(PropertyService.KEYS.BUILDINGS, buildings);
-  }
-
-  private validateApartment(apartment: Apartment): void {
-    if (!apartment.id || !apartment.doorNumber || apartment.bedroomCount < 0) {
-      throw new LocalStorageError(
-        "Apartment must have id, doorNumber, and non-negative bedroom count",
-        LocalStorageErrorCodes.VALIDATION_ERROR
-      );
+  public async saveTenant(
+    tenantData: Omit<
+      Tenant,
+      "id" | "createdAt" | "updatedAt" | "references" | "documents"
+    >
+  ): Promise<Tenant> {
+    try {
+      this.validateTenantData(tenantData);
+      return await ApiService.createTenant(tenantData);
+    } catch (error) {
+      console.error("PropertyService.saveTenant error:", error);
+      throw new Error(`Failed to create tenant: ${error.message}`);
     }
   }
 
-  // Flat CRUD Operations
-  public getFlats(): Flat[] {
-    return this.getFromStorage<Flat>(PropertyService.KEYS.FLATS);
-  }
-
-  public getFlatById(id: string): Flat | null {
-    const flats = this.getFlats();
-    return flats.find((flat) => flat.id === id) || null;
-  }
-
-  public saveFlat(flat: Flat): void {
-    this.validateFlat(flat);
-    const flats = this.getFlats();
-    flats.push(flat);
-    this.saveToStorage(PropertyService.KEYS.FLATS, flats);
-  }
-
-  public updateFlat(id: string, updates: Partial<Flat>): void {
-    const flats = this.getFlats();
-    const index = flats.findIndex((flat) => flat.id === id);
-
-    if (index === -1) {
-      throw new LocalStorageError(
-        `Flat with id "${id}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    const updatedFlat = {
-      ...flats[index],
-      ...updates,
-      updatedAt: new Date(),
-    };
-    this.validateFlat(updatedFlat);
-
-    flats[index] = updatedFlat;
-    this.saveToStorage(PropertyService.KEYS.FLATS, flats);
-  }
-
-  public deleteFlat(id: string): void {
-    const flats = this.getFlats();
-    const flat = flats.find((f) => f.id === id);
-
-    if (flat?.currentTenant) {
-      this.deleteTenant(flat.currentTenant.id);
-    }
-
-    const filteredFlats = flats.filter((flat) => flat.id !== id);
-
-    if (flats.length === filteredFlats.length) {
-      throw new LocalStorageError(
-        `Flat with id "${id}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    this.saveToStorage(PropertyService.KEYS.FLATS, filteredFlats);
-  }
-
-  private validateFlat(flat: Flat): void {
-    if (!flat.id || !flat.name || !flat.address || !flat.doorNumber) {
-      throw new LocalStorageError(
-        "Flat must have id, name, address, and doorNumber",
-        LocalStorageErrorCodes.VALIDATION_ERROR
-      );
+  public async updateTenant(
+    id: string,
+    updates: Partial<Tenant>
+  ): Promise<Tenant> {
+    try {
+      return await ApiService.updateTenant(id, updates);
+    } catch (error) {
+      console.error("PropertyService.updateTenant error:", error);
+      throw new Error(`Failed to update tenant: ${error.message}`);
     }
   }
 
-  // Land CRUD Operations
-  public getLands(): Land[] {
-    return this.getFromStorage<Land>(PropertyService.KEYS.LANDS);
-  }
-
-  public getLandById(id: string): Land | null {
-    const lands = this.getLands();
-    return lands.find((land) => land.id === id) || null;
-  }
-
-  public saveLand(land: Land): void {
-    this.validateLand(land);
-    const lands = this.getLands();
-    lands.push(land);
-    this.saveToStorage(PropertyService.KEYS.LANDS, lands);
-  }
-
-  public updateLand(id: string, updates: Partial<Land>): void {
-    const lands = this.getLands();
-    const index = lands.findIndex((land) => land.id === id);
-
-    if (index === -1) {
-      throw new LocalStorageError(
-        `Land with id "${id}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    const updatedLand = {
-      ...lands[index],
-      ...updates,
-      updatedAt: new Date(),
-    };
-    this.validateLand(updatedLand);
-
-    lands[index] = updatedLand;
-    this.saveToStorage(PropertyService.KEYS.LANDS, lands);
-  }
-
-  public deleteLand(id: string): void {
-    const lands = this.getLands();
-    const land = lands.find((l) => l.id === id);
-
-    if (land?.currentTenant) {
-      this.deleteTenant(land.currentTenant.id);
-    }
-
-    const filteredLands = lands.filter((land) => land.id !== id);
-
-    if (lands.length === filteredLands.length) {
-      throw new LocalStorageError(
-        `Land with id "${id}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    this.saveToStorage(PropertyService.KEYS.LANDS, filteredLands);
-  }
-
-  private validateLand(land: Land): void {
-    if (!land.id || !land.name || !land.address || land.area <= 0) {
-      throw new LocalStorageError(
-        "Land must have id, name, address, and positive area",
-        LocalStorageErrorCodes.VALIDATION_ERROR
-      );
+  public async deleteTenant(id: string): Promise<void> {
+    try {
+      await ApiService.deleteTenant(id);
+    } catch (error) {
+      console.error("PropertyService.deleteTenant error:", error);
+      throw new Error(`Failed to delete tenant: ${error.message}`);
     }
   }
 
-  // Tenant CRUD Operations
-  public getTenants(): Tenant[] {
-    return this.getFromStorage<Tenant>(PropertyService.KEYS.TENANTS);
-  }
-
-  public getTenantById(id: string): Tenant | null {
-    const tenants = this.getTenants();
-    return tenants.find((tenant) => tenant.id === id) || null;
-  }
-
-  public saveTenant(tenant: Tenant): void {
-    this.validateTenant(tenant);
-    const tenants = this.getTenants();
-    tenants.push(tenant);
-    this.saveToStorage(PropertyService.KEYS.TENANTS, tenants);
-  }
-
-  public updateTenant(id: string, updates: Partial<Tenant>): void {
-    const tenants = this.getTenants();
-    const index = tenants.findIndex((tenant) => tenant.id === id);
-
-    if (index === -1) {
-      throw new LocalStorageError(
-        `Tenant with id "${id}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
+  private validateTenantData(tenant: Partial<Tenant>): void {
+    if (tenant.personalInfo?.fullName && !tenant.personalInfo.fullName.trim()) {
+      throw new Error("Tenant full name is required");
     }
-
-    const updatedTenant = {
-      ...tenants[index],
-      ...updates,
-      updatedAt: new Date(),
-    };
-    this.validateTenant(updatedTenant);
-
-    tenants[index] = updatedTenant;
-    this.saveToStorage(PropertyService.KEYS.TENANTS, tenants);
-  }
-
-  public deleteTenant(id: string): void {
-    const tenants = this.getTenants();
-    const filteredTenants = tenants.filter((tenant) => tenant.id !== id);
-
-    if (tenants.length === filteredTenants.length) {
-      throw new LocalStorageError(
-        `Tenant with id "${id}" not found`,
-        LocalStorageErrorCodes.NOT_FOUND
-      );
-    }
-
-    this.saveToStorage(PropertyService.KEYS.TENANTS, filteredTenants);
-  }
-
-  private validateTenant(tenant: Tenant): void {
-    if (
-      !tenant.id ||
-      !tenant.personalInfo?.fullName ||
-      !tenant.contactInfo?.phone
-    ) {
-      throw new LocalStorageError(
-        "Tenant must have id, full name, and phone number",
-        LocalStorageErrorCodes.VALIDATION_ERROR
-      );
+    if (tenant.contactInfo?.phone && !tenant.contactInfo.phone.trim()) {
+      throw new Error("Tenant phone number is required");
     }
   }
 
-  // Property Statistics and Analytics
-  public getPropertyStatistics(): {
+  // Property Statistics and Analytics - Now async using ApiService
+  public async getPropertyStatistics(): Promise<{
     buildings: { total: number; occupied: number; vacant: number };
     flats: { total: number; occupied: number; vacant: number };
     lands: { total: number; leased: number; vacant: number };
     totalUnits: number;
     totalOccupied: number;
     occupancyRate: number;
-  } {
-    const buildings = this.getBuildings();
-    const flats = this.getFlats();
-    const lands = this.getLands();
+  }> {
+    try {
+      console.log("PropertyService: Getting property statistics...");
 
-    // Building statistics
-    let totalApartments = 0;
-    let occupiedApartments = 0;
-    buildings.forEach((building) => {
-      if (building.apartments) {
-        totalApartments += building.apartments.length;
-        occupiedApartments += building.apartments.filter(
-          (apt) => apt.isOccupied
-        ).length;
+      // Try to get data, but handle failures gracefully
+      let buildings = [];
+      let flats = [];
+      let lands = [];
+
+      try {
+        buildings = await this.getBuildings();
+        console.log("PropertyService: Got buildings:", buildings.length);
+      } catch (error) {
+        console.error("PropertyService: Failed to get buildings:", error);
+        buildings = [];
       }
-    });
 
-    // Flat statistics
-    const totalFlats = flats.length;
-    const occupiedFlats = flats.filter((flat) => flat.isOccupied).length;
+      try {
+        flats = await this.getFlats();
+        console.log("PropertyService: Got flats:", flats.length);
+      } catch (error) {
+        console.error("PropertyService: Failed to get flats:", error);
+        flats = [];
+      }
 
-    // Land statistics
-    const totalLands = lands.length;
-    const leasedLands = lands.filter((land) => land.isLeased).length;
+      try {
+        lands = await this.getLands();
+        console.log("PropertyService: Got lands:", lands.length);
+      } catch (error) {
+        console.error("PropertyService: Failed to get lands:", error);
+        lands = [];
+      }
 
-    const totalUnits = totalApartments + totalFlats + totalLands;
-    const totalOccupied = occupiedApartments + occupiedFlats + leasedLands;
-    const occupancyRate =
-      totalUnits > 0 ? (totalOccupied / totalUnits) * 100 : 0;
+      // Building statistics
+      let totalApartments = 0;
+      let occupiedApartments = 0;
+      buildings.forEach((building) => {
+        if (building.apartments) {
+          totalApartments += building.apartments.length;
+          occupiedApartments += building.apartments.filter(
+            (apt) => apt.isOccupied
+          ).length;
+        }
+      });
 
-    return {
-      buildings: {
-        total: buildings.length,
-        occupied: buildings.filter((b) =>
-          b.apartments?.some((apt) => apt.isOccupied)
-        ).length,
-        vacant: buildings.filter(
-          (b) => !b.apartments?.some((apt) => apt.isOccupied)
-        ).length,
-      },
-      flats: {
-        total: totalFlats,
-        occupied: occupiedFlats,
-        vacant: totalFlats - occupiedFlats,
-      },
-      lands: {
-        total: totalLands,
-        leased: leasedLands,
-        vacant: totalLands - leasedLands,
-      },
-      totalUnits,
-      totalOccupied,
-      occupancyRate: Math.round(occupancyRate * 100) / 100,
-    };
+      // Flat statistics
+      const totalFlats = flats.length;
+      const occupiedFlats = flats.filter((flat) => flat.isOccupied).length;
+
+      // Land statistics
+      const totalLands = lands.length;
+      const leasedLands = lands.filter((land) => land.isLeased).length;
+
+      const totalUnits = totalApartments + totalFlats + totalLands;
+      const totalOccupied = occupiedApartments + occupiedFlats + leasedLands;
+      const occupancyRate =
+        totalUnits > 0 ? (totalOccupied / totalUnits) * 100 : 0;
+
+      const stats = {
+        buildings: {
+          total: buildings.length,
+          occupied: occupiedApartments, // Total occupied apartments across all buildings
+          vacant: totalApartments - occupiedApartments, // Total vacant apartments across all buildings
+        },
+        flats: {
+          total: totalFlats,
+          occupied: occupiedFlats,
+          vacant: totalFlats - occupiedFlats,
+        },
+        lands: {
+          total: totalLands,
+          leased: leasedLands,
+          vacant: totalLands - leasedLands,
+        },
+        totalUnits,
+        totalOccupied,
+        occupancyRate: Math.round(occupancyRate * 100) / 100,
+      };
+
+      console.log("PropertyService: Calculated statistics:", stats);
+      return stats;
+    } catch (error) {
+      console.error("PropertyService.getPropertyStatistics error:", error);
+      // Return empty stats instead of throwing
+      return {
+        buildings: { total: 0, occupied: 0, vacant: 0 },
+        flats: { total: 0, occupied: 0, vacant: 0 },
+        lands: { total: 0, leased: 0, vacant: 0 },
+        totalUnits: 0,
+        totalOccupied: 0,
+        occupancyRate: 0,
+      };
+    }
   }
 
-  // Search and Filter Operations
-  public searchProperties(
+  // Search and Filter Operations - Now async using ApiService
+  public async searchProperties(
     query: string,
     type?: PropertyType
-  ): (Building | Flat | Land)[] {
-    const results: (Building | Flat | Land)[] = [];
-    const searchTerm = query.toLowerCase();
-
-    if (!type || type === "building") {
-      const buildings = this.getBuildings().filter(
-        (building) =>
-          building.name.toLowerCase().includes(searchTerm) ||
-          building.address.toLowerCase().includes(searchTerm) ||
-          building.buildingCode.toLowerCase().includes(searchTerm)
-      );
-      results.push(...buildings);
+  ): Promise<(Building | Flat | Land)[]> {
+    try {
+      return await ApiService.searchProperties(query, type);
+    } catch (error) {
+      console.error("PropertyService.searchProperties error:", error);
+      throw new Error(`Failed to search properties: ${error.message}`);
     }
-
-    if (!type || type === "flat") {
-      const flats = this.getFlats().filter(
-        (flat) =>
-          flat.name.toLowerCase().includes(searchTerm) ||
-          flat.address.toLowerCase().includes(searchTerm) ||
-          flat.doorNumber.toLowerCase().includes(searchTerm)
-      );
-      results.push(...flats);
-    }
-
-    if (!type || type === "land") {
-      const lands = this.getLands().filter(
-        (land) =>
-          land.name.toLowerCase().includes(searchTerm) ||
-          land.address.toLowerCase().includes(searchTerm) ||
-          land.surveyNumber?.toLowerCase().includes(searchTerm)
-      );
-      results.push(...lands);
-    }
-
-    return results;
   }
 
-  // Data Export/Import
-  public exportPropertyData(): {
+  // Data Export/Import - Now async using ApiService
+  public async exportPropertyData(): Promise<{
     buildings: Building[];
     flats: Flat[];
     lands: Land[];
     tenants: Tenant[];
     exportDate: string;
-  } {
-    return {
-      buildings: this.getBuildings(),
-      flats: this.getFlats(),
-      lands: this.getLands(),
-      tenants: this.getTenants(),
-      exportDate: new Date().toISOString(),
-    };
-  }
+  }> {
+    try {
+      const [buildings, flats, lands, tenants] = await Promise.all([
+        this.getBuildings(),
+        this.getFlats(),
+        this.getLands(),
+        this.getTenants(),
+      ]);
 
-  public importPropertyData(data: {
-    buildings?: Building[];
-    flats?: Flat[];
-    lands?: Land[];
-    tenants?: Tenant[];
-  }): void {
-    if (data.buildings) {
-      this.saveToStorage(PropertyService.KEYS.BUILDINGS, data.buildings);
-    }
-    if (data.flats) {
-      this.saveToStorage(PropertyService.KEYS.FLATS, data.flats);
-    }
-    if (data.lands) {
-      this.saveToStorage(PropertyService.KEYS.LANDS, data.lands);
-    }
-    if (data.tenants) {
-      this.saveToStorage(PropertyService.KEYS.TENANTS, data.tenants);
+      return {
+        buildings,
+        flats,
+        lands,
+        tenants,
+        exportDate: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error("PropertyService.exportPropertyData error:", error);
+      throw new Error(`Failed to export property data: ${error.message}`);
     }
   }
 
-  // Utility Methods
-  public clearAllPropertyData(): void {
-    Object.values(PropertyService.KEYS).forEach((key) => {
-      localStorage.removeItem(key);
-    });
-  }
-
-  public getStorageStats(): { [key: string]: number } {
-    const stats: { [key: string]: number } = {};
-    Object.entries(PropertyService.KEYS).forEach(([name, key]) => {
-      const data = localStorage.getItem(key);
-      stats[name] = data ? data.length : 0;
-    });
-    return stats;
-  }
+  // Note: Import functionality would need to be implemented with individual API calls
+  // since we're now using Supabase instead of localStorage
 }
 
 // Export singleton instance

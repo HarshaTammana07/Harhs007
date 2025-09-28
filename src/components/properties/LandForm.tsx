@@ -147,57 +147,63 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Basic Information */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Basic Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Property Name *
               </label>
               <Input
                 {...register("name", { required: "Property name is required" })}
                 placeholder="e.g., Agricultural Land - Annavaram"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
               {errors.name && (
-                <p className="text-red-600 text-sm mt-1">
+                <p className="text-red-600 dark:text-red-400 text-sm mt-1">
                   {errors.name.message}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Survey Number
               </label>
-              <Input {...register("surveyNumber")} placeholder="e.g., 123/A" />
+              <Input 
+                {...register("surveyNumber")} 
+                placeholder="e.g., 123/A"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Address *
               </label>
               <Input
                 {...register("address", { required: "Address is required" })}
                 placeholder="Complete address of the land property"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
               {errors.address && (
-                <p className="text-red-600 text-sm mt-1">
+                <p className="text-red-600 dark:text-red-400 text-sm mt-1">
                   {errors.address.message}
                 </p>
               )}
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Description
               </label>
               <textarea
                 {...register("description")}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder="Additional details about the land property"
               />
             </div>
@@ -206,14 +212,14 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
       </Card>
 
       {/* Property Details */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Property Details
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Area *
               </label>
               <Input
@@ -224,21 +230,22 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
                   min: { value: 0.01, message: "Area must be greater than 0" },
                 })}
                 placeholder="e.g., 1000"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
               {errors.area && (
-                <p className="text-red-600 text-sm mt-1">
+                <p className="text-red-600 dark:text-red-400 text-sm mt-1">
                   {errors.area.message}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Area Unit *
               </label>
               <select
                 {...register("areaUnit", { required: "Area unit is required" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
                 <option value="sqft">Square Feet</option>
                 <option value="acres">Acres</option>
@@ -247,12 +254,12 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Zoning *
               </label>
               <select
                 {...register("zoning", { required: "Zoning is required" })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
                 <option value="residential">Residential</option>
                 <option value="commercial">Commercial</option>
@@ -262,22 +269,24 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Soil Type
               </label>
               <Input
                 {...register("soilType")}
                 placeholder="e.g., Black soil, Red soil"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Water Source
               </label>
               <Input
                 {...register("waterSource")}
                 placeholder="e.g., Borewell, Canal, River"
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
@@ -286,9 +295,9 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
                 <input
                   type="checkbox"
                   {...register("roadAccess")}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
                 />
-                <label className="ml-2 text-sm text-gray-700">
+                <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                   Road Access Available
                 </label>
               </div>
@@ -297,9 +306,9 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
                 <input
                   type="checkbox"
                   {...register("electricityConnection")}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
                 />
-                <label className="ml-2 text-sm text-gray-700">
+                <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                   Electricity Connection Available
                 </label>
               </div>
@@ -309,19 +318,19 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
       </Card>
 
       {/* Lease Information */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               Lease Information
             </h3>
             <div className="flex items-center">
               <input
                 type="checkbox"
                 {...register("isLeased")}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
               />
-              <label className="ml-2 text-sm text-gray-700">
+              <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                 Currently Leased
               </label>
             </div>
@@ -330,14 +339,14 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
           {isLeased && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Lease Type *
                 </label>
                 <select
                   {...register("leaseType", {
                     required: isLeased ? "Lease type is required" : false,
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                   <option value="agricultural">Agricultural</option>
                   <option value="commercial">Commercial</option>
@@ -346,7 +355,7 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Rent Amount *
                 </label>
                 <Input
@@ -356,23 +365,24 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
                     min: { value: 0, message: "Rent amount must be positive" },
                   })}
                   placeholder="e.g., 50000"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {errors.rentAmount && (
-                  <p className="text-red-600 text-sm mt-1">
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">
                     {errors.rentAmount.message}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Rent Frequency *
                 </label>
                 <select
                   {...register("rentFrequency", {
                     required: isLeased ? "Rent frequency is required" : false,
                   })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                   <option value="monthly">Monthly</option>
                   <option value="quarterly">Quarterly</option>
@@ -381,18 +391,19 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Security Deposit
                 </label>
                 <Input
                   type="number"
                   {...register("securityDeposit")}
                   placeholder="e.g., 100000"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Lease Duration (years) *
                 </label>
                 <Input
@@ -405,34 +416,35 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
                     },
                   })}
                   placeholder="e.g., 5"
+                  className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 />
                 {errors.leaseDuration && (
-                  <p className="text-red-600 text-sm mt-1">
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-1">
                     {errors.leaseDuration.message}
                   </p>
                 )}
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Renewal Terms
                 </label>
                 <textarea
                   {...register("renewalTerms")}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   placeholder="Terms and conditions for lease renewal"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Restrictions
                 </label>
                 <textarea
                   {...register("restrictions")}
                   rows={2}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   placeholder="Any restrictions or limitations (comma-separated)"
                 />
               </div>
@@ -442,9 +454,9 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
       </Card>
 
       {/* Images */}
-      <Card>
+      <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <CardContent className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Property Images
           </h3>
           <SimpleFileUpload
@@ -463,6 +475,7 @@ export function LandForm({ land, onSubmit }: LandFormProps) {
           variant="outline"
           onClick={handleCancel}
           disabled={loading}
+          className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           Cancel
         </Button>

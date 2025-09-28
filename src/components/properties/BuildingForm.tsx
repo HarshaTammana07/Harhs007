@@ -21,6 +21,7 @@ interface BuildingFormData {
   address: string;
   description: string;
   totalFloors: number;
+  totalApartments: number;
   constructionYear: number;
   amenities: string;
 }
@@ -59,6 +60,7 @@ export function BuildingForm({
       address: building?.address || "",
       description: building?.description || "",
       totalFloors: building?.totalFloors || 1,
+      totalApartments: building?.totalApartments || 1,
       constructionYear: building?.constructionYear || new Date().getFullYear(),
       amenities: "",
     },
@@ -91,7 +93,7 @@ export function BuildingForm({
       address: data.address,
       description: data.description,
       totalFloors: data.totalFloors,
-      totalApartments: building?.totalApartments || 0,
+      totalApartments: data.totalApartments,
       constructionYear: data.constructionYear,
       images,
       amenities: amenitiesList,
@@ -103,27 +105,28 @@ export function BuildingForm({
   };
 
   return (
-    <Card>
+    <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       <CardHeader>
-        <CardTitle>{building ? "Edit Building" : "Add New Building"}</CardTitle>
+        <CardTitle className="text-gray-900 dark:text-white">{building ? "Edit Building" : "Add New Building"}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Building Name *
               </label>
               <Input
                 {...register("name", { required: "Building name is required" })}
                 placeholder="e.g., Satyanarayana Apartments"
                 error={errors.name?.message}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Building Code *
               </label>
               <Input
@@ -132,37 +135,39 @@ export function BuildingForm({
                 })}
                 placeholder="e.g., A, B, C"
                 error={errors.buildingCode?.message}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Address *
             </label>
             <Input
               {...register("address", { required: "Address is required" })}
               placeholder="Full address of the building"
               error={errors.address?.message}
+              className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Description
             </label>
             <textarea
               {...register("description")}
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               placeholder="Brief description of the building"
             />
           </div>
 
           {/* Building Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Total Floors *
               </label>
               <Input
@@ -173,11 +178,28 @@ export function BuildingForm({
                   min: { value: 1, message: "Must be at least 1 floor" },
                 })}
                 error={errors.totalFloors?.message}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Total Apartments *
+              </label>
+              <Input
+                type="number"
+                min="1"
+                {...register("totalApartments", {
+                  required: "Total apartments is required",
+                  min: { value: 1, message: "Must be at least 1 apartment" },
+                })}
+                error={errors.totalApartments?.message}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Construction Year
               </label>
               <Input
@@ -192,13 +214,14 @@ export function BuildingForm({
                   },
                 })}
                 error={errors.constructionYear?.message}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
           </div>
 
           {/* Images */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Building Images
             </label>
             <SimpleFileUpload
@@ -230,7 +253,7 @@ export function BuildingForm({
 
           {/* Amenities */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Amenities
             </label>
             <div className="flex space-x-2 mb-3">
@@ -244,12 +267,14 @@ export function BuildingForm({
                     handleAddAmenity();
                   }
                 }}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
               <Button
                 type="button"
                 onClick={handleAddAmenity}
                 variant="outline"
                 disabled={!newAmenity.trim()}
+                className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 Add
               </Button>
@@ -259,13 +284,13 @@ export function BuildingForm({
                 {amenitiesList.map((amenity) => (
                   <span
                     key={amenity}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
                   >
                     {amenity}
                     <button
                       type="button"
                       onClick={() => handleRemoveAmenity(amenity)}
-                      className="ml-2 text-blue-600 hover:text-blue-800"
+                      className="ml-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
                     >
                       <XMarkIcon className="h-3 w-3" />
                     </button>
@@ -276,12 +301,13 @@ export function BuildingForm({
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
               disabled={isLoading}
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Cancel
             </Button>

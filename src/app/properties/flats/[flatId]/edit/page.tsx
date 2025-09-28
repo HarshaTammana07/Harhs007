@@ -26,7 +26,7 @@ export default function EditFlatPage() {
   const loadFlat = async () => {
     try {
       setLoading(true);
-      const flatData = propertyService.getFlatById(flatId);
+      const flatData = await propertyService.getFlatById(flatId);
       if (!flatData) {
         toast.error("Flat not found");
         router.push("/properties/flats");
@@ -47,7 +47,7 @@ export default function EditFlatPage() {
     try {
       setSaving(true);
 
-      propertyService.updateFlat(flatId, {
+      await propertyService.updateFlat(flatId, {
         ...flatData,
         updatedAt: new Date(),
       });

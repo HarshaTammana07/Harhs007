@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -43,39 +43,108 @@ export default function ApartmentDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAddTenantForm, setShowAddTenantForm] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, [buildingId, apartmentId]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const buildingData = propertyService.getBuildingById(buildingId);
+      console.log(
+        "Loading apartment detail - buildingId:",
+        buildingId,
+        "apartmentId:",
+        apartmentId
+      );
+
+      const buildingData = await propertyService.getBuildingById(buildingId);
+      console.log("Building data loaded:", buildingData);
       if (!buildingData) {
+        console.error("Building not found for ID:", buildingId);
         toast.error("Building not found");
         router.push("/properties/buildings");
         return;
       }
 
-      const apartmentData = propertyService.getApartmentById(
-        buildingId,
-        apartmentId
-      );
+      const apartmentData = await propertyService.getApartmentById(apartmentId);
+      console.log("Apartment data loaded:", apartmentData);
       if (!apartmentData) {
+        console.error(
+          "Apartment not found for buildingId:",
+          buildingId,
+          "apartmentId:",
+          apartmentId
+        );
         toast.error("Apartment not found");
         router.push(`/properties/buildings/${buildingId}/apartments`);
         return;
       }
 
+      // Fetch tenant data for this apartment
+      console.log("Fetching tenant for apartment:", apartmentId);
+      let apartmentTenant = null;
+
+      try {
+        // Try efficient method first (requires property_id column)
+        apartmentTenant = await propertyService.getTenantByProperty(
+          apartmentId,
+          "apartment"
+        );
+        console.log(
+          "Apartment tenant found (efficient method):",
+          apartmentTenant
+        );
+      } catch (error) {
+        console.log(
+          "Efficient method failed, falling back to old method:",
+          error.message
+        );
+
+        // Fallback: Get all tenants and filter (works with existing database)
+        try {
+          const allTenants = await propertyService.getTenants();
+          apartmentTenant = allTenants.find(
+            (tenant) =>
+              tenant.propertyId === apartmentId &&
+              tenant.propertyType === "apartment"
+          );
+          console.log(
+            "Apartment tenant found (fallback method):",
+            apartmentTenant
+          );
+        } catch (fallbackError) {
+          console.error("Both methods failed to fetch tenant:", fallbackError);
+          apartmentTenant = null;
+        }
+      }
+
+      if (apartmentTenant) {
+        console.log("Tenant details:", {
+          id: apartmentTenant.id,
+          fullName: apartmentTenant.personalInfo?.fullName,
+          phone: apartmentTenant.contactInfo?.phone,
+          email: apartmentTenant.contactInfo?.email,
+          rentAmount: apartmentTenant.rentalAgreement?.rentAmount,
+        });
+      } else {
+        console.log("No tenant found for apartment:", apartmentId);
+      }
+
+      // Link tenant to apartment
+      const apartmentWithTenant = {
+        ...apartmentData,
+        currentTenant: apartmentTenant || null,
+      };
+
       setBuilding(buildingData);
-      setApartment(apartmentData);
+      setApartment(apartmentWithTenant);
     } catch (error) {
       console.error("Error loading data:", error);
       toast.error("Failed to load apartment details");
     } finally {
       setLoading(false);
     }
-  };
+  }, [buildingId, apartmentId, router]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleBack = () => {
     router.push(`/properties/buildings/${buildingId}/apartments`);
@@ -89,7 +158,7 @@ export default function ApartmentDetailPage() {
 
   const handleDelete = async () => {
     try {
-      propertyService.deleteApartment(buildingId, apartmentId);
+      await propertyService.deleteApartment(apartmentId);
       toast.success("Apartment deleted successfully");
       router.push(`/properties/buildings/${buildingId}/apartments`);
     } catch (error) {
@@ -102,20 +171,33 @@ export default function ApartmentDetailPage() {
     setShowAddTenantForm(true);
   };
 
-  const handleTenantSubmit = async (tenant: any) => {
+  const handleTenantSubmit = async (tenant: unknown) => {
     try {
-      // Save tenant to property service
-      propertyService.saveTenant(tenant);
+      // Save tenant to property service with apartment reference
+      const tenantData = {
+        ...tenant,
+        propertyId: apartmentId,
+        propertyType: "apartment",
+        buildingId: buildingId,
+      };
 
-      // Update apartment with tenant
-      propertyService.updateApartment(buildingId, apartmentId, {
-        currentTenant: tenant,
+      console.log("Saving tenant with data:", tenantData);
+      console.log("Property linking fields:", {
+        propertyId: apartmentId,
+        propertyType: "apartment",
+        buildingId: buildingId,
+      });
+
+      await propertyService.saveTenant(tenantData);
+
+      // Update apartment occupancy status only
+      await propertyService.updateApartment(apartmentId, {
         isOccupied: true,
       });
 
       setShowAddTenantForm(false);
       toast.success("Tenant added successfully");
-      loadData(); // Reload data to show the new tenant
+      await loadData(); // Reload data to show the new tenant
     } catch (error) {
       console.error("Error adding tenant:", error);
       throw error; // Let the form handle the error
@@ -123,10 +205,18 @@ export default function ApartmentDetailPage() {
   };
 
   const handleViewTenant = () => {
+    console.log("handleViewTenant called");
+    console.log("apartment:", apartment);
+    console.log("apartment.currentTenant:", apartment?.currentTenant);
+
     if (apartment?.currentTenant) {
+      console.log("Navigating to tenant details page");
       router.push(
         `/properties/buildings/${buildingId}/apartments/${apartmentId}/tenant`
       );
+    } else {
+      console.log("No tenant found, cannot navigate");
+      toast.error("No tenant information available");
     }
   };
 
@@ -144,13 +234,13 @@ export default function ApartmentDetailPage() {
     return (
       <ProtectedRoute>
         <AppLayout>
-          <div className="text-center py-12">
-            <HomeIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
+          <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+            <HomeIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">
               Apartment not found
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              The apartment you're looking for doesn't exist.
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              The apartment you're looking for doesn&apos;t exist.
             </p>
             <div className="mt-6">
               <Button onClick={handleBack}>
@@ -180,30 +270,31 @@ export default function ApartmentDetailPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
-          <Breadcrumb items={breadcrumbItems} />
+        <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <div className="p-6">
+            <Breadcrumb items={breadcrumbItems} />
 
-          {/* Header */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            {/* Header */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mt-6">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                   Apartment D-No: {apartment.doorNumber}
                 </h1>
-                <p className="text-gray-600 mt-1">
+                <p className="text-gray-600 dark:text-gray-300 mt-1">
                   {building.name} • Floor {apartment.floor}
                 </p>
                 <div className="flex items-center space-x-4 mt-2">
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                       apartment.isOccupied
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
                     }`}
                   >
                     {apartment.isOccupied ? "Occupied" : "Vacant"}
                   </span>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 dark:text-gray-300">
                     {apartment.bedroomCount} bedroom
                     {apartment.bedroomCount !== 1 ? "s" : ""} •{" "}
                     {apartment.bathroomCount} bathroom
@@ -236,9 +327,9 @@ export default function ApartmentDetailPage() {
             {/* Apartment Details */}
             <div className="lg:col-span-2 space-y-6">
               {/* Basic Information */}
-              <Card>
+              <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-gray-900 dark:text-white">
                     <HomeIcon className="h-5 w-5 mr-2" />
                     Apartment Details
                   </CardTitle>
@@ -246,49 +337,59 @@ export default function ApartmentDetailPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Door Number
                       </label>
-                      <p className="text-lg font-semibold">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {apartment.doorNumber}
                       </p>
                     </div>
+                    {apartment.serviceNumber && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                          Service Number
+                        </label>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {apartment.serviceNumber}
+                        </p>
+                      </div>
+                    )}
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Floor
                       </label>
                       <p className="text-lg font-semibold">{apartment.floor}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Area
                       </label>
-                      <p className="text-lg font-semibold">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {apartment.area} sq ft
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Bedrooms
                       </label>
-                      <p className="text-lg font-semibold">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {apartment.bedroomCount}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Bathrooms
                       </label>
-                      <p className="text-lg font-semibold">
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {apartment.bathroomCount}
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-600">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Monthly Rent
                       </label>
-                      <p className="text-lg font-semibold text-green-600">
-                        ₹{apartment.rentAmount.toLocaleString()}
+                      <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+                        ₹{apartment.rentAmount?.toLocaleString() || "0"}
                       </p>
                     </div>
                   </div>
@@ -344,7 +445,7 @@ export default function ApartmentDetailPage() {
                           }`}
                         />
                         <span
-                          className={`text-sm ${spec.value ? "text-gray-900" : "text-gray-500"}`}
+                          className={`text-sm ${spec.value ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}`}
                         >
                           {spec.label}
                         </span>
@@ -352,18 +453,18 @@ export default function ApartmentDetailPage() {
                     ))}
                   </div>
 
-                  <div className="pt-4 border-t border-gray-200">
-                    <label className="text-sm font-medium text-gray-600">
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                       Water Supply
                     </label>
-                    <p className="text-sm text-gray-900 capitalize">
+                    <p className="text-sm text-gray-900 dark:text-white capitalize">
                       {apartment.specifications.waterSupply.replace("_", " ")}
                     </p>
                   </div>
 
                   {apartment.specifications.additionalFeatures.length > 0 && (
-                    <div className="pt-4 border-t border-gray-200">
-                      <label className="text-sm font-medium text-gray-600 mb-2 block">
+                    <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <label className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2 block">
                         Additional Features
                       </label>
                       <div className="flex flex-wrap gap-2">
@@ -371,7 +472,7 @@ export default function ApartmentDetailPage() {
                           (feature) => (
                             <span
                               key={feature}
-                              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300"
                             >
                               {feature}
                             </span>
@@ -404,10 +505,10 @@ export default function ApartmentDetailPage() {
                   {apartment.currentTenant ? (
                     <div className="space-y-4">
                       <div>
-                        <h4 className="font-semibold text-gray-900">
+                        <h4 className="font-semibold text-gray-900 dark:text-white">
                           {apartment.currentTenant.personalInfo?.fullName}
                         </h4>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
                           {apartment.currentTenant.personalInfo?.occupation}
                         </p>
                       </div>
@@ -417,7 +518,7 @@ export default function ApartmentDetailPage() {
                           {apartment.currentTenant.contactInfo.phone && (
                             <div className="flex items-center space-x-2">
                               <PhoneIcon className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-900">
+                              <span className="text-sm text-gray-900 dark:text-white">
                                 {apartment.currentTenant.contactInfo.phone}
                               </span>
                             </div>
@@ -425,7 +526,7 @@ export default function ApartmentDetailPage() {
                           {apartment.currentTenant.contactInfo.email && (
                             <div className="flex items-center space-x-2">
                               <EnvelopeIcon className="h-4 w-4 text-gray-400" />
-                              <span className="text-sm text-gray-900">
+                              <span className="text-sm text-gray-900 dark:text-white">
                                 {apartment.currentTenant.contactInfo.email}
                               </span>
                             </div>
@@ -434,41 +535,43 @@ export default function ApartmentDetailPage() {
                       )}
 
                       {apartment.currentTenant.rentalAgreement && (
-                        <div className="pt-4 border-t border-gray-200">
+                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Monthly Rent
                               </span>
-                              <span className="text-sm font-medium text-green-600">
+                              <span className="text-sm font-medium text-green-600 dark:text-green-400">
                                 ₹
-                                {apartment.currentTenant.rentalAgreement.rentAmount.toLocaleString()}
+                                {apartment.currentTenant.rentalAgreement.rentAmount?.toLocaleString() ||
+                                  "0"}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Security Deposit
                               </span>
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
                                 ₹
-                                {apartment.currentTenant.rentalAgreement.securityDeposit.toLocaleString()}
+                                {apartment.currentTenant.rentalAgreement.securityDeposit?.toLocaleString() ||
+                                  "0"}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Lease Start
                               </span>
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
                                 {new Date(
                                   apartment.currentTenant.rentalAgreement.startDate
                                 ).toLocaleDateString()}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
                                 Lease End
                               </span>
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">
                                 {new Date(
                                   apartment.currentTenant.rentalAgreement.endDate
                                 ).toLocaleDateString()}
@@ -478,7 +581,7 @@ export default function ApartmentDetailPage() {
                         </div>
                       )}
 
-                      <div className="pt-4 border-t border-gray-200">
+                      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
                         <Button
                           size="sm"
                           variant="outline"
@@ -491,11 +594,11 @@ export default function ApartmentDetailPage() {
                     </div>
                   ) : (
                     <div className="text-center py-6">
-                      <UsersIcon className="mx-auto h-8 w-8 text-gray-400" />
-                      <p className="mt-2 text-sm text-gray-600">
+                      <UsersIcon className="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" />
+                      <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
                         No tenant assigned
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         This apartment is currently vacant
                       </p>
                     </div>
@@ -513,29 +616,29 @@ export default function ApartmentDetailPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Monthly Rent</span>
-                    <span className="text-sm font-medium text-green-600">
-                      ₹{apartment.rentAmount.toLocaleString()}
+                    <span className="text-sm text-gray-600 dark:text-gray-300">Monthly Rent</span>
+                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                      ₹{apartment.rentAmount?.toLocaleString() || "0"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
                       Security Deposit
                     </span>
-                    <span className="text-sm font-medium">
-                      ₹{apartment.securityDeposit.toLocaleString()}
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      ₹{apartment.securityDeposit?.toLocaleString() || "0"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Annual Rent</span>
-                    <span className="text-sm font-medium">
-                      ₹{(apartment.rentAmount * 12).toLocaleString()}
+                    <span className="text-sm text-gray-600 dark:text-gray-300">Annual Rent</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      ₹{((apartment.rentAmount || 0) * 12).toLocaleString()}
                     </span>
                   </div>
                   {apartment.rentHistory &&
                     apartment.rentHistory.length > 0 && (
-                      <div className="pt-3 border-t border-gray-200">
-                        <p className="text-xs text-gray-500">
+                      <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           {apartment.rentHistory.length} payment
                           {apartment.rentHistory.length !== 1 ? "s" : ""}{" "}
                           recorded
@@ -587,6 +690,7 @@ export default function ApartmentDetailPage() {
               title="Add Tenant to Apartment"
             />
           )}
+          </div>
         </div>
       </AppLayout>
     </ProtectedRoute>

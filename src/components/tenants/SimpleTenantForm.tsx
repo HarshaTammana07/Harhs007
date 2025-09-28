@@ -38,6 +38,7 @@ interface SimpleTenantFormProps {
   isOpen: boolean;
   defaultRent?: number;
   title?: string;
+  tenant?: Tenant; // For editing existing tenant
 }
 
 export function SimpleTenantForm({
@@ -46,6 +47,7 @@ export function SimpleTenantForm({
   isOpen,
   defaultRent = 0,
   title = "Add Tenant",
+  tenant,
 }: SimpleTenantFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -56,18 +58,25 @@ export function SimpleTenantForm({
     formState: { errors },
   } = useForm<SimpleTenantFormData>({
     defaultValues: {
-      fullName: "",
-      phone: "",
-      email: "",
-      occupation: "",
-      monthlyRent: defaultRent,
-      securityDeposit: defaultRent * 2, // Default to 2x rent
-      agreementNumber: "",
-      startDate: new Date().toISOString().split("T")[0],
-      endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split("T")[0], // 1 year from now
-      moveInDate: new Date().toISOString().split("T")[0],
+      fullName: tenant?.personalInfo?.fullName || "",
+      phone: tenant?.contactInfo?.phone || "",
+      email: tenant?.contactInfo?.email || "",
+      occupation: tenant?.personalInfo?.occupation || "",
+      monthlyRent: tenant?.rentalAgreement?.rentAmount || defaultRent,
+      securityDeposit:
+        tenant?.rentalAgreement?.securityDeposit || defaultRent * 2,
+      agreementNumber: tenant?.rentalAgreement?.agreementNumber || "",
+      startDate: tenant?.rentalAgreement?.startDate
+        ? new Date(tenant.rentalAgreement.startDate).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+      endDate: tenant?.rentalAgreement?.endDate
+        ? new Date(tenant.rentalAgreement.endDate).toISOString().split("T")[0]
+        : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0],
+      moveInDate: tenant?.moveInDate
+        ? new Date(tenant.moveInDate).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
     },
   });
 
@@ -75,49 +84,67 @@ export function SimpleTenantForm({
     try {
       setIsSubmitting(true);
 
-      // Create a complete tenant object with minimal required data
-      const tenant: Tenant = {
-        id: `tenant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      // Create or update tenant object
+      const tenantData: Tenant = {
+        id:
+          tenant?.id ||
+          `tenant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         personalInfo: {
           firstName: data.fullName.split(" ")[0] || "",
           lastName: data.fullName.split(" ").slice(1).join(" ") || "",
           fullName: data.fullName,
           occupation: data.occupation,
-          familySize: 1,
-          nationality: "Indian",
-          maritalStatus: "single",
+          familySize: tenant?.personalInfo?.familySize || 1,
+          nationality: tenant?.personalInfo?.nationality || "Indian",
+          maritalStatus: tenant?.personalInfo?.maritalStatus || "single",
+          dateOfBirth: tenant?.personalInfo?.dateOfBirth,
+          employer: tenant?.personalInfo?.employer,
+          monthlyIncome: tenant?.personalInfo?.monthlyIncome,
+          religion: tenant?.personalInfo?.religion,
         },
         contactInfo: {
           phone: data.phone,
           email: data.email || "",
+          address: tenant?.contactInfo?.address,
         },
-        emergencyContact: {
+        emergencyContact: tenant?.emergencyContact || {
           name: "",
           relationship: "",
           phone: "",
         },
-        identification: {},
+        identification: tenant?.identification || {},
         rentalAgreement: {
           agreementNumber: data.agreementNumber,
           startDate: new Date(data.startDate),
           endDate: new Date(data.endDate),
           rentAmount: data.monthlyRent,
           securityDeposit: data.securityDeposit,
-          rentDueDate: 5, // Default to 5th of every month
-          paymentMethod: "bank_transfer",
-          noticePeriod: 30,
+          rentDueDate: tenant?.rentalAgreement?.rentDueDate || 5,
+          paymentMethod:
+            tenant?.rentalAgreement?.paymentMethod || "bank_transfer",
+          noticePeriod: tenant?.rentalAgreement?.noticePeriod || 30,
+          maintenanceCharges: tenant?.rentalAgreement?.maintenanceCharges,
+          lateFeeAmount: tenant?.rentalAgreement?.lateFeeAmount,
+          renewalTerms: tenant?.rentalAgreement?.renewalTerms,
+          specialConditions: tenant?.rentalAgreement?.specialConditions,
         },
-        references: [],
-        documents: [],
+        references: tenant?.references || [],
+        documents: tenant?.documents || [],
         moveInDate: new Date(data.moveInDate),
-        isActive: true,
-        createdAt: new Date(),
+        moveOutDate: tenant?.moveOutDate,
+        isActive: tenant?.isActive !== undefined ? tenant.isActive : true,
+        propertyId: tenant?.propertyId,
+        propertyType: tenant?.propertyType,
+        buildingId: tenant?.buildingId,
+        createdAt: tenant?.createdAt || new Date(),
         updatedAt: new Date(),
       };
 
-      await onSubmit(tenant);
+      await onSubmit(tenantData);
       reset();
-      toast.success("Tenant added successfully");
+      toast.success(
+        tenant ? "Tenant updated successfully" : "Tenant added successfully"
+      );
     } catch (error) {
       console.error("Error adding tenant:", error);
       toast.error("Failed to add tenant");
@@ -130,7 +157,7 @@ export function SimpleTenantForm({
     <Modal isOpen={isOpen} onClose={onCancel} size="2xl">
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
           <Button variant="outline" onClick={onCancel}>
             Cancel
           </Button>
@@ -269,7 +296,13 @@ export function SimpleTenantForm({
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Adding Tenant..." : "Add Tenant"}
+              {isSubmitting
+                ? tenant
+                  ? "Updating Tenant..."
+                  : "Adding Tenant..."
+                : tenant
+                  ? "Update Tenant"
+                  : "Add Tenant"}
             </Button>
           </div>
         </form>

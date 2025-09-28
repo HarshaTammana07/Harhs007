@@ -163,6 +163,10 @@ CREATE TABLE tenants (
     notice_period INTEGER DEFAULT 30,
     renewal_terms TEXT,
     special_conditions TEXT[],
+    -- Property Assignment (direct linking)
+    property_id UUID, -- References buildings, flats, or lands
+    property_type VARCHAR(20), -- 'apartment', 'flat', 'land'
+    building_id UUID, -- For apartments, references buildings table
     -- Status
     move_in_date DATE NOT NULL,
     move_out_date DATE,

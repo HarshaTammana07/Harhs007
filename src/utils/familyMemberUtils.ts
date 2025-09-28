@@ -131,6 +131,19 @@ export function formatContactInfo(contactInfo: ContactInfo): string {
 }
 
 /**
+ * Formats date without timezone issues for birth dates and other dates
+ */
+export function formatDateWithoutTimezone(date: Date | string): string {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  return dateObj.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: 'UTC'
+  });
+}
+
+/**
  * Gets initials from full name
  */
 export function getInitials(fullName: string): string {

@@ -86,10 +86,10 @@ export default function EditLandPage() {
           <Breadcrumb items={breadcrumbItems} />
 
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               Edit Land Property
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
               Update the details and lease information for {land.name}.
             </p>
           </div>

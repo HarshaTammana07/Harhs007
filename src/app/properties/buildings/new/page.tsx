@@ -51,13 +51,15 @@ export default function NewBuildingPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="space-y-6">
-          <Breadcrumb items={breadcrumbItems} />
-          <BuildingForm
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            isLoading={isLoading}
-          />
+        <div className="space-y-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+          <div className="p-6">
+            <Breadcrumb items={breadcrumbItems} />
+            <BuildingForm
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              isLoading={isLoading}
+            />
+          </div>
         </div>
       </AppLayout>
     </ProtectedRoute>

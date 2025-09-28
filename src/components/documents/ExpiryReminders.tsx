@@ -20,9 +20,10 @@ import { format } from "date-fns";
 
 interface ExpiryRemindersProps {
   onViewDocument?: (document: Document) => void;
+  refreshTrigger?: number;
 }
 
-export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
+export function ExpiryReminders({ onViewDocument, refreshTrigger }: ExpiryRemindersProps) {
   const [expiryInfo, setExpiryInfo] = useState<DocumentExpiryInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -33,6 +34,13 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
   useEffect(() => {
     loadExpiryInfo();
   }, []);
+
+  // Refresh data when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger !== undefined) {
+      loadExpiryInfo();
+    }
+  }, [refreshTrigger]);
 
   const loadExpiryInfo = () => {
     setIsLoading(true);
@@ -60,10 +68,10 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
 
   if (isLoading) {
     return (
-      <Card className="p-4">
+      <Card className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-400"></div>
+          <span className="ml-2 text-gray-600 dark:text-gray-400">
             Checking document expiry...
           </span>
         </div>
@@ -76,58 +84,41 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
       {/* Header */}
       <div
-        className="p-4 bg-gradient-to-r from-yellow-50 to-red-50 border-b cursor-pointer"
+        className="p-4 bg-gradient-to-r from-yellow-50 to-red-50 dark:from-yellow-900/20 dark:to-red-900/20 border-b border-gray-200 dark:border-gray-700 cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               {expiredDocs.length > 0 && (
-                <ExclamationTriangleIcon className="h-5 w-5 text-red-500" />
+                <ExclamationTriangleIcon className="h-5 w-5 text-red-500 dark:text-red-400" />
               )}
               {expiringSoonDocs.length > 0 && (
-                <ClockIcon className="h-5 w-5 text-yellow-500" />
+                <ClockIcon className="h-5 w-5 text-yellow-500 dark:text-yellow-400" />
               )}
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
                 Document Expiry Reminders
               </h3>
-              <p className="text-sm text-gray-600">
-                {expiredDocs.length > 0 && (
-                  <span className="text-red-600 font-medium">
-                    {expiredDocs.length} expired
-                  </span>
-                )}
-                {expiredDocs.length > 0 && expiringSoonDocs.length > 0 && (
-                  <span className="text-gray-500"> • </span>
-                )}
-                {expiringSoonDocs.length > 0 && (
-                  <span className="text-yellow-600 font-medium">
-                    {expiringSoonDocs.length} expiring soon
-                  </span>
-                )}
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {expiredDocs.length > 0 && expiringSoonDocs.length > 0
+                  ? `${expiredDocs.length} expired, ${expiringSoonDocs.length} expiring soon`
+                  : expiredDocs.length > 0
+                  ? `${expiredDocs.length} document${expiredDocs.length !== 1 ? "s" : ""} expired`
+                  : `${expiringSoonDocs.length} document${expiringSoonDocs.length !== 1 ? "s" : ""} expiring soon`}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsExpanded(!isExpanded);
-              }}
-            >
-              {isExpanded ? (
-                <ChevronUpIcon className="h-4 w-4" />
-              ) : (
-                <ChevronDownIcon className="h-4 w-4" />
-              )}
-            </Button>
+            {isExpanded ? (
+              <ChevronUpIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            ) : (
+              <ChevronDownIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+            )}
           </div>
         </div>
       </div>
@@ -138,7 +129,7 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
           {/* Expired Documents */}
           {expiredDocs.length > 0 && (
             <div>
-              <h4 className="font-medium text-red-800 mb-3 flex items-center gap-2">
+              <h4 className="font-medium text-red-800 dark:text-red-200 mb-3 flex items-center gap-2">
                 <ExclamationTriangleIcon className="h-4 w-4" />
                 Expired Documents ({expiredDocs.length})
               </h4>
@@ -146,21 +137,22 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
                 {expiredDocs.map((info) => (
                   <div
                     key={info.document.id}
-                    className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-red-900 truncate">
+                      <p className="font-medium text-red-900 dark:text-red-200 truncate">
                         {info.document.title}
                       </p>
-                      <p className="text-sm text-red-700">
+                      <p className="text-sm text-red-700 dark:text-red-300">
                         {documentService.getCategoryDisplayName(
                           info.document.category
                         )}{" "}
-                        • Expired {Math.abs(info.daysUntilExpiry)} days ago
+                        • Expired {Math.abs(info.daysUntilExpiry)} day
+                        {Math.abs(info.daysUntilExpiry) !== 1 ? "s" : ""} ago
                       </p>
                       {info.document.expiryDate && (
-                        <p className="text-xs text-red-600">
-                          Expiry:{" "}
+                        <p className="text-xs text-red-600 dark:text-red-400">
+                          Expired:{" "}
                           {format(
                             new Date(info.document.expiryDate),
                             "MMM dd, yyyy"
@@ -174,7 +166,7 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
                           size="sm"
                           variant="ghost"
                           onClick={() => onViewDocument(info.document)}
-                          className="text-red-700 hover:text-red-800 hover:bg-red-100"
+                          className="text-red-700 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30"
                         >
                           <EyeIcon className="h-4 w-4" />
                         </Button>
@@ -183,7 +175,7 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDismiss(info.document.id)}
-                        className="text-red-700 hover:text-red-800 hover:bg-red-100"
+                        className="text-red-700 dark:text-red-300 hover:text-red-800 dark:hover:text-red-200 hover:bg-red-100 dark:hover:bg-red-900/30"
                       >
                         <XMarkIcon className="h-4 w-4" />
                       </Button>
@@ -197,7 +189,7 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
           {/* Expiring Soon Documents */}
           {expiringSoonDocs.length > 0 && (
             <div>
-              <h4 className="font-medium text-yellow-800 mb-3 flex items-center gap-2">
+              <h4 className="font-medium text-yellow-800 dark:text-yellow-200 mb-3 flex items-center gap-2">
                 <ClockIcon className="h-4 w-4" />
                 Expiring Soon ({expiringSoonDocs.length})
               </h4>
@@ -205,13 +197,13 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
                 {expiringSoonDocs.map((info) => (
                   <div
                     key={info.document.id}
-                    className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg"
+                    className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-yellow-900 truncate">
+                      <p className="font-medium text-yellow-900 dark:text-yellow-200 truncate">
                         {info.document.title}
                       </p>
-                      <p className="text-sm text-yellow-700">
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
                         {documentService.getCategoryDisplayName(
                           info.document.category
                         )}{" "}
@@ -219,7 +211,7 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
                         {info.daysUntilExpiry !== 1 ? "s" : ""}
                       </p>
                       {info.document.expiryDate && (
-                        <p className="text-xs text-yellow-600">
+                        <p className="text-xs text-yellow-600 dark:text-yellow-400">
                           Expiry:{" "}
                           {format(
                             new Date(info.document.expiryDate),
@@ -234,7 +226,7 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
                           size="sm"
                           variant="ghost"
                           onClick={() => onViewDocument(info.document)}
-                          className="text-yellow-700 hover:text-yellow-800 hover:bg-yellow-100"
+                          className="text-yellow-700 dark:text-yellow-300 hover:text-yellow-800 dark:hover:text-yellow-200 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"
                         >
                           <EyeIcon className="h-4 w-4" />
                         </Button>
@@ -243,7 +235,7 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
                         size="sm"
                         variant="ghost"
                         onClick={() => handleDismiss(info.document.id)}
-                        className="text-yellow-700 hover:text-yellow-800 hover:bg-yellow-100"
+                        className="text-yellow-700 dark:text-yellow-300 hover:text-yellow-800 dark:hover:text-yellow-200 hover:bg-yellow-100 dark:hover:bg-yellow-900/30"
                       >
                         <XMarkIcon className="h-4 w-4" />
                       </Button>
@@ -255,11 +247,16 @@ export function ExpiryReminders({ onViewDocument }: ExpiryRemindersProps) {
           )}
 
           {/* Action Buttons */}
-          <div className="flex justify-between items-center pt-3 border-t">
-            <p className="text-xs text-gray-500">
+          <div className="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Dismissed reminders will reappear on page refresh
             </p>
-            <Button size="sm" variant="outline" onClick={loadExpiryInfo}>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={loadExpiryInfo}
+              className="border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
               Refresh
             </Button>
           </div>

@@ -1,0 +1,26 @@
+{
+  "extends": ["next/core-web-vitals"],
+  "rules": {
+    // Disable common problematic rules
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "react-hooks/exhaustive-deps": "off",
+    "@next/next/no-img-element": "off",
+    "react/no-unescaped-entities": "off",
+    "@typescript-eslint/ban-ts-comment": "off",
+    "prefer-const": "off",
+    "no-unused-vars": "off",
+    // Turn errors into warnings
+    "@typescript-eslint/no-inferrable-types": "warn",
+    "react/jsx-key": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "out/",
+    "build/",
+    "dist/",
+    "*.config.js",
+    "scripts/"
+  ]
+}

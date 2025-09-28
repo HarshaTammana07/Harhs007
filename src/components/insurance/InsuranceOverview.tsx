@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { InsuranceTypeCard } from "./InsuranceTypeCard";
-import { insuranceService } from "@/services/InsuranceService";
+import { ApiService } from "@/services/ApiService";
 import { InsurancePolicy } from "@/types";
+import toast from "react-hot-toast";
 
 // Icons for different insurance types
 const CarIcon = () => (
@@ -79,11 +80,13 @@ const HealthIcon = () => (
 interface InsuranceOverviewProps {
   onSelectType: (type: InsurancePolicy["type"]) => void;
   onAddNew: (type: InsurancePolicy["type"]) => void;
+  refreshTrigger?: number;
 }
 
 export const InsuranceOverview: React.FC<InsuranceOverviewProps> = ({
   onSelectType,
   onAddNew,
+  refreshTrigger = 0,
 }) => {
   const [stats, setStats] = useState<
     Record<
@@ -97,13 +100,54 @@ export const InsuranceOverview: React.FC<InsuranceOverviewProps> = ({
     health: { count: 0, expiringSoon: 0, expired: 0 },
   });
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     loadStats();
-  }, []);
+  }, [refreshTrigger]); // Reload when refreshTrigger changes
 
-  const loadStats = () => {
-    const policyStats = insuranceService.getPolicyStatsByType();
-    setStats(policyStats);
+  const loadStats = async () => {
+    try {
+      setLoading(true);
+      const allPolicies = await ApiService.getInsurancePolicies();
+      const expiringSoon = await ApiService.getPoliciesExpiringSoon(30);
+      const expired = await ApiService.getExpiredPolicies();
+
+      const newStats = {
+        car: { count: 0, expiringSoon: 0, expired: 0 },
+        bike: { count: 0, expiringSoon: 0, expired: 0 },
+        LIC: { count: 0, expiringSoon: 0, expired: 0 },
+        health: { count: 0, expiringSoon: 0, expired: 0 },
+      };
+
+      // Count total policies by type
+      allPolicies.forEach(policy => {
+        if (newStats[policy.type]) {
+          newStats[policy.type].count++;
+        }
+      });
+
+      // Count expiring soon by type
+      expiringSoon.forEach(policy => {
+        if (newStats[policy.type]) {
+          newStats[policy.type].expiringSoon++;
+        }
+      });
+
+      // Count expired by type
+      expired.forEach(policy => {
+        if (newStats[policy.type]) {
+          newStats[policy.type].expired++;
+        }
+      });
+
+      setStats(newStats);
+    } catch (error) {
+      console.error("Failed to load insurance stats:", error);
+      toast.error("Failed to load insurance statistics");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const insuranceTypes = [
@@ -130,12 +174,12 @@ export const InsuranceOverview: React.FC<InsuranceOverviewProps> = ({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Insurance Management
         </h1>
-        <p className="text-gray-600 mt-1">
+        <p className="text-gray-600 dark:text-gray-300 mt-1">
           Manage all your insurance policies in one place
         </p>
       </div>
@@ -157,43 +201,43 @@ export const InsuranceOverview: React.FC<InsuranceOverviewProps> = ({
       </div>
 
       {/* Summary section */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Quick Summary
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {Object.values(stats).reduce((sum, stat) => sum + stat.count, 0)}
             </div>
-            <div className="text-sm text-gray-600">Total Policies</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">Total Policies</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {Object.values(stats).reduce(
                 (sum, stat) => sum + (stat.count - stat.expired),
                 0
               )}
             </div>
-            <div className="text-sm text-gray-600">Active</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">Active</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
               {Object.values(stats).reduce(
                 (sum, stat) => sum + stat.expiringSoon,
                 0
               )}
             </div>
-            <div className="text-sm text-gray-600">Expiring Soon</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">Expiring Soon</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-2xl font-bold text-red-600 dark:text-red-400">
               {Object.values(stats).reduce(
                 (sum, stat) => sum + stat.expired,
                 0
               )}
             </div>
-            <div className="text-sm text-gray-600">Expired</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">Expired</div>
           </div>
         </div>
       </div>
