@@ -380,7 +380,8 @@ export type DocumentCategory =
   | "insurance_documents"
   | "bank_documents"
   | "educational_certificates"
-  | "medical_records";
+  | "medical_records"
+  | "others";
 
 export interface Document {
   id: string;

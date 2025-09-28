@@ -391,49 +391,49 @@ export function FamilyMemberDetail({
                     <div className="grid grid-cols-2 gap-4 mt-4 text-xs text-gray-500 dark:text-gray-400">
                       <div className="flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${member.fullName ? "bg-green-500" : "bg-gray-300"}`}
+                          className={`w-2 h-2 rounded-full mr-2 ${member.fullName ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
                         />
                         Full Name
                       </div>
                       <div className="flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${member.nickname ? "bg-green-500" : "bg-gray-300"}`}
+                          className={`w-2 h-2 rounded-full mr-2 ${member.nickname ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
                         />
                         Nickname
                       </div>
                       <div className="flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${member.relationship ? "bg-green-500" : "bg-gray-300"}`}
+                          className={`w-2 h-2 rounded-full mr-2 ${member.relationship ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
                         />
                         Relationship
                       </div>
                       <div className="flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${member.profilePhoto ? "bg-green-500" : "bg-gray-300"}`}
+                          className={`w-2 h-2 rounded-full mr-2 ${member.profilePhoto ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
                         />
                         Profile Photo
                       </div>
                       <div className="flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${member.dateOfBirth ? "bg-green-500" : "bg-gray-300"}`}
+                          className={`w-2 h-2 rounded-full mr-2 ${member.dateOfBirth ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
                         />
                         Date of Birth
                       </div>
                       <div className="flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${member.contactInfo.phone ? "bg-green-500" : "bg-gray-300"}`}
+                          className={`w-2 h-2 rounded-full mr-2 ${member.contactInfo.phone ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
                         />
                         Phone
                       </div>
                       <div className="flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${member.contactInfo.email ? "bg-green-500" : "bg-gray-300"}`}
+                          className={`w-2 h-2 rounded-full mr-2 ${member.contactInfo.email ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
                         />
                         Email
                       </div>
                       <div className="flex items-center">
                         <span
-                          className={`w-2 h-2 rounded-full mr-2 ${member.contactInfo.address ? "bg-green-500" : "bg-gray-300"}`}
+                          className={`w-2 h-2 rounded-full mr-2 ${member.contactInfo.address ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"}`}
                         />
                         Address
                       </div>
@@ -489,13 +489,13 @@ export function FamilyMemberDetail({
                       <div className="text-2xl font-bold text-blue-600">
                         {documents.length}
                       </div>
-                      <div className="text-sm text-gray-600">Documents</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Documents</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-green-600">
                         {insurancePolicies.length}
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         Insurance Policies
                       </div>
                     </div>
@@ -503,13 +503,13 @@ export function FamilyMemberDetail({
                       <div className="text-2xl font-bold text-orange-600">
                         {alertCount}
                       </div>
-                      <div className="text-sm text-gray-600">Active Alerts</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Active Alerts</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-purple-600">
                         {completionPercentage}%
                       </div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         Profile Complete
                       </div>
                     </div>
@@ -523,15 +523,15 @@ export function FamilyMemberDetail({
                 {loading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="text-gray-600 mt-2">Loading documents...</p>
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">Loading documents...</p>
                   </div>
                 ) : documents.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-gray-400 text-6xl mb-4">📄</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                       No documents yet
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 dark:text-gray-400">
                       Documents will appear here when added for {member.fullName}
                     </p>
                   </div>
@@ -541,7 +541,7 @@ export function FamilyMemberDetail({
                       <Card key={document.id} className="p-4 hover:shadow-md transition-shadow">
                         <div className="flex items-start space-x-4">
                           <div className="flex-shrink-0">
-                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                               <svg
                                 className="w-6 h-6 text-blue-600"
                                 fill="none"
@@ -559,14 +559,14 @@ export function FamilyMemberDetail({
                           </div>
                           
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-base font-medium text-gray-900 truncate">
+                            <h4 className="text-base font-medium text-gray-900 dark:text-white truncate">
                               {document.title}
                             </h4>
-                            <p className="text-sm text-gray-500 capitalize mt-1">
+                            <p className="text-sm text-gray-500 dark:text-gray-400 capitalize mt-1">
                               {document.category.replace("_", " ")}
                             </p>
                             
-                            <div className="flex flex-wrap gap-4 mt-2 text-xs text-gray-500">
+                            <div className="flex flex-wrap gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                               {document.expiryDate && (
                                 <span>
                                   Expires: {new Date(document.expiryDate).toLocaleDateString()}
@@ -616,15 +616,15 @@ export function FamilyMemberDetail({
                 {loading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
-                    <p className="text-gray-600 mt-2">Loading insurance policies...</p>
+                    <p className="text-gray-600 dark:text-gray-400 mt-2">Loading insurance policies...</p>
                   </div>
                 ) : insurancePolicies.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-gray-400 text-6xl mb-4">🛡️</div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                       No insurance policies yet
                     </h3>
-                    <p className="text-gray-600">
+                    <p className="text-gray-600 dark:text-gray-400">
                       Insurance policies will appear here when added for {member.fullName}
                     </p>
                   </div>
@@ -635,7 +635,7 @@ export function FamilyMemberDetail({
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center space-x-3">
-                              <h4 className="text-lg font-semibold text-gray-900">
+                              <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
                                 {policy.type.toUpperCase()} Policy
                               </h4>
                               <span
@@ -650,35 +650,35 @@ export function FamilyMemberDetail({
                                 {policy.status}
                               </span>
                             </div>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                               {policy.provider} • Policy #{policy.policyNumber}
                             </p>
                             <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                               <div>
-                                <span className="text-gray-500">Premium:</span>
-                                <p className="font-medium">
+                                <span className="text-gray-500 dark:text-gray-400">Premium:</span>
+                                <p className="font-medium text-gray-900 dark:text-white">
                                   ₹{policy.premiumAmount.toLocaleString()}
                                 </p>
                               </div>
                               <div>
-                                <span className="text-gray-500">Coverage:</span>
-                                <p className="font-medium">
+                                <span className="text-gray-500 dark:text-gray-400">Coverage:</span>
+                                <p className="font-medium text-gray-900 dark:text-white">
                                   ₹{policy.coverageAmount.toLocaleString()}
                                 </p>
                               </div>
                               <div>
-                                <span className="text-gray-500">
+                                <span className="text-gray-500 dark:text-gray-400">
                                   Start Date:
                                 </span>
-                                <p className="font-medium">
+                                <p className="font-medium text-gray-900 dark:text-white">
                                   {new Date(
                                     policy.startDate
                                   ).toLocaleDateString()}
                                 </p>
                               </div>
                               <div>
-                                <span className="text-gray-500">Renewal:</span>
-                                <p className="font-medium">
+                                <span className="text-gray-500 dark:text-gray-400">Renewal:</span>
+                                <p className="font-medium text-gray-900 dark:text-white">
                                   {new Date(
                                     policy.renewalDate
                                   ).toLocaleDateString()}

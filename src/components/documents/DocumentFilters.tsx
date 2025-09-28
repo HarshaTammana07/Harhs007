@@ -9,6 +9,7 @@ import {
 } from "@/services/DocumentService";
 import { ApiService } from "@/services/ApiService";
 import { localStorageService } from "@/services/LocalStorageService";
+import { propertyService } from "@/services/PropertyService";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -38,7 +39,7 @@ export function DocumentFilters({
   onCancel,
 }: DocumentFiltersProps) {
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
-  const [properties, setProperties] = useState<unknown[]>([]);
+  const [properties, setProperties] = useState<Array<{id: string, name: string, type: string}>>([]);
   const [insurancePolicies, setInsurancePolicies] = useState<InsurancePolicy[]>([]);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -74,23 +75,21 @@ export function DocumentFilters({
     const loadRelatedData = async () => {
       try {
         setLoadingData(true);
-        const [members, policies] = await Promise.all([
+        const [members, policies, propertiesData] = await Promise.all([
           ApiService.getFamilyMembers(),
           ApiService.getInsurancePolicies(),
-          // TODO: Add properties when they're migrated to API
-          // ApiService.getProperties(),
+          propertyService.getAllPropertiesForDropdown(),
         ]);
         
         setFamilyMembers(members);
         setInsurancePolicies(policies);
-        // setProperties(properties); // TODO: Uncomment when properties are migrated
-        setProperties(localStorageService.getProperties()); // Temporary fallback
+        setProperties(propertiesData);
         setAvailableTags(documentService.getAllTags());
       } catch (error) {
         console.error('Failed to load filter data:', error);
         // Fallback to localStorage for now
         setFamilyMembers(localStorageService.getFamilyMembers());
-        setProperties(localStorageService.getProperties());
+        setProperties([]); // No fallback for properties since they're not in localStorage
         setInsurancePolicies(localStorageService.getInsurancePolicies());
         setAvailableTags(documentService.getAllTags());
       } finally {
@@ -165,6 +164,7 @@ export function DocumentFilters({
     { value: "bank_documents", label: "Bank Documents" },
     { value: "educational_certificates", label: "Educational Certificates" },
     { value: "medical_records", label: "Medical Records" },
+    { value: "others", label: "Others" },
   ];
 
   return (
@@ -209,13 +209,13 @@ export function DocumentFilters({
             placeholder="All properties"
             className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
           >
-            {(properties as { id: string; address: string }[]).map((property) => (
+            {properties.map((property) => (
               <option
                 key={property.id}
                 value={property.id}
                 className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
               >
-                {property.address}
+                {property.name}
               </option>
             ))}
           </Select>

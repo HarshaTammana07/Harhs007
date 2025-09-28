@@ -109,7 +109,7 @@ export const RentCollectionDashboard: React.FC<
             ? "yearly"
             : "custom";
 
-      const report = rentPaymentService.generateRentCollectionReport(
+      const report = await rentPaymentService.generateRentCollectionReport(
         startDate,
         endDate,
         reportType

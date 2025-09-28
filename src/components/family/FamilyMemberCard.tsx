@@ -58,7 +58,7 @@ export function FamilyMemberCard({
   return (
     <Card
       className={`relative transition-all duration-200 hover:shadow-lg cursor-pointer ${
-        hasAlert ? "ring-2 ring-orange-200 bg-orange-50" : ""
+        hasAlert ? "ring-2 ring-orange-200 dark:ring-orange-600 bg-orange-50 dark:bg-orange-900/20" : ""
       } ${compact ? "p-4" : "p-6"}`}
       onClick={handleCardClick}
     >

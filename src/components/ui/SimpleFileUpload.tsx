@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 interface SimpleFileUploadProps {
-  onFileSelect: (file: File) => void;
+  onFileSelect: (file: File | null) => void;
   selectedFile?: File | null;
   accept?: string;
   maxSizeMB?: number;
@@ -98,7 +98,8 @@ export function SimpleFileUpload({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-    // We can't really "unselect" the file, but we can clear the input
+    // Notify parent component that file has been removed
+    onFileSelect(null);
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -124,8 +125,8 @@ export function SimpleFileUpload({
         <Card
           className={`border-2 border-dashed transition-colors cursor-pointer ${
             isDragOver
-              ? "border-blue-400 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400"
+              ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+              : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
           } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -133,12 +134,12 @@ export function SimpleFileUpload({
           onClick={handleClick}
         >
           <div className="p-6 text-center">
-            <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
             <div className="mt-4">
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
                 Click to upload or drag and drop
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {accept.includes("image") && "Images, "}
                 PDF, DOC, DOCX up to {maxSizeMB}MB
               </p>
@@ -151,10 +152,10 @@ export function SimpleFileUpload({
             <div className="flex items-center space-x-3">
               <DocumentIcon className="h-8 w-8 text-blue-500" />
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
                   {selectedFile.name}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {formatFileSize(selectedFile.size)}
                 </p>
               </div>
@@ -164,7 +165,7 @@ export function SimpleFileUpload({
               variant="ghost"
               size="sm"
               onClick={handleRemoveFile}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
             >
               <XMarkIcon className="h-4 w-4" />
             </Button>
@@ -172,7 +173,7 @@ export function SimpleFileUpload({
         </Card>
       )}
 
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>}
     </div>
   );
 }

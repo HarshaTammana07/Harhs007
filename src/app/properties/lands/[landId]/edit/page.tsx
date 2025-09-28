@@ -26,7 +26,7 @@ export default function EditLandPage() {
   const loadLand = async () => {
     try {
       setLoading(true);
-      const landData = propertyService.getLandById(landId);
+      const landData = await propertyService.getLandById(landId);
       if (landData) {
         setLand(landData);
       } else {

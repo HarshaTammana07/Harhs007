@@ -266,8 +266,8 @@ export function DashboardContent() {
       // Generate recent activity
       const activity: RecentActivity[] = [];
 
-      // Add expired documents
-      expiredDocs.slice(0, 3).forEach((doc) => {
+      // Add ALL expired documents
+      expiredDocs.forEach((doc) => {
         activity.push({
           type: 'document',
           title: 'Document Expired',
@@ -277,8 +277,8 @@ export function DashboardContent() {
         });
       });
 
-      // Add expiring documents
-      expiringDocs.slice(0, 2).forEach((doc) => {
+      // Add ALL expiring documents
+      expiringDocs.forEach((doc) => {
         activity.push({
           type: 'document',
           title: 'Document Expiring Soon',
@@ -302,8 +302,8 @@ export function DashboardContent() {
           });
         });
 
-      // Add expiring insurance policies
-      expiringPolicies.slice(0, 2).forEach((policy) => {
+      // Add ALL expiring insurance policies
+      expiringPolicies.forEach((policy) => {
         activity.push({
           type: 'insurance',
           title: 'Insurance Policy Renewing',
@@ -315,7 +315,7 @@ export function DashboardContent() {
 
       // Sort by date (most recent first)
       activity.sort((a, b) => b.date.getTime() - a.date.getTime());
-      setRecentActivity(activity.slice(0, 5));
+      setRecentActivity(activity);
 
     } catch (err: unknown) {
       const error = err as Error;
@@ -1193,12 +1193,19 @@ export function DashboardContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5h5m-5-5v5m-5-5l-5 5m5-5H5m5 0v-5m0 5l5-5" />
                 </svg>
               </div>
-              <CardTitle>Recent Activity & Alerts</CardTitle>
+              <CardTitle>
+                Recent Activity & Alerts
+                {recentActivity.length > 0 && (
+                  <span className="ml-2 text-sm font-normal text-gray-500 dark:text-gray-400">
+                    ({recentActivity.length} items)
+                  </span>
+                )}
+              </CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             {recentActivity.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                 {recentActivity.map((activity, index) => {
                   const getActivityIcon = (type: string) => {
                     switch (type) {
@@ -1249,6 +1256,13 @@ export function DashboardContent() {
                   </div>
                   );
                 })}
+                {recentActivity.length > 8 && (
+                  <div className="text-center pt-2 border-t border-gray-100 dark:border-gray-700">
+                    <p className="text-xs text-gray-400 dark:text-gray-500">
+                      Scroll to see more items
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-gray-500 text-sm">No recent activity to show.</p>

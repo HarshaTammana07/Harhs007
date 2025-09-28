@@ -38,7 +38,7 @@ export const RentReceiptModal: React.FC<RentReceiptModalProps> = ({
         payment.id
       );
       if (!receiptData && payment.status === "paid") {
-        receiptData = rentPaymentService.generateRentReceipt(payment.id);
+        receiptData = await rentPaymentService.generateRentReceipt(payment.id);
       }
       setReceipt(receiptData);
 
@@ -80,7 +80,7 @@ export const RentReceiptModal: React.FC<RentReceiptModalProps> = ({
       const flat = propertyService.getFlatById(propertyId);
       return { name: flat?.name || "", address: flat?.address || "" };
     } else if (propertyType === "land") {
-      const land = propertyService.getLandById(propertyId);
+      const land = await propertyService.getLandById(propertyId);
       return { name: land?.name || "", address: land?.address || "" };
     }
     return { name: "", address: "" };

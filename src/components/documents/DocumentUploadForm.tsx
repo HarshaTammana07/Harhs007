@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Document, DocumentCategory, FamilyMember, InsurancePolicy } from "@/types";
 import { ApiService } from "@/services/ApiService";
+import { propertyService } from "@/services/PropertyService";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
@@ -73,17 +74,15 @@ export function DocumentUploadForm({
   const loadRelatedData = async () => {
     try {
       setLoadingData(true);
-      const [members, policies] = await Promise.all([
+      const [members, policies, propertiesData] = await Promise.all([
         ApiService.getFamilyMembers(),
         ApiService.getInsurancePolicies(),
-        // TODO: Add properties when they're migrated
-        // ApiService.getProperties(),
+        propertyService.getAllPropertiesForDropdown(),
       ]);
       
       setFamilyMembers(members);
       setInsurancePolicies(policies);
-      // setProperties(properties); // TODO: Uncomment when properties are migrated
-      setProperties([]); // Temporary empty array
+      setProperties(propertiesData);
     } catch (error) {
       console.error("Failed to load related data:", error);
       toast.error("Failed to load form data");
@@ -92,7 +91,7 @@ export function DocumentUploadForm({
     }
   };
 
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = (file: File | null) => {
     setSelectedFile(file);
 
     // Auto-generate title from filename if not set
@@ -165,6 +164,7 @@ export function DocumentUploadForm({
     { value: "bank_documents", label: "Bank Documents" },
     { value: "educational_certificates", label: "Educational Certificates" },
     { value: "medical_records", label: "Medical Records" },
+    { value: "others", label: "Others" },
   ];
 
   if (loadingData) {
@@ -254,7 +254,7 @@ export function DocumentUploadForm({
                 value={property.id}
                 className="text-gray-900 dark:text-white bg-white dark:bg-gray-800"
               >
-                {property.address}
+                {property.name}
               </option>
             ))}
           </Select>

@@ -205,8 +205,8 @@ export function FileUpload({
           relative border-2 border-dashed rounded-lg p-8 text-center transition-colors
           ${
             isDragOver
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400"
+              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+              : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
           }
           ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
         `}
@@ -223,7 +223,7 @@ export function FileUpload({
         />
 
         <div className="space-y-4">
-          <div className="mx-auto w-12 h-12 text-gray-400">
+          <div className="mx-auto w-12 h-12 text-gray-400 dark:text-gray-500">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
@@ -235,19 +235,19 @@ export function FileUpload({
           </div>
 
           <div>
-            <p className="text-lg font-medium text-gray-900">
+            <p className="text-lg font-medium text-gray-900 dark:text-white">
               {isDragOver ? "Drop files here" : "Drag and drop files here"}
             </p>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               or{" "}
-              <span className="text-blue-600 hover:text-blue-500 font-medium">
+              <span className="text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 font-medium">
                 browse to choose files
               </span>
             </p>
           </div>
 
           {options.maxSizeMB && (
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-400 dark:text-gray-500">
               Maximum file size: {options.maxSizeMB}MB
             </p>
           )}
