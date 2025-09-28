@@ -408,6 +408,7 @@ export class ApiService {
       .insert({
         building_id: apartmentData.buildingId,
         door_number: apartmentData.doorNumber,
+        service_number: apartmentData.serviceNumber,
         floor: apartmentData.floor,
         bedroom_count: apartmentData.bedroomCount,
         bathroom_count: apartmentData.bathroomCount,
@@ -460,6 +461,7 @@ export class ApiService {
     const updateData: any = {};
 
     if (updates.doorNumber) updateData.door_number = updates.doorNumber;
+    if (updates.serviceNumber !== undefined) updateData.service_number = updates.serviceNumber;
     if (updates.floor !== undefined) updateData.floor = updates.floor;
     if (updates.bedroomCount) updateData.bedroom_count = updates.bedroomCount;
     if (updates.bathroomCount)
@@ -550,6 +552,7 @@ export class ApiService {
       .insert({
         name: flatData.name,
         door_number: flatData.doorNumber,
+        service_number: flatData.serviceNumber,
         address: flatData.address,
         description: flatData.description,
         bedroom_count: flatData.bedroomCount,
@@ -588,6 +591,7 @@ export class ApiService {
 
     if (updates.name) updateData.name = updates.name;
     if (updates.doorNumber) updateData.door_number = updates.doorNumber;
+    if (updates.serviceNumber !== undefined) updateData.service_number = updates.serviceNumber;
     if (updates.address) updateData.address = updates.address;
     if (updates.description !== undefined)
       updateData.description = updates.description;
@@ -2124,6 +2128,7 @@ export class ApiService {
       id: data.id,
       buildingId: data.building_id,
       doorNumber: data.door_number,
+      serviceNumber: data.service_number,
       floor: data.floor,
       bedroomCount: data.bedroom_count,
       bathroomCount: data.bathroom_count,
@@ -2155,6 +2160,7 @@ export class ApiService {
       type: "flat",
       name: data.name,
       doorNumber: data.door_number,
+      serviceNumber: data.service_number,
       address: data.address,
       description: data.description,
       bedroomCount: data.bedroom_count,

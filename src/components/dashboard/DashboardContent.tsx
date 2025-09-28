@@ -135,6 +135,10 @@ export function DashboardContent() {
       );
 
       // Calculate occupancy stats
+      const occupiedApartments = buildings.reduce(
+        (sum, building) => sum + (building.apartments?.filter(apt => apt.isOccupied).length || 0),
+        0
+      );
       const occupiedFlats = flats.filter((flat) => flat.isOccupied).length;
       const vacantFlats = flats.filter((flat) => !flat.isOccupied).length;
       const leasedLands = lands.filter((land) => land.isLeased).length;
@@ -173,7 +177,7 @@ export function DashboardContent() {
       
       const totalRentableUnits = flats.length + totalApartments;
       const occupancyRate = totalRentableUnits > 0 
-        ? ((occupiedFlats + totalApartments) / totalRentableUnits) * 100 
+        ? ((occupiedFlats + occupiedApartments) / totalRentableUnits) * 100 
         : 0;
       
       const averageRentPerUnit = totalRentableUnits > 0
@@ -220,8 +224,8 @@ export function DashboardContent() {
           apartments: totalApartments,
         },
         occupancy: {
-          occupied: occupiedFlats,
-          vacant: vacantFlats,
+          occupied: occupiedApartments + occupiedFlats,
+          vacant: (totalApartments - occupiedApartments) + vacantFlats,
           leased: leasedLands,
         },
         tenants: {

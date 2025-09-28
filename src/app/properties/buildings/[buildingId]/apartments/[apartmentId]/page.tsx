@@ -344,6 +344,16 @@ export default function ApartmentDetailPage() {
                         {apartment.doorNumber}
                       </p>
                     </div>
+                    {apartment.serviceNumber && (
+                      <div>
+                        <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                          Service Number
+                        </label>
+                        <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {apartment.serviceNumber}
+                        </p>
+                      </div>
+                    )}
                     <div>
                       <label className="text-sm font-medium text-gray-600 dark:text-gray-300">
                         Floor

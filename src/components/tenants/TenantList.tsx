@@ -214,7 +214,7 @@ export function TenantList({
               (apt) => apt.currentTenant?.id === tenant.id
             );
             if (apartment) {
-              await propertyService.updateApartment(propertyId, apartment.id, {
+              await propertyService.updateApartment(apartment.id, {
                 currentTenant: undefined,
                 isOccupied: false,
               });

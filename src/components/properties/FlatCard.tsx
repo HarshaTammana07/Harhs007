@@ -68,6 +68,9 @@ export function FlatCard({ flat, onClick, onEdit, onDelete }: FlatCardProps) {
               {flat.name}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">Door No: {flat.doorNumber}</p>
+            {flat.serviceNumber && (
+              <p className="text-sm text-gray-600 dark:text-gray-300">Service No: {flat.serviceNumber}</p>
+            )}
           </div>
 
           {/* Address */}
