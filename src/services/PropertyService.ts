@@ -502,12 +502,8 @@ export class PropertyService {
       const stats = {
         buildings: {
           total: buildings.length,
-          occupied: buildings.filter((b) =>
-            b.apartments?.some((apt) => apt.isOccupied)
-          ).length,
-          vacant: buildings.filter(
-            (b) => !b.apartments?.some((apt) => apt.isOccupied)
-          ).length,
+          occupied: occupiedApartments, // Total occupied apartments across all buildings
+          vacant: totalApartments - occupiedApartments, // Total vacant apartments across all buildings
         },
         flats: {
           total: totalFlats,

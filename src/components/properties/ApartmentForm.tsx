@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Building, Apartment, ApartmentSpecifications } from "@/types";
 import {
@@ -15,6 +15,7 @@ import { Select } from "@/components/ui/Select";
 
 interface ApartmentFormData {
   doorNumber: string;
+  serviceNumber: string;
   floor: number;
   bedroomCount: number;
   bathroomCount: number;
@@ -53,6 +54,13 @@ export function ApartmentForm({
   >(apartment?.specifications?.additionalFeatures || []);
   const [newFeature, setNewFeature] = useState("");
 
+  // Reset form when apartment data changes
+  useEffect(() => {
+    if (apartment) {
+      setAdditionalFeaturesList(apartment.specifications?.additionalFeatures || []);
+    }
+  }, [apartment]);
+
   const {
     register,
     handleSubmit,
@@ -62,6 +70,7 @@ export function ApartmentForm({
   } = useForm<ApartmentFormData>({
     defaultValues: {
       doorNumber: apartment?.doorNumber || "",
+      serviceNumber: apartment?.serviceNumber || "",
       floor: apartment?.floor || 1,
       bedroomCount: apartment?.bedroomCount || 1,
       bathroomCount: apartment?.bathroomCount || 1,
@@ -108,6 +117,7 @@ export function ApartmentForm({
     const apartmentData: Omit<Apartment, "id" | "createdAt" | "updatedAt"> = {
       buildingId: building.id,
       doorNumber: data.doorNumber,
+      serviceNumber: data.serviceNumber,
       floor: data.floor,
       bedroomCount: data.bedroomCount,
       bathroomCount: data.bathroomCount,
@@ -158,6 +168,18 @@ export function ApartmentForm({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Service Number
+              </label>
+              <Input
+                {...register("serviceNumber")}
+                placeholder="e.g., ELEC-001, WATER-101"
+                error={errors.serviceNumber?.message}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Floor *
               </label>
               <Input
@@ -176,7 +198,10 @@ export function ApartmentForm({
                 className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
+          </div>
 
+          {/* Area Field */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Area (sq ft) *

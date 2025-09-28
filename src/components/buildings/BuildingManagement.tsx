@@ -525,6 +525,9 @@ export default function BuildingManagement() {
                           </span>
                         </div>
                         <div className="text-sm text-gray-600 space-y-1">
+                          {apartment.serviceNumber && (
+                            <p>Service No: {apartment.serviceNumber}</p>
+                          )}
                           <p>Floor: {apartment.floor}</p>
                           <p>Bedrooms: {apartment.bedroomCount}</p>
                           <p>Bathrooms: {apartment.bathroomCount}</p>

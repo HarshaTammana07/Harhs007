@@ -245,6 +245,12 @@ function ApartmentCard({
 
         {/* Apartment Details */}
         <div className="space-y-2 mb-4">
+          {apartment.serviceNumber && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-300">Service Number:</span>
+              <span className="font-medium text-gray-900 dark:text-white">{apartment.serviceNumber}</span>
+            </div>
+          )}
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600 dark:text-gray-300">Bedrooms:</span>
             <span className="font-medium text-gray-900 dark:text-white">

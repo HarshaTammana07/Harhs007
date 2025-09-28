@@ -58,9 +58,16 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
     watch,
   } = useForm<InsurancePolicyFormData>();
 
+  // Load family members when modal opens
   useEffect(() => {
     if (isOpen) {
       loadFamilyMembers();
+    }
+  }, [isOpen]);
+
+  // Set form values after family members are loaded
+  useEffect(() => {
+    if (isOpen && familyMembers.length > 0) {
       if (policy) {
         // Populate form with existing policy data
         setValue("policyNumber", policy.policyNumber);
@@ -88,7 +95,7 @@ export const InsurancePolicyForm: React.FC<InsurancePolicyFormProps> = ({
         setValue("status", "active");
       }
     }
-  }, [isOpen, policy, defaultType, setValue]);
+  }, [isOpen, policy, defaultType, setValue, familyMembers]);
 
   const loadFamilyMembers = async () => {
     try {

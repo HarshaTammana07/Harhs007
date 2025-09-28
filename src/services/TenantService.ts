@@ -156,7 +156,7 @@ export class TenantService {
       if (building) {
         const apartment = building.apartments?.find((apt) => apt.id === unitId);
         if (apartment) {
-          propertyService.updateApartment(propertyId, unitId, {
+          propertyService.updateApartment(unitId, {
             currentTenant: tenant,
             isOccupied: true,
           });
@@ -210,7 +210,7 @@ export class TenantService {
 
     // Update property occupancy
     if (propertyType === "building" && unitId) {
-      propertyService.updateApartment(propertyId, unitId, {
+      propertyService.updateApartment(unitId, {
         currentTenant: undefined,
         isOccupied: false,
       });

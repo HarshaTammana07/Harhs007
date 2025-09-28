@@ -11,6 +11,7 @@ interface FlatFormData {
   name: string;
   address: string;
   doorNumber: string;
+  serviceNumber: string;
   bedroomCount: number;
   bathroomCount: number;
   area: number;
@@ -37,6 +38,13 @@ export function FlatForm({
 }: FlatFormProps) {
   const [images, setImages] = useState<string[]>(flat?.images || []);
 
+  // Reset form when flat data changes
+  useEffect(() => {
+    if (flat) {
+      setImages(flat.images || []);
+    }
+  }, [flat]);
+
   const {
     register,
     handleSubmit,
@@ -48,6 +56,7 @@ export function FlatForm({
       name: flat?.name || "",
       address: flat?.address || "",
       doorNumber: flat?.doorNumber || "",
+      serviceNumber: flat?.serviceNumber || "",
       bedroomCount: flat?.bedroomCount || 1,
       bathroomCount: flat?.bathroomCount || 1,
       area: flat?.area || 0,
@@ -87,6 +96,7 @@ export function FlatForm({
       name: data.name,
       address: data.address,
       doorNumber: data.doorNumber,
+      serviceNumber: data.serviceNumber,
       bedroomCount: data.bedroomCount,
       bathroomCount: data.bathroomCount,
       area: data.area,
@@ -180,6 +190,18 @@ export function FlatForm({
             Property Details
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Service Number
+              </label>
+              <Input
+                {...register("serviceNumber")}
+                placeholder="e.g., ELEC-001, WATER-101"
+                error={errors.serviceNumber?.message}
+                className="bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Bedrooms *

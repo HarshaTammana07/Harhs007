@@ -217,6 +217,20 @@ export default function FlatDetailPage() {
                         </div>
                       </div>
 
+                      {flat.serviceNumber && (
+                        <div className="flex items-center space-x-3">
+                          <div className="h-5 w-5 text-gray-400 flex items-center justify-center">
+                            <span className="text-xs font-bold">#</span>
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">Service Number</p>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {flat.serviceNumber}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-center space-x-3">
                         <HomeIcon className="h-5 w-5 text-gray-400" />
                         <div>
