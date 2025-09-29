@@ -12,6 +12,7 @@ import {
   TrashIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
 
 interface ApartmentListProps {
@@ -20,6 +21,7 @@ interface ApartmentListProps {
   onEditApartment: (apartmentId: string) => void;
   onDeleteApartment: (apartmentId: string) => void;
   onViewTenant: (apartmentId: string) => void;
+  onViewHistory?: (apartmentId: string) => void;
 }
 
 export function ApartmentList({
@@ -28,6 +30,7 @@ export function ApartmentList({
   onEditApartment,
   onDeleteApartment,
   onViewTenant,
+  onViewHistory,
 }: ApartmentListProps) {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -196,6 +199,7 @@ export function ApartmentList({
               onEdit={() => onEditApartment(apartment.id)}
               onDelete={() => onDeleteApartment(apartment.id)}
               onViewTenant={() => onViewTenant(apartment.id)}
+              onViewHistory={onViewHistory ? () => onViewHistory(apartment.id) : undefined}
             />
           ))}
         </div>
@@ -210,6 +214,7 @@ interface ApartmentCardProps {
   onEdit: () => void;
   onDelete: () => void;
   onViewTenant: () => void;
+  onViewHistory?: () => void;
 }
 
 function ApartmentCard({
@@ -218,6 +223,7 @@ function ApartmentCard({
   onEdit,
   onDelete,
   onViewTenant,
+  onViewHistory,
 }: ApartmentCardProps) {
   return (
     <Card className="hover:shadow-md dark:hover:shadow-lg transition-shadow bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
@@ -240,6 +246,17 @@ function ApartmentCard({
             >
               {apartment.isOccupied ? "Occupied" : "Vacant"}
             </span>
+            {onViewHistory && (
+              <button
+                type="button"
+                onClick={onViewHistory}
+                title="View History"
+                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <ClockIcon className="h-4 w-4 mr-1" />
+                History
+              </button>
+            )}
           </div>
         </div>
 

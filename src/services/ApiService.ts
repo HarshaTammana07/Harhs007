@@ -452,6 +452,153 @@ export class ApiService {
   }
 
   /**
+   * Aggregate apartment history: current + previous tenants and rent payments
+   * Returns a lightweight object without introducing new exported types
+   */
+  static async getApartmentHistory(
+    apartmentId: string
+  ): Promise<{
+    apartmentId: string;
+    apartmentInfo: {
+      doorNumber: string;
+      floor: number;
+      buildingName: string;
+      buildingAddress?: string;
+    };
+    currentTenant: Tenant | null;
+    tenantHistory: Array<{
+      tenant: Tenant;
+      paymentHistory: RentPayment[];
+      summary: {
+        totalPaid: number;
+        totalPayments: number;
+        monthlyRent: number;
+      };
+    }>;
+    totals: {
+      totalTenants: number;
+      totalRevenue: number;
+      averageMonthlyRent: number;
+    };
+  }> {
+    // Fetch apartment and building
+    const apartment = await this.getApartmentById(apartmentId);
+    if (!apartment) {
+      throw new Error(`Apartment not found: ${apartmentId}`);
+    }
+    const building = await this.getBuildingById(apartment.buildingId);
+
+    // All tenants for this apartment (active + inactive)
+    const { data: tenants, error: tenantsError } = await supabase
+      .from("tenants")
+      .select("*")
+      .eq("property_id", apartmentId)
+      .eq("property_type", "apartment")
+      .order("move_in_date", { ascending: false });
+    if (tenantsError) {
+      throw new Error(tenantsError.message);
+    }
+
+    const transformedTenants: Tenant[] = (tenants || []).map((t: any) =>
+      this.transformTenant(t)
+    );
+
+    // Payments from Supabase (authoritative). We'll query by multiple strategies and merge.
+    const tenantIds = transformedTenants.map((t) => t.id);
+
+    const [byBuildingAndUnit, byApartmentId, byTenantIds] = await Promise.all([
+      supabase
+        .from("rent_payments")
+        .select("*")
+        .eq("property_type", "building")
+        .eq("property_id", apartment.buildingId)
+        .eq("unit_id", apartment.id),
+      supabase
+        .from("rent_payments")
+        .select("*")
+        .eq("property_id", apartmentId),
+      tenantIds.length
+        ? supabase
+            .from("rent_payments")
+            .select("*")
+            .in("tenant_id", tenantIds)
+        : Promise.resolve({ data: [], error: null } as any),
+    ]);
+
+    if (byBuildingAndUnit.error)
+      throw new Error(`Failed to fetch payments (building+unit): ${byBuildingAndUnit.error.message}`);
+    if (byApartmentId.error)
+      throw new Error(`Failed to fetch payments (apartmentId): ${byApartmentId.error.message}`);
+    if ((byTenantIds as any).error)
+      throw new Error(`Failed to fetch payments (tenantIds): ${(byTenantIds as any).error.message}`);
+
+    const paymentsFromDb: RentPayment[] = [
+      ...((byBuildingAndUnit.data || []).map((d: any) => this.transformRentPayment(d))),
+      ...((byApartmentId.data || []).map((d: any) => this.transformRentPayment(d))),
+      ...(((byTenantIds as any).data || []).map((d: any) => this.transformRentPayment(d))),
+    ];
+
+    // Also include any locally stored payments just in case (merge strategy)
+    const { RentPaymentService } = await import("./RentPaymentService");
+    const rps = new RentPaymentService();
+    const localAll = rps.getRentPayments();
+    const localRelevant = localAll.filter(
+      (p) =>
+        (p.propertyId === apartment.buildingId && p.unitId === apartment.id) ||
+        p.propertyId === apartmentId ||
+        tenantIds.includes(p.tenantId)
+    );
+
+    const mergedMap = new Map<string, RentPayment>();
+    [...paymentsFromDb, ...localRelevant].forEach((p) => mergedMap.set(p.id, p));
+    const allPayments = Array.from(mergedMap.values());
+
+    // Build per-tenant history
+    const tenantHistory = transformedTenants.map((tenant) => {
+      const paymentHistory = (allPayments || []).filter(
+        (p) => p.tenantId === tenant.id
+      );
+      const totalPaid = paymentHistory
+        .filter((p) => p.status === "paid")
+        .reduce((sum, p) => sum + (p.actualAmountPaid || p.amount), 0);
+      return {
+        tenant,
+        paymentHistory,
+        summary: {
+          totalPaid,
+          totalPayments: paymentHistory.length,
+          monthlyRent: apartment.rentAmount,
+        },
+      };
+    });
+
+    const currentTenant = tenantHistory.find((t) => t.tenant.isActive)?.tenant || null;
+    const totalRevenue = (allPayments || [])
+      .filter((p) => p.status === "paid")
+      .reduce((sum, p) => sum + (p.actualAmountPaid || p.amount), 0);
+    const averageMonthlyRent = (allPayments || []).length
+      ? (allPayments || []).reduce((s, p) => s + p.amount, 0) / (allPayments || []).length
+      : 0;
+
+    return {
+      apartmentId,
+      apartmentInfo: {
+        doorNumber: apartment.doorNumber,
+        floor: apartment.floor,
+        buildingName: building?.name || "",
+        buildingAddress: building?.address,
+      },
+      currentTenant,
+      tenantHistory,
+      totals: {
+        totalTenants: transformedTenants.length,
+        totalRevenue,
+        averageMonthlyRent,
+      },
+    };
+  }
+
+  /**
    * Update apartment
    */
   static async updateApartment(
@@ -966,14 +1113,78 @@ export class ApiService {
       .eq("property_id", propertyId)
       .eq("property_type", propertyType)
       .eq("is_active", true)
-      .single();
+      .order("move_in_date", { ascending: false }); // Get the most recent tenant
 
     if (error) {
-      if (error.code === "PGRST116") return null; // No tenant found
       throw new Error(`Failed to fetch tenant: ${error.message}`);
     }
 
-    return ApiService.transformTenant(data);
+    if (!data || data.length === 0) {
+      return null; // No tenant found
+    }
+
+    if (data.length > 1) {
+      console.warn(`Multiple active tenants found for property ${propertyId}. Using the most recent one.`);
+      // You might want to fix this data issue by deactivating older tenants
+    }
+
+    return ApiService.transformTenant(data[0]); // Return the most recent tenant
+  }
+
+  /**
+   * Fix multiple active tenants issue by deactivating older tenants
+   * This should be called when you have multiple active tenants for the same property
+   */
+  static async fixMultipleActiveTenants(
+    propertyId: string,
+    propertyType: string,
+    keepTenantId?: string
+  ): Promise<void> {
+    const { data: tenants, error: fetchError } = await supabase
+      .from("tenants")
+      .select("id, move_in_date")
+      .eq("property_id", propertyId)
+      .eq("property_type", propertyType)
+      .eq("is_active", true)
+      .order("move_in_date", { ascending: false });
+
+    if (fetchError) {
+      throw new Error(`Failed to fetch tenants: ${fetchError.message}`);
+    }
+
+    if (!tenants || tenants.length <= 1) {
+      return; // No issue to fix
+    }
+
+    console.log(`Found ${tenants.length} active tenants for property ${propertyId}. Fixing...`);
+
+    // Determine which tenant to keep
+    let tenantToKeep = tenants[0]; // Most recent by default
+    if (keepTenantId) {
+      tenantToKeep = tenants.find(t => t.id === keepTenantId) || tenants[0];
+    }
+
+    // Deactivate all other tenants
+    const tenantsToDeactivate = tenants.filter(t => t.id !== tenantToKeep.id);
+    
+    for (const tenant of tenantsToDeactivate) {
+      const { error: updateError } = await supabase
+        .from("tenants")
+        .update({
+          is_active: false,
+          move_out_date: new Date().toISOString().split('T')[0],
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", tenant.id);
+
+      if (updateError) {
+        console.error(`Failed to deactivate tenant ${tenant.id}:`, updateError);
+      } else {
+        console.log(`Deactivated tenant ${tenant.id} (moved in: ${tenant.move_in_date})`);
+      }
+    }
+
+    console.log(`Fixed multiple active tenants issue. Kept tenant: ${tenantToKeep.id}`);
   }
 
   /**

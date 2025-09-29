@@ -121,7 +121,7 @@ export function EnhancedRentPaymentForm({
       watchBuildingId &&
       watchApartmentId
     ) {
-      loadTenantsForBuilding(watchBuildingId);
+      loadTenantsForApartment(watchBuildingId, watchApartmentId);
     } else if (watchPropertyType === "building") {
       setTenants([]);
       setValue("tenantId", "");
@@ -187,29 +187,26 @@ export function EnhancedRentPaymentForm({
     }
   };
 
-  const loadTenantsForBuilding = async (buildingId: string) => {
+  const loadTenantsForApartment = async (buildingId: string, apartmentId: string) => {
     try {
       setLoadingTenants(true);
       const allTenants = await propertyService.getTenants();
 
-      // Filter tenants for this building and add property metadata
+      // Only current active tenant for this specific apartment
       const buildingTenants = await Promise.all(
         allTenants
           .filter(
             (tenant) =>
               tenant.buildingId === buildingId &&
-              tenant.propertyType === "apartment"
+              tenant.propertyType === "apartment" &&
+              tenant.propertyId === apartmentId &&
+              tenant.isActive
           )
           .map(async (tenant) => {
             const tenantWithInfo: TenantWithPropertyInfo = { ...tenant };
             try {
               // Get apartment details
-              const apartments = await propertyService.getApartmentsByBuildingId(
-                buildingId
-              );
-              const apartment = apartments.find(
-                (apt) => apt.id === tenant.propertyId
-              );
+              const apartment = await propertyService.getApartmentById(apartmentId);
               if (apartment) {
                 tenantWithInfo.displayInfo = {
                   apartmentDoorNumber: apartment.doorNumber,
@@ -218,7 +215,7 @@ export function EnhancedRentPaymentForm({
               }
 
               // Get building details
-              const building = buildings.find((b) => b.id === buildingId);
+              const building = await propertyService.getBuildingById(buildingId);
               if (building) {
                 tenantWithInfo.displayInfo = {
                   ...tenantWithInfo.displayInfo,
@@ -234,7 +231,7 @@ export function EnhancedRentPaymentForm({
 
       setTenants(buildingTenants);
     } catch (error) {
-      console.error("Error loading tenants for building:", error);
+      console.error("Error loading tenants for apartment:", error);
       toast.error("Failed to load tenants");
     } finally {
       setLoadingTenants(false);
@@ -246,12 +243,14 @@ export function EnhancedRentPaymentForm({
       setLoadingTenants(true);
       const allTenants = await propertyService.getTenants();
 
-      // Filter tenants for this flat and add property metadata
+      // Only current active tenant for this flat
       const flatTenants = await Promise.all(
         allTenants
           .filter(
             (tenant) =>
-              tenant.propertyId === flatId && tenant.propertyType === "flat"
+              tenant.propertyId === flatId &&
+              tenant.propertyType === "flat" &&
+              tenant.isActive
           )
           .map(async (tenant) => {
             const tenantWithInfo: TenantWithPropertyInfo = { ...tenant };
