@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Building, Apartment } from "@/types";
+import { Building, Apartment, Tenant, RentPayment } from "@/types";
 import { propertyService } from "@/services/PropertyService";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button, LoadingState, Card, CardContent } from "@/components/ui";
 import { ApartmentList } from "@/components/properties/ApartmentList";
+import { Modal } from "@/components/ui/Modal";
+import { ApiService } from "@/services/ApiService";
 import {
   ArrowLeftIcon,
   PlusIcon,
@@ -25,6 +27,19 @@ export default function BuildingApartmentsPage() {
 
   const [building, setBuilding] = useState<Building | null>(null);
   const [loading, setLoading] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [apartmentHistory, setApartmentHistory] = useState<{
+    apartmentId: string;
+    apartmentInfo: { doorNumber: string; floor: number; buildingName: string; buildingAddress?: string };
+    currentTenant: Tenant | null;
+    tenantHistory: Array<{
+      tenant: Tenant;
+      paymentHistory: RentPayment[];
+      summary: { totalPaid: number; totalPayments: number; monthlyRent: number };
+    }>;
+    totals: { totalTenants: number; totalRevenue: number; averageMonthlyRent: number };
+  } | null>(null);
 
   useEffect(() => {
     loadBuilding();
@@ -81,6 +96,20 @@ export default function BuildingApartmentsPage() {
     );
   };
 
+  const handleViewHistory = async (apartmentId: string) => {
+    try {
+      setHistoryOpen(true);
+      setHistoryLoading(true);
+      // minimal initial aggregate: tenants + payments
+      const history = await ApiService.getApartmentHistory(apartmentId as string);
+      setApartmentHistory(history);
+    } catch (e) {
+      console.error("Failed to load apartment history", e);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <ProtectedRoute>
@@ -102,7 +131,7 @@ export default function BuildingApartmentsPage() {
                 Building not found
               </h3>
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                The building you're looking for doesn't exist.
+                The building you are looking for does not exist.
               </p>
               <div className="mt-6">
                 <Button onClick={handleBack}>
@@ -247,10 +276,107 @@ export default function BuildingApartmentsPage() {
                   onEditApartment={handleEditApartment}
                   onDeleteApartment={handleDeleteApartment}
                   onViewTenant={handleViewTenant}
+                  onViewHistory={handleViewHistory}
                 />
               )}
             </div>
           </div>
+          <Modal
+            isOpen={historyOpen}
+            onClose={() => setHistoryOpen(false)}
+            title="Apartment History"
+            size="xl"
+          >
+            {historyLoading ? (
+              <LoadingState message="Loading history..." />)
+              : apartmentHistory ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Total Tenants</div>
+                    <div className="text-2xl font-semibold text-gray-900 dark:text-white">{apartmentHistory.totals.totalTenants}</div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Total Revenue</div>
+                    <div className="text-2xl font-semibold text-green-600 dark:text-green-400">₹{apartmentHistory.totals.totalRevenue.toLocaleString()}</div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Avg Monthly Rent</div>
+                    <div className="text-2xl font-semibold text-indigo-600 dark:text-indigo-400">₹{Math.round(apartmentHistory.totals.averageMonthlyRent).toLocaleString()}</div>
+                  </div>
+                </div>
+                {apartmentHistory.currentTenant && (
+                  <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <div className="text-sm text-blue-900 dark:text-blue-300 font-medium">Current Tenant</div>
+                    <div className="mt-1 text-gray-900 dark:text-white">
+                      {apartmentHistory.currentTenant.personalInfo?.fullName}
+                    </div>
+                    {apartmentHistory.currentTenant.contactInfo?.phone && (
+                      <div className="text-sm text-blue-800 dark:text-blue-400">{apartmentHistory.currentTenant.contactInfo.phone}</div>
+                    )}
+                  </div>
+                )}
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Tenants</h4>
+                  <div className="space-y-2">
+                    {apartmentHistory.tenantHistory.map((entry: { tenant: Tenant; summary: { totalPaid: number; totalPayments: number }; }) => (
+                      <div key={entry.tenant.id} className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-gray-900 dark:text-white font-medium">{entry.tenant.personalInfo?.fullName || "Unknown"}</div>
+                            {entry.tenant.contactInfo?.phone && (
+                              <div className="text-sm text-gray-600 dark:text-gray-300">{entry.tenant.contactInfo.phone}</div>
+                            )}
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              Move in: {entry.tenant.moveInDate ? new Date(entry.tenant.moveInDate).toLocaleDateString() : "-"}
+                              {" · "}
+                              Move out: {entry.tenant.moveOutDate ? new Date(entry.tenant.moveOutDate).toLocaleDateString() : "Present"}
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-600 dark:text-gray-300">Paid: ₹{entry.summary.totalPaid.toLocaleString()} ({entry.summary.totalPayments})</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Payment History</h4>
+                  <div className="space-y-3">
+                    {apartmentHistory.tenantHistory.map((entry: { tenant: Tenant; paymentHistory: RentPayment[]; }) => (
+                      <details key={entry.tenant.id} className="rounded border border-gray-200 dark:border-gray-700">
+                        <summary className="cursor-pointer px-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
+                          <span className="font-medium">{entry.tenant.personalInfo?.fullName || "Unknown"}</span>
+                          {entry.tenant.contactInfo?.phone && (
+                            <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">{entry.tenant.contactInfo.phone}</span>
+                          )}
+                          <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                            ({entry.tenant.moveInDate ? new Date(entry.tenant.moveInDate).toLocaleDateString() : "-"}
+                            {" → "}
+                            {entry.tenant.moveOutDate ? new Date(entry.tenant.moveOutDate).toLocaleDateString() : "Present"})
+                          </span>
+                        </summary>
+                        <div className="p-4 space-y-2">
+                          {entry.paymentHistory.length === 0 ? (
+                            <div className="text-sm text-gray-500 dark:text-gray-400">No payments found</div>
+                          ) : (
+                            entry.paymentHistory.map((p: RentPayment) => (
+                              <div key={p.id} className="flex items-center justify-between text-sm text-gray-900 dark:text-white">
+                                <div>Due: {new Date(p.dueDate).toLocaleDateString()}</div>
+                                <div>Amount: ₹{p.amount.toLocaleString()}</div>
+                                <div className={p.status === 'paid' ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}>{p.status}</div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-600 dark:text-gray-300">No history available</div>
+            )}
+          </Modal>
         </div>
       </AppLayout>
     </ProtectedRoute>

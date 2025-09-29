@@ -6,6 +6,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Building, Apartment } from "@/types";
 import { propertyService } from "@/services/PropertyService";
+import { ApiService } from "@/services/ApiService";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import {
   Button,
@@ -188,7 +189,14 @@ export default function ApartmentDetailPage() {
         buildingId: buildingId,
       });
 
-      await propertyService.saveTenant(tenantData);
+      const createdTenant = await propertyService.saveTenant(tenantData);
+
+      // Ensure only the latest tenant remains active for this apartment
+      try {
+        await ApiService.fixMultipleActiveTenants(apartmentId, "apartment", createdTenant.id);
+      } catch (e) {
+        console.warn("fixMultipleActiveTenants failed or not needed", e);
+      }
 
       // Update apartment occupancy status only
       await propertyService.updateApartment(apartmentId, {
